@@ -222,6 +222,13 @@ window.SITE_CONTENT_IMAGES = {
   'oda-queen-cift-1':           'img/foto/oda-queen-cift-1.webp',
   'oda-queen-cift-3':           'img/foto/oda-queen-cift-3.webp',
   'oda-queen-cift-4':           'img/foto/oda-queen-cift-4.webp',
+  /* --- Otelin dış avlusu (otel fotoğrafları) --- */
+  'dis-avlu-gunduz':            'img/foto/dis-avlu-gunduz.webp',
+  'dis-tas-avlu':               'img/foto/dis-tas-avlu.webp',
+  'dis-avlu-genis':             'img/foto/dis-avlu-genis.webp',
+  'dis-gece-teras':             'img/foto/dis-gece-teras.webp',
+  'dis-gece-havuz':             'img/foto/dis-gece-havuz.webp',
+  'dis-havuz':                  'img/foto/dis-havuz.webp',
   /* --- Wikimedia Commons (CC BY / CC BY-SA; atıf footer'da) --- */
   'aktivite-atv':               'img/foto/aktivite-atv.webp',
   'aktivite-at-turu':           'img/foto/aktivite-at-turu.webp',
@@ -301,38 +308,106 @@ window.SITE_CONTENT = {
 
   /* ---------- Ana sayfa galerisi ---------- */
   HOME_GALLERY: [
-    { src: 'hero-balon-1', alt: 'Peri bacaları üzerinde gün doğumunda sıcak hava balonları' },
-    { src: 'oda-junior-suit-1', alt: 'Junior Suit: kemerli taş duvarlar ve şömine' },
-    { src: 'teras-2', alt: 'Otel terası ve karşısındaki peri bacası' },
-    { src: 'oda-havuzlu-1', alt: 'Havuzlu oda: mağara içinde özel havuz' },
-    { src: 'goreme-gece', alt: 'Gece ışıklarıyla Göreme kasabası' },
-    { src: 'hamam-1', alt: 'Mermer banyoda ahşap sıcak küvet' },
-    { src: 'hero-balon-2', alt: 'Gün doğumunda Uçhisar ve balonlar' },
-    { src: 'oda-deluxe-uc-1', alt: 'Deluxe Üç Kişilik Oda' },
-    { src: 'oda-saunali-1', alt: 'Çift Kişilik Saunalı Oda' },
-    { src: 'goreme-gun-batimi', alt: 'Gün batımında Göreme' },
-    { src: 'oda-junior-suit-hamamli-2', alt: 'Junior Suit Hamamlı: mermer hamam' },
-    { src: 'hero-balon-3', alt: 'Gün batımında vadi üzerinde balonlar' }
+    { src: 'dis-avlu-gunduz', alt: 'Peri bacasının dibinde otelin avlusu ve havuzu' },
+    { src: 'dis-tas-avlu', alt: 'Kemerli taş avlu ve peri bacasına çıkan merdiven' },
+    { src: 'dis-avlu-genis', alt: 'Göreme\'nin içinde, peri bacasıyla iç içe otel' },
+    { src: 'dis-havuz', alt: 'Taş kemerlerin önünde mavi havuz' },
+    { src: 'dis-gece-teras', alt: 'Gece ışıklarında avlu terası' },
+    { src: 'dis-gece-havuz', alt: 'Gece aydınlatılmış peri bacası ve havuz' }
   ],
 
-  /* ---------- Aktiviteler (ana sayfa) ---------- */
+  /* ---------- Aktiviteler ----------
+     Karttaki fotoğrafa tıklanınca #aktivite/<slug> sayfası açılır.
+     hotel: ayrıcalık kutusunda kullanılan otel fotoğrafı.
+     Saat ve ücret sayfada yazılmaz; rezervasyon resepsiyondan. */
   ACTIVITIES: [
-    { title: 'Sıcak Hava Balonu Turu', img: 'hero-balon-1',
-      text: 'Gün doğumunda peri bacalarının üzerinde süzülün. Rezervasyon ve otel transferi resepsiyonumuzdan ayarlanır.' },
-    { title: 'ATV Turu', img: 'aktivite-atv', pos: 'center 82%',
-      text: 'Vadilerin patikalarında rehber eşliğinde, peri bacaları arasında dört mevsim heyecanlı bir sürüş.' },
-    { title: 'At Turu', img: 'aktivite-at-turu',
-      text: 'Kapadokya\'nın "güzel atlar diyarı" adına yakışır şekilde vadileri at sırtında keşfedin.' },
-    { title: 'Kırmızı Tur', img: 'aktivite-kirmizi-tur',
-      text: 'Göreme Açık Hava Müzesi, Uçhisar, Paşabağ ve Avanos gibi kuzey Kapadokya duraklarını kapsayan günlük tur.' },
-    { title: 'Yeşil Tur', img: 'aktivite-yesil-tur',
-      text: 'Derinkuyu yeraltı şehri, Ihlara Vadisi ve Selime Katedrali ile güney Kapadokya\'yı keşfedin.' },
-    { title: 'Vadi Yürüyüşleri', img: 'aktivite-vadi-yuruyusu',
-      text: 'Güvercinlik, Aşk ve Kızılçukur vadilerinde rehberli ya da kendi temponuzda doğa yürüyüşleri.' },
-    { title: 'Gün Batımı Noktaları', img: 'aktivite-gun-batimi',
-      text: 'Kızılçukur ve Uçhisar\'daki seyir noktalarında gökyüzünün kızıla döndüğü anı yakalayın.' },
-    { title: 'Türk Gecesi', img: 'aktivite-turk-gecesi',
-      text: 'Halk dansları, semah gösterisi ve yöresel lezzetlerle Anadolu kültürüyle dolu bir akşam.' }
+    { slug: 'balon', title: 'Sıcak Hava Balonu', kicker: 'Gün doğumu', time: 'Yaklaşık 1 saat',
+      img: 'hero-balon-1',
+      images: [
+        { src: 'hero-balon-1', alt: 'Peri bacaları üzerinde gün doğumunda sıcak hava balonları' },
+        { src: 'hero-balon-2', alt: 'Vadi üzerinde alçaktan geçen bir balon' },
+        { src: 'hero-balon-3', alt: 'Gün batımına yakın gökyüzünde balonlar' }
+      ],
+      hotel: { src: 'dis-avlu-gunduz', alt: 'Otelin avlusu ve peri bacası' },
+      lead: 'Peri bacalarının üzerinde, gün daha doğmadan.',
+      body: [
+        'Kapadokya\'nın sabahı gökyüzünde başlar. Balonlar Göreme\'nin üstünde sırayla yükselir; vadi, baca baca, altınızda açılır. Uçuş yaklaşık bir saat sürer ve iniş vadinin içinde bir yere yapılır.',
+        'Göreme, uçuşların kalbidir. Otelimiz kalkış alanlarına birkaç dakika uzaklıktadır; karanlıkta çıkılan yol kısa sürer.'
+      ],
+      privilege: 'Rezervasyonu, kalkış saatini ve otelden transferi resepsiyon ayarlar. Dönüşte aynı avluya, peri bacasının dibine bırakılırsınız.' },
+    { slug: 'atv', title: 'ATV Turu', kicker: 'Vadiler', time: '1–2 saat',
+      img: 'aktivite-atv', pos: 'center 82%',
+      images: [ { src: 'aktivite-atv', alt: 'Peri bacaları arasında ATV turu' } ],
+      hotel: { src: 'dis-avlu-genis', alt: 'Göreme\'nin içinde otelin avlusu' },
+      lead: 'Tozlu patikalarda, bacaların arasından geçen bir tur.',
+      body: [
+        'ATV ile Güvercinlik ve çevresindeki patikalar, yürüyerek gün sürecek mesafeyi bir saate indirir. Rehber önde gider; duraklar manzara içindir, hız için değil.',
+        'Kask ve kısa bir anlatımla başlar. Dört mevsim yapılır; yağmurdan sonraki toprak daha yumuşaktır.'
+      ],
+      privilege: 'Saati ve buluşma noktasını resepsiyon gününüze göre ayarlar. Tur bittiğinde otelin önündesiniz; havuz ve hamam hemen avludadır.' },
+    { slug: 'at', title: 'At Turu', kicker: 'Vadiler', time: '1–2 saat',
+      img: 'aktivite-at-turu',
+      images: [ { src: 'aktivite-at-turu', alt: 'Vadide at sırtında gezi' } ],
+      hotel: { src: 'dis-tas-avlu', alt: 'Taş avlu ve merdivenler' },
+      lead: 'Kapadokya\'nın adı "güzel atlar diyarı" demektir.',
+      body: [
+        'Atlar Aşk Vadisi\'nin ve Güvercinlik\'in patikalarını yavaş gider. Tempo bineğe göredir; ilk kez binenle deneyimli olan aynı grupta yorulmaz.',
+        'Manzara eyerin üstünden başka görünür: bacalar yaklaşır, vadi tabanı uzar, kasaba geride kalır.'
+      ],
+      privilege: 'Resepsiyon turu deneyiminize göre seçer ve sizi buluşma noktasına bırakır. Dönüş, yine otelin avlusunadır.' },
+    { slug: 'kirmizi', title: 'Kırmızı Tur', kicker: 'Kuzey Kapadokya', time: 'Tam gün',
+      img: 'aktivite-kirmizi-tur',
+      images: [ { src: 'aktivite-kirmizi-tur', alt: 'Kızıl kaya oluşumları arasında vadi' } ],
+      hotel: { src: 'dis-havuz', alt: 'Taş kemerlerin önünde otelin havuzu' },
+      lead: 'Müze, Uçhisar, Paşabağ ve Avanos: bir günde kuzey.',
+      body: [
+        'Kırmızı Tur, Göreme\'nin çevresindeki durakları toplar. Göreme Açık Hava Müzesi\'nin kiliseleri, Uçhisar Kalesi\'nin sırtı, Paşabağ\'ın keşiş bacaları ve Avanos\'un çömlek atölyeleri aynı güne sığar.',
+        'Rehber durakların sırasını bilir; siz inip bakarsınız. Öğle yemeği genellikle güzergâh üzerindeki bir kasabada yenir.'
+      ],
+      privilege: 'Sabah otelden alınırsınız, akşam avluya bırakılırsınız. Saati ve kontenjanı resepsiyon tutar; siz yalnızca çantanızı hazırlarsınız.' },
+    { slug: 'yesil', title: 'Yeşil Tur', kicker: 'Güney Kapadokya', time: 'Tam gün',
+      img: 'aktivite-yesil-tur',
+      images: [ { src: 'aktivite-yesil-tur', alt: 'Ihlara Vadisi\'nin yeşil yatağı' } ],
+      hotel: { src: 'dis-gece-havuz', alt: 'Gece aydınlatılmış peri bacası ve havuz' },
+      lead: 'Yeraltından vadiye: Derinkuyu, Ihlara, Selime.',
+      body: [
+        'Yeşil Tur güneye iner. Derinkuyu\'nun kat kat yeraltı şehri, Ihlara\'nın ırmak boyu yürüyüşü ve Selime\'nin kayaya oyulmuş manastırı aynı günün üç hali.',
+        'Ihlara\'da tempo yürüyüştür; vadi serindir ve patika kısadır. Gün, Göreme\'ye dönüşle kapanır.'
+      ],
+      privilege: 'Tam gün dışarıda geçtiği için resepsiyon sabah saatini ve dönüşü netleştirir. Akşam hamam ve avlu, günün tozunu almak içindir.' },
+    { slug: 'vadi', title: 'Vadi Yürüyüşleri', kicker: 'Patikalar', time: 'Kendi temponuz',
+      img: 'aktivite-vadi-yuruyusu',
+      images: [ { src: 'aktivite-vadi-yuruyusu', alt: 'Aşk Vadisi\'nin uzun peri bacaları' } ],
+      hotel: { src: 'dis-avlu-genis', alt: 'Otelin Göreme içindeki konumu' },
+      lead: 'Güvercinlik, Aşk ve Kızılçukur, otelin yakınında başlar.',
+      body: [
+        'En iyi Kapadokya, iki durak arasında yürüyendir. Güvercinlik\'in güvercinlikleri, Aşk Vadisi\'nin uzun bacaları ve Kızılçukur\'un kırmızı toprağı işaretli patikalarla birbirine bağlanır.',
+        'Yolun bir kısmı Göreme\'nin içinden çıkar. Harita tutan, istediği yerde durur; acele eden, bir vadide yetinir.'
+      ],
+      privilege: 'Otel patikaların başladığı kasabada. Resepsiyon gününüze, ayakkabınıza ve gün batımına göre hangi vadinin uygun olduğunu söyler.' },
+    { slug: 'gunbatimi', title: 'Gün Batımı', kicker: 'Akşam', time: 'Bir saat',
+      img: 'aktivite-gun-batimi',
+      images: [
+        { src: 'aktivite-gun-batimi', alt: 'Gün batımında kızıla dönen kaya' },
+        { src: 'dis-gece-teras', alt: 'Akşam ışıklarında otelin terası' }
+      ],
+      hotel: { src: 'dis-gece-teras', alt: 'Işıklandırılmış avlu terası' },
+      lead: 'Kızılçukur kızarır; isterseniz akşamı avluda kapatırsınız.',
+      body: [
+        'Kızılçukur\'un sırtı ve Uçhisar\'ın kalesi, gökyüzü döndüğünde Kapadokya\'nın en sakin saatini verir. Kalabalık on beş dakikada dağılır; renk biraz daha kalır.',
+        'Aynı ışık otelin avlusuna da vurur. Peri bacası, havuzun kenarındaki masaların üstünde kararır.'
+      ],
+      privilege: 'Seyir noktasına gidişi resepsiyon ayarlar. Gitmek istemezseniz gün, otelin kendi bacasının dibinde, teras masasında biter.' },
+    { slug: 'turk-gecesi', title: 'Türk Gecesi', kicker: 'Akşam', time: 'Bir akşam',
+      img: 'aktivite-turk-gecesi',
+      images: [ { src: 'aktivite-turk-gecesi', alt: 'Halk dansları gösterisi' } ],
+      hotel: { src: 'dis-gece-havuz', alt: 'Gece otelin avlusu' },
+      lead: 'Semah, halk oyunları ve uzun bir sofra.',
+      body: [
+        'Türk gecesi, Anadolu\'nun halk oyunlarını ve semahı tek programda toplar. Sahne çoğu zaman kayaya oyulmuş bir mekândadır; yemek gösteriyle birlikte gelir.',
+        'Müzik yüksek, tempo aktiftir. Kapadokya\'yı gündüz vadide, akşam sahnede görmek isteyen için günü kapatır.'
+      ],
+      privilege: 'Programı ve transferi resepsiyon ayarlar. Gösteri bitince otelin ışıklı avlusuna dönersiniz.' }
   ],
 
   /* ---------- Restoran menüsü (#restoran) ----------
@@ -587,7 +662,7 @@ window.SITE_CONTENT = {
        Yeni Tailwind sınıfı eklenirse css/site.css yeniden derlenmelidir (KURULUM.md). -->
   <link rel="preload" href="fonts/montserrat-normal-latin-1.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="fonts/playfair-display-normal-latin-5.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="css/site.css?v=7" />
+  <link rel="stylesheet" href="css/site.css?v=8" />
 
   <style>
 /* =====================================================================
@@ -901,7 +976,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
 
   /* ---------- Menü ---------- */
   var NAV = [
-    { id: 'tarihce', label: 'Tarihçe', href: '#tarihce' },
+    { id: 'tarihce', label: 'Hakkımızda', href: '#tarihce' },
     { id: 'odalar', label: 'Odalar', href: '#odalar' },
     { id: 'restoran', label: 'Restoran', href: '#restoran' },
     { id: 'hamam', label: 'Hamam', href: '#hamam' },
@@ -1180,36 +1255,40 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       <button id="videoToggle" type="button" class="absolute bottom-8 right-5 sm:right-8 z-10 h-11 w-11 rounded-full border border-white/50 bg-cocoa-900/30 backdrop-blur flex items-center justify-center text-white hover:bg-gold hover:border-gold hover:text-ink transition-colors" aria-label="Videoyu duraklat" aria-pressed="false"></button>
     </section>
 
-    <!-- ============ HAKKIMIZDA / TARİHÇE ============ -->
+    <!-- ============ HAKKIMIZDA ============ -->
     <section id="tarihce" class="relative py-24 sm:py-32 bg-sand-100" aria-labelledby="tarihce-title">
-      <div class="mx-auto max-w-7xl px-6 sm:px-8 grid gap-14 lg:grid-cols-12 items-center">
-        <div class="lg:col-span-6 relative reveal reveal-left">
-          <div class="media aspect-[4/5] sm:aspect-[5/4] lg:aspect-[4/5]">
-            <img data-img="teras-2" alt="Otelin terası ve karşısında yükselen peri bacası" loading="lazy" onerror="imgFallback(this)" />
-          </div>
-          <div class="hidden sm:block absolute -bottom-10 -right-6 lg:-right-10 w-44 lg:w-52">
-            <div class="media aspect-square ring-8 ring-sand-100">
-              <img data-img="oda-junior-suit-1" alt="Kemerli taş duvarlı Junior Suit" loading="lazy" onerror="imgFallback(this)" />
+      <div class="mx-auto max-w-7xl px-6 sm:px-8">
+        <div class="grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-14">
+          <div class="lg:col-span-7 grid grid-cols-6 gap-3 sm:gap-4">
+            <div class="col-span-6 media aspect-[16/10]">
+              <img data-img="dis-avlu-gunduz" alt="Peri bacasının dibinde otelin avlusu ve havuzu" loading="lazy" onerror="imgFallback(this)" />
+            </div>
+            <div class="col-span-6 media aspect-[4/3] sm:col-span-4">
+              <img data-img="dis-tas-avlu" alt="Kemerli taş avlu ve peri bacasına çıkan merdiven" loading="lazy" onerror="imgFallback(this)" />
+            </div>
+            <div class="col-span-6 media aspect-[16/10] sm:col-span-2 sm:aspect-[4/3]">
+              <img data-img="dis-gece-havuz" alt="Gece ışıklarında havuz ve peri bacası" loading="lazy" onerror="imgFallback(this)" />
             </div>
           </div>
-        </div>
-
-        <div class="lg:col-span-6 lg:pl-10">
-          <p class="reveal text-xs uppercase tracking-widest2 text-gold-dark font-semibold">Hakkımızda · Tarihçe</p>
-          <h2 id="tarihce-title" class="reveal mt-4 font-serif text-4xl sm:text-5xl leading-tight text-ink" style="--d:.08s">Kapadokya'nın kalbinde, <em class="text-stone-600">benzersiz bir deneyim</em></h2>
-          <div class="reveal mt-8 space-y-5 text-ink-soft font-light leading-relaxed" style="--d:.16s">
-            <p>Kapadokya'nın kalbinde, benzersiz bir deneyim yaşamak için doğru yerdesiniz. Göreme'deki butik otelimiz, doğanın ve tarihin bir araya geldiği büyülü bir ortamda, misafirlerimize unutulmaz bir konaklama fırsatı sunuyor.</p>
-            <p>Volkanik tüfe oyulmuş mağara odalarımız ve yöresel taşla örülmüş duvarlarımız, bölgenin yüzyıllık yapı geleneğini bugünün konforuyla buluşturur. Otelimizde konaklarken sadece dinlenmekle kalmaz, Kapadokya'nın derin kültürünü keşfetme imkânı da bulursunuz.</p>
-            <p>Rehberli turlar, sıcak hava balonuyla yapılan muazzam yolculuklar ve doğa yürüyüşleriyle Kapadokya'nın gizli köylerini ve saklı vadilerini daha yakından tanıyabilirsiniz.</p>
+          <div class="lg:col-span-5">
+            <p class="reveal text-xs uppercase tracking-widest2 text-gold-dark font-semibold">Hakkımızda</p>
+            <h2 id="tarihce-title" class="reveal mt-4 font-serif text-4xl sm:text-5xl leading-[1.12] text-ink" style="--d:.08s">Peri bacasının <em class="text-stone-600">dibinde</em></h2>
+            <div class="reveal mt-7 space-y-5 text-ink-soft font-light leading-relaxed" style="--d:.16s">
+              <p>Göreme Cave Suites, kasabanın içinde, bir peri bacasının etrafında kurulmuş taş bir avludur. Havuz, kemerli odalar ve akşam ışıkları aynı avluda buluşur.</p>
+              <p>Yirmi beş mağara ve taş oda günü yavaşlatır. Sabah balonlar vadinin üstünde yükselirken siz hâlâ buradasınızdır; akşam aynı bacanın dibinde masaya oturursunuz.</p>
+            </div>
+            <dl class="reveal mt-10 grid grid-cols-3 gap-6 border-t border-ink/10 pt-8" style="--d:.24s">
+              <div><dt class="text-[0.65rem] uppercase tracking-[0.18em] text-stone-600">Mağara &amp; taş oda</dt><dd class="mt-1 font-serif text-4xl text-ink">25</dd></div>
+              <div><dt class="text-[0.65rem] uppercase tracking-[0.18em] text-stone-600">Oda tipi</dt><dd class="mt-1 font-serif text-4xl text-ink">10</dd></div>
+              <div><dt class="text-[0.65rem] uppercase tracking-[0.18em] text-stone-600"><span lang="en">Booking.com</span> puanı</dt><dd class="mt-1 font-serif text-4xl text-ink">4.9</dd></div>
+            </dl>
           </div>
-          <dl class="reveal mt-10 grid grid-cols-3 gap-6 border-t border-ink/10 pt-8" style="--d:.24s">
-            <div><dt class="text-[0.65rem] uppercase tracking-[0.18em] text-stone-600">Mağara &amp; taş oda</dt><dd class="mt-1 font-serif text-4xl text-ink">25</dd></div>
-            <div><dt class="text-[0.65rem] uppercase tracking-[0.18em] text-stone-600">Oda tipi</dt><dd class="mt-1 font-serif text-4xl text-ink">10</dd></div>
-            <div><dt class="text-[0.65rem] uppercase tracking-[0.18em] text-stone-600"><span lang="en">Booking.com</span> puanı</dt><dd class="mt-1 font-serif text-4xl text-ink">4.9</dd></div>
-          </dl>
-          <a href="#odalar" class="reveal btn-outline mt-10 inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-ink" style="--d:.3s">Odalarımız
-            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
         </div>
+        <ul class="mt-4 grid gap-3 sm:mt-5 sm:grid-cols-3 sm:gap-4" aria-label="Otelin avlusu">
+          <li class="media aspect-[4/3]"><img data-img="dis-gece-teras" alt="Gece ışıklarında avlu terası" loading="lazy" onerror="imgFallback(this)" /></li>
+          <li class="media aspect-[4/3]"><img data-img="dis-avlu-genis" alt="Göreme'nin içinde, peri bacasıyla iç içe otel" loading="lazy" onerror="imgFallback(this)" /></li>
+          <li class="media aspect-[4/3]"><img data-img="dis-havuz" alt="Taş kemerlerin önünde mavi havuz" loading="lazy" onerror="imgFallback(this)" /></li>
+        </ul>
       </div>
     </section>
 
@@ -1231,11 +1310,11 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     <section id="aktiviteler" class="py-24 sm:py-32 bg-sand-200/60" aria-labelledby="aktivite-title">
       <div class="mx-auto max-w-7xl px-6 sm:px-8">
         <div class="text-center max-w-2xl mx-auto">
-          <p class="reveal divider-ornament text-xs uppercase tracking-widest2 font-semibold">Aktiviteler</p>
-          <h2 id="aktivite-title" class="reveal mt-5 font-serif text-4xl sm:text-5xl text-ink" style="--d:.08s">Kapadokya'yı yaşayın</h2>
-          <p class="reveal mt-5 text-ink-soft font-light leading-relaxed" style="--d:.16s">Turlarınızı ve transferlerinizi resepsiyonumuz sizin için planlar; siz yalnızca anın tadını çıkarın.</p>
+          <p class="reveal divider-ornament text-xs uppercase tracking-widest2 font-semibold">Kapadokya, otelimizle</p>
+          <h2 id="aktivite-title" class="reveal mt-5 font-serif text-4xl sm:text-5xl text-ink" style="--d:.08s">Vadiden dönünce avlu sizi bekler</h2>
+          <p class="reveal mt-5 text-ink-soft font-light leading-relaxed" style="--d:.16s">Balon, tur, vadi ve akşam programını resepsiyon ayarlar: saati, transferi ve dönüşü. Siz Kapadokya'yı yaşarsınız.</p>
         </div>
-        <ul id="activities" class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4"></ul>
+        <ul id="activities" class="mt-14 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4"></ul>
       </div>
     </section>
 
@@ -1279,6 +1358,11 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     <!-- ################################################################
          GÖRÜNÜM: ODALAR (#odalar)
          ################################################################ -->
+    <!-- ============ AKTİVİTE SAYFASI (#aktivite/<slug>) ============ -->
+    <div id="view-aktivite" data-view="aktivite" hidden>
+      <article id="activityPage" class="bg-sand-100 pb-24"></article>
+    </div>
+
     <div id="view-odalar" data-view="odalar" hidden>
 
     <!-- ============ SAYFA HERO ============ -->
@@ -2009,14 +2093,67 @@ dialog.dish-dlg { width: min(940px, 94vw); }
   var actEl = $('#activities');
   if (actEl && K.ACTIVITIES) {
     actEl.innerHTML = K.ACTIVITIES.map(function (a) {
-      return '<li class="reveal group lift rounded-2xl bg-sand-50 ring-1 ring-ink/5 overflow-hidden flex flex-col">' +
-        '<div class="media aspect-[4/3] !rounded-none !shadow-none">' + imgTag(a.img, a.title, a.pos ? ' style="object-position:' + esc(a.pos) + '"' : '') + '</div>' +
-        '<div class="p-6 flex-1">' +
-          '<h3 class="font-serif text-xl text-ink">' + esc(a.title) + '</h3>' +
-          '<p class="mt-2 text-sm text-ink-soft font-light leading-relaxed">' + esc(a.text) + '</p>' +
-        '</div></li>';
+      return '<li class="reveal">' +
+        '<a href="#aktivite/' + esc(a.slug) + '" class="group block">' +
+          '<div class="media aspect-[4/3]">' + imgTag(a.img, a.title, a.pos ? ' style="object-position:' + esc(a.pos) + '"' : '') +
+            '<span class="pointer-events-none absolute bottom-3 right-3 z-[1] inline-flex h-9 w-9 items-center justify-center rounded-full bg-sand-50/90 text-ink opacity-0 transition-opacity duration-300 group-hover:opacity-100" aria-hidden="true"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>' +
+          '<p class="mt-4 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-gold-dark">' + esc(a.kicker) + ' · ' + esc(a.time) + '</p>' +
+          '<h3 class="mt-1 font-serif text-2xl text-ink">' + esc(a.title) + '</h3>' +
+          '<p class="mt-2 text-sm font-light leading-relaxed text-ink-soft">' + esc(a.lead) + '</p>' +
+        '</a></li>';
     }).join('');
-    stagger(actEl, 0.1);
+    stagger(actEl, 0.08);
+  }
+
+  /* Aktivite sayfası: #aktivite/<slug>. Fotoğraflar lightbox'ta büyür. */
+  function renderActivity(slug) {
+    var list = K.ACTIVITIES || [];
+    var a = null;
+    for (var i = 0; i < list.length; i++) if (list[i].slug === slug) a = list[i];
+    var root = $('#activityPage');
+    if (!a || !root) return false;
+    var shots = a.images || [];
+    var gallery = shots.map(function (s, n) {
+      return '<li class="' + (n === 0 ? 'sm:col-span-2' : '') + '"><button type="button" data-act-shot="' + n + '" class="media aspect-[4/3] w-full cursor-zoom-in" aria-label="' + esc(s.alt) + ' – büyüt">' +
+        imgTag(s.src, s.alt) + '</button></li>';
+    }).join('');
+    var others = list.filter(function (x) { return x.slug !== slug; }).map(function (x) {
+      return '<li><a href="#aktivite/' + esc(x.slug) + '" class="group block">' +
+        '<div class="media aspect-[4/3]">' + imgTag(x.img, x.title) + '</div>' +
+        '<p class="mt-3 font-serif text-lg text-ink">' + esc(x.title) + '</p></a></li>';
+    }).join('');
+    root.innerHTML =
+      '<div class="mx-auto max-w-6xl px-6 pb-4 pt-28 sm:px-8 sm:pt-32">' +
+        '<a href="#aktiviteler" class="inline-flex items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-stone-600 hover:text-gold-dark">‹ Kapadokya, otelimizle</a>' +
+        '<p class="mt-8 text-xs font-semibold uppercase tracking-widest2 text-gold-dark">' + esc(a.kicker) + ' · ' + esc(a.time) + '</p>' +
+        '<h1 id="page-title-aktivite" tabindex="-1" data-view-heading class="mt-3 font-serif text-5xl leading-[1.05] text-ink sm:text-6xl">' + esc(a.title) + '</h1>' +
+        '<p class="mt-5 max-w-2xl font-serif text-xl italic text-stone-600 sm:text-2xl">' + esc(a.lead) + '</p>' +
+      '</div>' +
+      '<div class="mx-auto grid max-w-6xl gap-10 px-6 sm:px-8 lg:grid-cols-12 lg:gap-14">' +
+        '<div class="space-y-5 text-[1.02rem] font-light leading-relaxed text-ink-soft lg:col-span-7">' +
+          (a.body || []).map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') +
+          '<ul class="mt-2 grid gap-3 sm:grid-cols-2">' + gallery + '</ul>' +
+        '</div>' +
+        '<aside class="lg:col-span-5">' +
+          '<div class="overflow-hidden rounded-2xl bg-cocoa-900 text-sand-100 lg:sticky lg:top-28">' +
+            '<div class="media aspect-[16/10] !rounded-none !shadow-none">' + imgTag(a.hotel.src, a.hotel.alt) + '</div>' +
+            '<div class="p-7 sm:p-8">' +
+              '<p class="text-[0.65rem] font-semibold uppercase tracking-widest2 text-gold">Otelimizin ayrıcalığı</p>' +
+              '<p class="mt-4 font-light leading-relaxed text-sand-100/90">' + esc(a.privilege) + '</p>' +
+              '<a href="#iletisim" class="btn-gold mt-6 inline-flex rounded-full px-6 py-3 text-[0.68rem] font-semibold uppercase tracking-[0.2em]">Resepsiyona sorun</a>' +
+            '</div>' +
+          '</div>' +
+        '</aside>' +
+      '</div>' +
+      '<div class="mx-auto mt-20 max-w-6xl px-6 sm:px-8">' +
+        '<p class="text-xs font-semibold uppercase tracking-widest2 text-gold-dark">Diğerleri</p>' +
+        '<ul class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">' + others + '</ul>' +
+      '</div>';
+    $$('[data-act-shot]', root).forEach(function (btn) {
+      btn.addEventListener('click', function () { openLightbox(shots, +btn.getAttribute('data-act-shot'), btn); });
+    });
+    document.title = a.title + ' · Göreme Cave Suites';
+    return true;
   }
 
   $$('[data-address-text]').forEach(function (el) { el.innerHTML = window.Layout.addressText('<br />'); });
@@ -2545,7 +2682,8 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     home: "Göreme Cave Suites · Kapadokya'da Butik Mağara Otel",
     odalar: 'Odalar & Süitler · Göreme Cave Suites',
     restoran: 'Restoran · Göreme Cave Suites',
-    hamam: 'Hamam & Spa · Göreme Cave Suites'
+    hamam: 'Hamam & Spa · Göreme Cave Suites',
+    aktivite: 'Kapadokya · Göreme Cave Suites'
   };
   var views = {};
   $$('[data-view]').forEach(function (v) { views[v.getAttribute('data-view')] = v; });
@@ -2581,6 +2719,14 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     if (location.hash === lastHash) return;
     lastHash = location.hash;
     var h = decodeURIComponent(location.hash.slice(1));
+    var actRoute = /^aktivite\/([a-z0-9-]+)$/.exec(h);
+    if (actRoute) {
+      if (lb.open) lb.close();
+      showView('aktivite');
+      if (!renderActivity(actRoute[1])) { showView('home'); jumpTop(); onScroll(); return; }
+      jumpTop(); onScroll(); focusHeading();
+      return;
+    }
     if (h in ROUTES) { showView(ROUTES[h]); jumpTop(); onScroll(); return; }
     var el = document.getElementById(h);
     var v = el ? viewOf(el) : null;
