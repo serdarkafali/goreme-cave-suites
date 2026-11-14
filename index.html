@@ -104,6 +104,24 @@ window.SITE_CONFIG = {
     { meal: 'Akşam yemeği', hours: '19:00 – 22:30' }
   ],
 
+  /* ---------- Restoran giriş videosu ----------
+     Yatay ekranlar için RESTAURANT_INTRO_VIDEO, dik telefon ekranları için
+     RESTAURANT_INTRO_VIDEO_PORTRAIT oynatılır. Kapak görseli, video adının
+     sonuna "-poster.jpg" eklenmiş dosyadır (ör. video/restoran-giris-poster.jpg).
+     RESTAURANT_INTRO_CHAPTERS: videodaki sahnelerin başlangıç saniyesi ve etiketi;
+     dish → menüdeki yemeğin img adı (etikete tıklanınca o yemeğin kartı açılır). */
+  RESTAURANT_INTRO_VIDEO: 'video/restoran-giris.mp4',
+  RESTAURANT_INTRO_VIDEO_PORTRAIT: 'video/restoran-giris-dikey.mp4',
+  RESTAURANT_INTRO_CHAPTERS: [
+    { at: 0,     label: 'Göreme · Gün doğumu' },
+    { at: 3.4,   label: 'Testi Kebabı',  dish: 'testi-kebabi' },
+    { at: 6.25,  label: 'Muhammara',     dish: 'muhammara' },
+    { at: 7.55,  label: 'Kuzu Pirzola',  dish: 'kuzu-pirzola' },
+    { at: 8.85,  label: 'Levrek',        dish: 'levrek' },
+    { at: 10.4,  label: 'Uçhisar · Akşam' },
+    { at: 13.2,  label: 'Göreme · Gün doğumu' }
+  ],
+
   /* ---------- Menü QR kodu (Restoran sayfası) ----------
      MENU_QR_IMAGE: QR görseli (bu HTML'e göre yol ya da URL). '' ise kart gizlenir.
      Şimdiki QR bu sitenin #restoran sayfasını açar [YER TUTUCU]; gerçek dijital
@@ -433,11 +451,11 @@ window.SITE_CONTENT = {
   ],
   RESTAURANT_GALLERY: [
     { src: 'restoran-testi-kebabi', alt: 'Testi kebabı' },
-    { src: 'teras-2', alt: 'Peri bacası manzaralı teras' },
+    { src: 'img/menu/ahtapot.webp', alt: 'Ahtapot güveç' },
     { src: 'restoran-mezeler', alt: 'Muhammara' },
+    { src: 'img/menu/hengel.webp', alt: 'Hengel' },
     { src: 'restoran-levrek', alt: 'Izgara levrek' },
-    { src: 'restoran-tatli', alt: 'San Sebastian cheesecake' },
-    { src: 'teras-1', alt: 'Teras ve şemsiyeler' }
+    { src: 'restoran-tatli', alt: 'San Sebastian cheesecake' }
   ],
 
   /* ---------- Hamam (#hamam) ----------
@@ -629,6 +647,17 @@ dialog.lightbox::backdrop { background: rgba(20, 15, 12, .94); }
 
 /* ---------- Harita ---------- */
 .map-frame { border: 0; width: 100%; height: 100%; filter: sepia(.25) saturate(.9); }
+
+/* ---------- Restoran girişi ---------- */
+.r-word { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: .1em; margin-bottom: -.1em; }
+.r-word > * { display: inline-block; transform: translateY(108%); }
+.r-intro-line { opacity: 0; transform: translateY(18px); }
+.r-intro.is-in .r-word > * { transform: none; transition: transform 1.2s cubic-bezier(.2, .8, .2, 1) calc(.3s + var(--i) * .14s); }
+.r-intro.is-in .r-intro-line { opacity: 1; transform: none; transition: opacity 1s ease calc(.25s + var(--i) * .14s), transform 1s cubic-bezier(.2, .8, .2, 1) calc(.25s + var(--i) * .14s); }
+.r-chapter-name { transition: opacity .35s ease, transform .35s ease; }
+.r-chapter-name.is-swap { opacity: 0; transform: translateY(6px); }
+.r-chapter:not(:disabled) .r-chapter-name { text-decoration: underline; text-decoration-color: rgba(212, 175, 55, .6); text-underline-offset: 5px; text-decoration-thickness: 1px; }
+.r-chapter:not(:disabled):hover .r-chapter-name { color: #E6C974; }
 
 /* ---------- Restoran menüsü ---------- */
 .menu-grain { isolation: isolate; }
@@ -903,7 +932,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
               '<ul class="mt-6 space-y-3 font-light">' +
                 '<li><a href="#tarihce" class="hover:text-gold transition-colors">Tarihçe</a></li>' +
                 '<li><a href="#odalar" class="hover:text-gold transition-colors">Odalar &amp; Süitler</a></li>' +
-                '<li><a href="#restoran" class="hover:text-gold transition-colors">Restoran &amp; Teras</a></li>' +
+                '<li><a href="#restoran" class="hover:text-gold transition-colors">Restoran</a></li>' +
                 '<li><a href="#hamam" class="hover:text-gold transition-colors">Hamam &amp; Spa</a></li>' +
                 '<li><a href="#ulasim" class="hover:text-gold transition-colors">Adres &amp; Ulaşım</a></li>' +
                 '<li><a href="' + esc(C.BOOKING_URL || '#') + '" target="_blank" rel="noopener" class="hover:text-gold transition-colors">Rezervasyon</a></li>' +
@@ -1162,15 +1191,32 @@ dialog.dish-dlg { width: min(940px, 94vw); }
          ################################################################ -->
     <div id="view-restoran" data-view="restoran" hidden>
 
-    <!-- ============ SAYFA HERO ============ -->
-    <section class="relative h-[68svh] min-h-[440px] overflow-hidden bg-cocoa-900 text-white" aria-labelledby="page-title-restoran">
-      <img class="hero-media kenburns" data-img="teras-2" alt="" loading="lazy" onerror="imgFallback(this)" />
-      <div class="absolute inset-0 bg-gradient-to-b from-cocoa-900/60 via-cocoa-900/20 to-cocoa-900/70" aria-hidden="true"></div>
-      <div class="relative z-10 flex h-full flex-col items-center justify-end pb-16 sm:pb-20 px-6 text-center">
-        <p class="hero-in divider-ornament text-[0.7rem] sm:text-xs uppercase tracking-widest2 font-medium" style="animation-delay:.2s">Yöresel lezzetler</p>
-        <h1 id="page-title-restoran" tabindex="-1" data-view-heading class="hero-in mt-5 font-serif text-5xl sm:text-6xl lg:text-7xl" style="animation-delay:.4s">Restoran &amp; Teras</h1>
-        <p class="hero-in mt-5 max-w-xl font-light text-sand-100/85" style="animation-delay:.6s">Peri bacalarına bakan terasta, sıcak ve servise hazır Kapadokya sofraları.</p>
+    <!-- ============ GİRİŞ: Kapadokya ve mutfak videosu (SITE_CONFIG → RESTAURANT_INTRO_*) ============ -->
+    <section id="restoranIntro" class="r-intro relative h-[100svh] min-h-[600px] overflow-hidden bg-cocoa-900 text-white" aria-labelledby="page-title-restoran">
+      <img id="rIntroPoster" class="absolute inset-0 h-full w-full object-cover" alt="" />
+      <video id="rIntroVideo" class="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-1000" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <div class="absolute inset-0 bg-gradient-to-t from-cocoa-900/90 via-cocoa-900/10 to-cocoa-900/45" aria-hidden="true"></div>
+      <div class="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-end px-6 sm:px-8 pb-32 sm:pb-24">
+        <p class="r-intro-line text-[0.68rem] sm:text-xs uppercase tracking-widest2 text-gold-light font-semibold" style="--i:0">Göreme Cave Suites · Restoran</p>
+        <h1 id="page-title-restoran" tabindex="-1" data-view-heading class="mt-5 font-serif text-[3.4rem] leading-[1.02] sm:text-7xl lg:text-[6.6rem]">
+          <span class="r-word"><span style="--i:1">Kapadokya,</span></span>
+          <span class="r-word"><em class="text-gold-light" style="--i:2">tabakta.</em></span>
+        </h1>
+        <p class="r-intro-line mt-6 max-w-md font-light text-sand-100/85 leading-relaxed" style="--i:3">Yöresel tariflerin ve modern yorumların, peri bacalarının ülkesinde buluştuğu sofra.</p>
+        <div class="r-intro-line mt-9" style="--i:4">
+          <a href="#yemek-menusu" class="btn-gold inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.2em]">Menüyü keşfedin
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
+        </div>
       </div>
+      <!-- Videodaki sahneyle eş zamanlı değişen etiket; yemek sahnesinde tıklanınca yemeğin kartını açar -->
+      <div class="r-intro-line absolute z-10 bottom-7 right-6 sm:right-8 flex items-center gap-4" style="--i:5">
+        <button type="button" id="rIntroChapter" class="r-chapter text-right disabled:cursor-default" disabled>
+          <span class="block text-[0.56rem] uppercase tracking-[0.28em] text-sand-200/60">Şu an</span>
+          <span id="rIntroChapterName" class="r-chapter-name block font-serif text-lg sm:text-xl text-sand-50"></span>
+        </button>
+        <button type="button" id="rIntroToggle" class="h-11 w-11 shrink-0 rounded-full border border-white/40 text-white flex items-center justify-center hover:border-gold hover:text-gold transition-colors" aria-label="Videoyu duraklat"></button>
+      </div>
+      <div class="absolute inset-x-0 bottom-0 z-10 h-px bg-white/10" aria-hidden="true"><span id="rIntroProgress" class="block h-full origin-left bg-gold" style="transform:scaleX(0)"></span></div>
     </section>
 
     <!-- ============ KONSEPT ============ -->
@@ -1206,7 +1252,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
           <div class="media aspect-[16/10]"><img data-img="restoran-aksam-yemegi" alt="Kuzu pirzola" loading="lazy" onerror="imgFallback(this)" /></div>
           <p class="mt-7 text-[0.65rem] uppercase tracking-widest2 text-gold-dark font-semibold">Rezervasyon önerilir</p>
           <h3 class="mt-2 font-serif text-3xl text-ink">Akşam yemeği</h3>
-          <p class="mt-3 text-ink-soft font-light leading-relaxed max-w-lg">Gün batımının ardından şömine sıcaklığında ya da yıldızların altında, mevsimin tazeliğiyle hazırlanan yöresel ana yemekler ve tatlılar.</p>
+          <p class="mt-3 text-ink-soft font-light leading-relaxed max-w-lg">Gün batımının ardından şömine sıcaklığında, mevsimin tazeliğiyle hazırlanan yöresel ana yemekler ve tatlılar.</p>
         </article>
       </div>
     </section>
@@ -1217,7 +1263,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
         <div class="lg:col-span-8">
           <p class="reveal divider-ornament text-xs uppercase tracking-widest2 font-semibold">Kapadokya mutfağı</p>
           <h2 id="menu-title" class="reveal mt-5 font-serif text-4xl sm:text-5xl lg:text-[3.6rem] text-ink leading-[1.08]" style="--d:.08s">Toprağın, ateşin ve <em class="text-stone-600">zamanın</em> lezzeti</h2>
-          <p class="reveal mt-7 max-w-2xl text-ink-soft font-light leading-relaxed" style="--d:.14s">Testi kebabından zeytinyağlılara, Anadolu'nun klasiklerini mevsimin ürünleriyle ve sade bir sunumla hazırlıyoruz. Her tabak, peri bacalarına bakan sofralarımızda paylaşılmak için.</p>
+          <p class="reveal mt-7 max-w-2xl text-ink-soft font-light leading-relaxed" style="--d:.14s">Testi kebabından zeytinyağlılara, Anadolu'nun klasiklerini mevsimin ürünleriyle ve sade bir sunumla hazırlıyoruz. Her tabak, sofrada paylaşılmak için.</p>
         </div>
         <div id="menuQr" class="reveal hidden md:flex lg:col-span-4 lg:justify-self-end items-center gap-5 rounded-2xl bg-sand-50 ring-1 ring-ink/5 p-4 pr-7 shadow-[0_18px_40px_-28px_rgba(43,38,34,.55)]" style="--d:.2s">
           <span class="block h-24 w-24 shrink-0 rounded-xl bg-white p-2.5 ring-1 ring-ink/5"><img id="menuQrImg" alt="Dijital menü QR kodu" class="h-full w-full" /></span>
@@ -1264,24 +1310,11 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       </div>
     </section>
 
-    <!-- ============ TERAS MANZARASI ============ -->
-    <section class="relative min-h-[70svh] overflow-hidden bg-cocoa-900 text-white flex items-end" aria-labelledby="teras-title">
-      <img class="absolute inset-0 h-full w-full object-cover" data-img="goreme-gun-batimi" alt="Gün batımında Göreme ve peri bacaları" loading="lazy" onerror="imgFallback(this)" />
-      <div class="absolute inset-0 bg-gradient-to-t from-cocoa-900/85 via-cocoa-900/30 to-transparent" aria-hidden="true"></div>
-      <div class="relative mx-auto w-full max-w-7xl px-6 sm:px-8 py-16 sm:py-20 grid gap-6 lg:grid-cols-12 items-end">
-        <div class="lg:col-span-7">
-          <p class="reveal text-xs uppercase tracking-widest2 text-gold font-semibold">Teras</p>
-          <h2 id="teras-title" class="reveal mt-4 font-serif text-4xl sm:text-6xl leading-tight" style="--d:.08s">Balonlarla kahvaltı, <em class="text-gold-light">gün batımıyla akşam</em></h2>
-        </div>
-        <p class="reveal lg:col-span-4 lg:col-start-9 font-light text-sand-100/85 leading-relaxed" style="--d:.16s">Terasımız, sabahları gökyüzünü dolduran balonları ve akşamları vadiye çöken kızıl ışığı izlemek için otelin en sevilen köşesi.</p>
-      </div>
-    </section>
-
     <!-- ============ GALERİ ============ -->
     <section class="py-24 sm:py-32 bg-sand-50" aria-labelledby="rgal-title">
       <div class="mx-auto max-w-7xl px-6 sm:px-8">
         <p class="reveal text-xs uppercase tracking-widest2 text-gold-dark font-semibold">Galeri</p>
-        <h2 id="rgal-title" class="reveal mt-4 font-serif text-4xl sm:text-5xl text-ink" style="--d:.08s">Lezzet ve manzara</h2>
+        <h2 id="rgal-title" class="reveal mt-4 font-serif text-4xl sm:text-5xl text-ink" style="--d:.08s">Sofradan kareler</h2>
         <ul id="restaurantGallery" class="mt-12 grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5" aria-label="Restoran fotoğraf galerisi"></ul>
       </div>
     </section>
@@ -1851,6 +1884,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
      fotoğraf vitrini, tıklayınca (mobilde alttan açılan) yemek detay kartı. */
   var menuList = $('#menuList');
   var dishDlg = $('#dishDialog');
+  var openDishBySlug = null;
   if (menuList && K.MENU_DISHES) {
     var CATS = K.MENU_CATEGORIES || [];
     var DISHES = K.MENU_DISHES;
@@ -2125,6 +2159,104 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     desktopMQ.addEventListener('change', function () { syncShow(); markCurrent(); preloadDishes(); });
     renderMenu();
     moveTabInd(false);
+    openDishBySlug = function (slug, opener) {
+      for (var n = 0; n < DISHES.length; n++) if (DISHES[n].img === slug) { openDish(n, opener); return; }
+    };
+  }
+
+  /* Restoran girişi: ekran oranına göre yatay/dikey video, sahneyle eş zamanlı etiket ve ilerleme çizgisi.
+     Video yalnızca Restoran sayfası açıkken ve giriş ekranda görünürken oynar. */
+  var RIntro = null;
+  var rIntro = $('#restoranIntro');
+  if (rIntro && C.RESTAURANT_INTRO_VIDEO) {
+    var rv = $('#rIntroVideo');
+    var rPoster = $('#rIntroPoster');
+    var rToggle = $('#rIntroToggle');
+    var rChapBtn = $('#rIntroChapter');
+    var rChapName = $('#rIntroChapterName');
+    var rProg = $('#rIntroProgress');
+    var CHAPTERS = C.RESTAURANT_INTRO_CHAPTERS || [];
+    var portraitMQ = window.matchMedia('(max-aspect-ratio: 4/5)');
+    var rActive = false, rVisible = true, rUserPaused = false, rChapIdx = -1, rRaf = 0, rSrc = '';
+    var R_PLAY = '<svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5L8 5.5Z"/></svg>';
+    var R_PAUSE = '<svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6.5" y="5" width="3.6" height="14" rx="1"/><rect x="13.9" y="5" width="3.6" height="14" rx="1"/></svg>';
+
+    function rWanted() { return (portraitMQ.matches && C.RESTAURANT_INTRO_VIDEO_PORTRAIT) || C.RESTAURANT_INTRO_VIDEO; }
+    function rLoad() {
+      var src = rWanted();
+      if (src === rSrc) return;
+      var t = rv.currentTime || 0;
+      rSrc = src;
+      rPoster.src = src.replace(/\.mp4$/, '-poster.jpg');
+      rv.poster = rPoster.src;
+      rv.src = src;
+      rv.addEventListener('loadedmetadata', function once() { rv.removeEventListener('loadedmetadata', once); if (t) rv.currentTime = t; });
+    }
+    function rSync() {
+      var playing = !rv.paused;
+      rToggle.innerHTML = playing ? R_PAUSE : R_PLAY;
+      rToggle.setAttribute('aria-label', playing ? 'Videoyu duraklat' : 'Videoyu oynat');
+    }
+    function rUpdate() {
+      if (!rActive) return;
+      var t = rv.currentTime || 0;
+      if (rv.duration) rProg.style.transform = 'scaleX(' + (t / rv.duration) + ')';
+      var idx = 0;
+      for (var n = 0; n < CHAPTERS.length; n++) if (t >= CHAPTERS[n].at) idx = n;
+      if (idx !== rChapIdx && CHAPTERS.length) {
+        rChapIdx = idx;
+        var ch = CHAPTERS[idx];
+        rChapName.classList.add('is-swap');
+        setTimeout(function () {
+          rChapName.textContent = ch.label;
+          rChapBtn.disabled = !(ch.dish && openDishBySlug);
+          rChapBtn.setAttribute('aria-label', ch.dish ? ch.label + ' – yemek detayını aç' : ch.label);
+          rChapName.classList.remove('is-swap');
+        }, reduceMotion ? 0 : 250);
+      }
+    }
+    function rLoop() { rUpdate(); rRaf = rv.paused ? 0 : requestAnimationFrame(rLoop); }
+    function rPlay() {
+      if (!rActive || !rVisible || rUserPaused || reduceMotion) { rSync(); return; }
+      var q = rv.play();
+      if (q && q.catch) q.catch(function () { rSync(); });
+    }
+
+    rv.addEventListener('playing', function () { rv.classList.remove('opacity-0'); rSync(); if (!rRaf) rRaf = requestAnimationFrame(rLoop); });
+    rv.addEventListener('pause', rSync);
+    rv.addEventListener('timeupdate', rUpdate);
+    rv.addEventListener('error', function () { rv.style.display = 'none'; rToggle.style.display = 'none'; });
+    rToggle.addEventListener('click', function () {
+      rUserPaused = !rv.paused;
+      if (rv.paused) { rUserPaused = false; rPlay(); } else rv.pause();
+    });
+    rChapBtn.addEventListener('click', function () {
+      var ch = CHAPTERS[rChapIdx];
+      if (ch && ch.dish && openDishBySlug) openDishBySlug(ch.dish, rChapBtn);
+    });
+    portraitMQ.addEventListener('change', function () { if (rActive) { rLoad(); rPlay(); } });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (en) {
+        rVisible = en[0].isIntersecting;
+        if (rVisible) rPlay(); else if (!rv.paused) rv.pause();
+      }, { threshold: 0.15 }).observe(rIntro);
+    }
+    if (reduceMotion) rToggle.style.display = 'none';
+
+    RIntro = {
+      enter: function () {
+        rActive = true;
+        rLoad();
+        rUpdate();
+        rIntro.classList.remove('is-in');
+        requestAnimationFrame(function () { requestAnimationFrame(function () { rIntro.classList.add('is-in'); }); });
+        rPlay();
+      },
+      leave: function () {
+        rActive = false;
+        if (!rv.paused) rv.pause();
+      }
+    };
   }
 
   var svcEl = $('#hamamServices');
@@ -2152,7 +2284,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
   var TITLES = {
     home: "Göreme Cave Suites · Kapadokya'da Butik Mağara Otel",
     odalar: 'Odalar & Süitler · Göreme Cave Suites',
-    restoran: 'Restoran & Teras · Göreme Cave Suites',
+    restoran: 'Restoran · Göreme Cave Suites',
     hamam: 'Hamam & Spa · Göreme Cave Suites'
   };
   var views = {};
@@ -2176,6 +2308,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     if (roomDlg && roomDlg.open) roomDlg.close();
     if (dishDlg && dishDlg.open) dishDlg.close();
     if (window.HeroVideo) { if (name === 'home') window.HeroVideo.resume(); else window.HeroVideo.pause(); }
+    if (RIntro) { if (name === 'restoran') RIntro.enter(); else RIntro.leave(); }
     return true;
   }
   function focusHeading() {
