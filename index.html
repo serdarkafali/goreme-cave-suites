@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
@@ -587,7 +587,7 @@ window.SITE_CONTENT = {
        Yeni Tailwind sınıfı eklenirse css/site.css yeniden derlenmelidir (KURULUM.md). -->
   <link rel="preload" href="fonts/montserrat-normal-latin-1.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="fonts/playfair-display-normal-latin-5.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="css/site.css?v=6" />
+  <link rel="stylesheet" href="css/site.css?v=7" />
 
   <style>
 /* =====================================================================
@@ -636,6 +636,7 @@ section[id], footer[id] { scroll-margin-top: 76px; }
 .social-icon:hover { color: #D4AF37; transform: translateY(-2px); }
 .site-header.is-solid .social-icon:hover { color: #B08F26; }
 .social-icon svg { width: 18px; height: 18px; }
+.header-sep { width: 1px; height: 1.6rem; margin: 0 1.25rem 0 1rem; background: currentColor; opacity: .25; }
 
 /* Hamburger */
 .burger span { display: block; height: 1.5px; width: 26px; background: currentColor; transition: transform .45s cubic-bezier(.7, 0, .3, 1), opacity .3s ease; transform-origin: center; }
@@ -887,9 +888,9 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7.5 9h9M12 9v8"/><circle cx="16.2" cy="15.8" r="1" fill="currentColor" stroke="none"/></svg>' }
   ];
 
-  function socialLinks(cls) {
+  function socialLinks(cls, keys) {
     var links = C.SOCIAL_LINKS || {};
-    return SOCIAL.map(function (s) {
+    return SOCIAL.filter(function (s) { return !keys || keys.indexOf(s.key) !== -1; }).map(function (s) {
       var url = links[s.key] || '#';
       var placeholder = !url || url === '#';
       return '<a href="' + esc(url) + '" target="_blank" rel="noopener" class="' + cls + '"' +
@@ -964,14 +965,18 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     write(
       '<a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:bg-gold focus:text-ink focus:px-4 focus:py-2 focus:rounded">İçeriğe geç</a>' +
       '<header id="siteHeader" class="site-header fixed inset-x-0 top-0 z-50">' +
-        '<div class="header-inner mx-auto max-w-7xl px-5 sm:px-8 py-5 flex items-center gap-6">' +
-          '<a href="#anasayfa" class="flex items-center gap-3 shrink-0" aria-label="Göreme Cave Suites ana sayfa">' + logoHtml() + '</a>' +
-          '<nav aria-label="Ana menü" class="hidden lg:block lg:ml-6 xl:ml-10">' +
-            '<ul class="flex items-center gap-7 xl:gap-9 text-[0.76rem] uppercase tracking-[0.2em]">' + desktopNav + '</ul>' +
+        /* Üç bölge: logo solda, menü tam ortada, sosyal medya + rezervasyon sağda.
+           OTA ikonları (Booking/Expedia/Trip) header'da yok: doğrudan rezervasyonu öne çıkarmak için
+           yalnızca footer'da ve mobil menüde. */
+        '<div class="header-inner mx-auto max-w-[88rem] px-5 sm:px-8 xl:px-12 py-5 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-8">' +
+          '<a href="#anasayfa" class="flex items-center gap-3 shrink-0 justify-self-start" aria-label="Göreme Cave Suites ana sayfa">' + logoHtml() + '</a>' +
+          '<nav aria-label="Ana menü" class="hidden lg:block justify-self-center">' +
+            '<ul class="flex items-center gap-8 xl:gap-11 text-[0.74rem] font-medium uppercase tracking-[0.22em]">' + desktopNav + '</ul>' +
           '</nav>' +
-          '<div class="ml-auto flex items-center gap-2 xl:gap-4">' +
-            '<div class="hidden lg:flex items-center gap-0.5" role="group" aria-label="Sosyal medya ve rezervasyon platformları">' + socialLinks('social-icon') + '</div>' +
-            '<a href="' + esc(C.BOOKING_URL || '#iletisim') + '" target="_blank" rel="noopener" class="btn-gold hidden xl:inline-flex items-center rounded-full px-6 py-3 text-[0.7rem] font-semibold uppercase tracking-[0.2em]">Rezervasyon</a>' +
+          '<div class="flex items-center justify-self-end">' +
+            '<div class="hidden xl:flex items-center gap-1" role="group" aria-label="Sosyal medya">' + socialLinks('social-icon', ['instagram', 'tiktok']) + '</div>' +
+            '<span class="header-sep hidden xl:block" aria-hidden="true"></span>' +
+            '<a href="' + esc(C.BOOKING_URL || '#iletisim') + '" target="_blank" rel="noopener" class="btn-gold hidden lg:inline-flex items-center gap-2 rounded-full px-6 py-3 text-[0.68rem] font-semibold uppercase tracking-[0.22em] whitespace-nowrap">Rezervasyon</a>' +
             '<button id="burger" class="burger lg:hidden p-2 -mr-2" type="button" aria-label="Menüyü aç" aria-expanded="false" aria-controls="mobileMenu"><span></span><span></span><span></span></button>' +
           '</div>' +
         '</div>' +
