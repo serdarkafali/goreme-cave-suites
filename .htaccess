@@ -1,0 +1,41 @@
+# cPanel / Apache hosting için güvenlik ve önbellek ayarları.
+# Bu dosya index.html ile aynı klasörde durmalıdır (genelde public_html).
+
+Options -Indexes
+ErrorDocument 404 /404.html
+
+# HTTPS'e yönlendir (hosting'de SSL sertifikası açık olmalı; çoğu cPanel'de ücretsiz "AutoSSL")
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; media-src 'self'; frame-src https://www.google.com https://maps.google.com; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
+  <FilesMatch "\.(webp|jpg|png|svg|mp4)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+  <FilesMatch "\.woff2$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>
+
+# Gizli/yardımcı dosyalar dışarıdan okunmasın
+<FilesMatch "^(README\.md|KURULUM\.md|_headers|\.git.*)$">
+  Require all denied
+</FilesMatch>
+
+<IfModule mod_mime.c>
+  AddType image/webp .webp
+  AddType font/woff2 .woff2
+  AddType video/mp4 .mp4
+  AddType application/manifest+json .webmanifest
+</IfModule>

@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!--
   =====================================================================
-  GÖREME CAVE SUITES · TEK DOSYALIK SİTE (v4)
+  GÖREME CAVE SUITES · WEB SİTESİ (v5)
   ---------------------------------------------------------------------
-  Bu dosya tek başına çalışır: çift tıklayarak açın. Klasör gerekmez.
+  Statik site: bu index.html, yanındaki css/, fonts/, img/, video/ klasörleri
+  ve goreme-hero.mp4 ile birlikte çalışır. Klasörün TAMAMI sunucuya yüklenir
+  (kurulum seçenekleri: KURULUM.md). Veritabanı veya PHP gerekmez.
   Sayfalar: Ana sayfa · #odalar · #restoran · #hamam (aynı dosya içinde).
 
   DÜZENLEME: Aşağıdaki ilk script bloğu tüm ayarları içerir:
@@ -18,8 +20,8 @@
   [YER TUTUCU] etiketli değerler gerçek bilgiyle değiştirilmelidir.
   [GERÇEK] etiketliler goremecavesuites.com'dan alınmıştır.
 
-  Not: Tasarım (Tailwind), yazı tipleri, fotoğraflar ve harita internetten
-  yüklenir; internet bağlantısı gerekir.
+  Fotoğraflar img/foto/ ve img/menu/ klasöründedir; yalnızca Google Haritalar
+  ve rezervasyon sayfası dış adreslerden açılır.
   =====================================================================
 -->
   <script>
@@ -49,7 +51,7 @@ window.SITE_CONFIG = {
      Video bulunamazsa veya boş ('') bırakılırsa HERO_POSTER görseli
      hafif yakınlaşma efektiyle gösterilir; sayfa yine düzgün görünür. */
   HERO_VIDEO: 'goreme-hero.mp4',        // [YER TUTUCU] geçici video (dosya yanında yoksa poster gösterilir)
-  HERO_POSTER: 'https://www.goremecavesuites.com/storage/slides/peW73uUuY5rBTaD0hsiXDscqYjibTHGCOPP7npUT.jpg',   // [GERÇEK] otelin sitesindeki balon fotoğrafı
+  HERO_POSTER: 'img/foto/hero-balon-1.webp',   // [GERÇEK] otelin sitesindeki balon fotoğrafı
 
   /* ---------- Sosyal medya ve rezervasyon platformları ----------
      Header ve footer'daki ikonlar buradan okunur; hepsi yeni sekmede açılır.
@@ -64,6 +66,12 @@ window.SITE_CONFIG = {
 
   /* Odalardaki "Rezervasyon" butonları bu adrese gider. */
   BOOKING_URL: 'https://www.reseliva.com/booknow/goreme-cave-suites/?lang=tr',   // [GERÇEK] otelin online rezervasyon sayfası
+
+  /* Footer'daki bülten formu. Boş ('') ise form gösterilmez, yerine "teklifleri
+     e-postayla isteyin" bağlantısı çıkar (ilk e-posta adresine). Brevo/Mailchimp gibi
+     bir bülten servisinin form adresi yazılırsa form o adrese "email" alanıyla gönderir;
+     bu durumda <head> içindeki Content-Security-Policy'de form-action'a o adresi ekleyin. */
+  NEWSLETTER_ACTION_URL: '',            // [YER TUTUCU] bülten servisi seçilince
 
   /* Footer alt satırındaki yasal metin bağlantıları. */
   PRIVACY_URL: 'https://www.goremecavesuites.com/privacy-policy',   // [GERÇEK] otelin mevcut gizlilik sayfası
@@ -151,62 +159,62 @@ window.SITE_CONFIG = {
    ===================================================================== */
 window.SITE_CONTENT_IMAGES = {
   /* --- Otelin kendi fotoğrafları (goremecavesuites.com) --- */
-  'hero-balon-1':               'https://www.goremecavesuites.com/storage/slides/peW73uUuY5rBTaD0hsiXDscqYjibTHGCOPP7npUT.jpg',
-  'hero-balon-2':               'https://www.goremecavesuites.com/storage/slides/crHIQiOcu8LsOeyiXELW6It0LNblWJzaLUt0vumx.jpg',
-  'hero-balon-3':               'https://www.goremecavesuites.com/storage/slides/4usAx9J8YeK7Hb6Tk04cQL80gZXeIDZGJHkTV4Aw.jpg',
-  'goreme-gun-batimi':          'https://www.goremecavesuites.com/storage/slides/RVCFA2r9CJJawYu2W8Cz2JVfPGMpcYGxpZNvb7zV.jpg',
-  'goreme-gece':                'https://www.goremecavesuites.com/storage/about/YlGGve48K1vxLrE7TIA0nPWnnJPUZwaugOy2bON1.jpg',
-  'teras-1':                    'https://www.goremecavesuites.com/storage/gallery_photos/VZRXVRUZI1UUXKyFWKylqCS3g3VyiLDfsUkuoNvb.jpg',
-  'teras-2':                    'https://www.goremecavesuites.com/storage/gallery_photos/l596vpvjaDaHkkJiXUOcrHX7If3cyxCHfk6zejLj.jpg',
-  'hamam-1':                    'https://www.goremecavesuites.com/storage/gallery_photos/8KaYbsPBlmMoEIPz1cNw7mEYoMpgg4vzsZoCRKGM.jpg',
-  'hamam-2':                    'https://www.goremecavesuites.com/storage/gallery_photos/Bkuji4tTU5cGRKBEAzDap4JHP0hQ8cZ1PAh2IoVt.jpg',
-  'hamam-3':                    'https://www.goremecavesuites.com/storage/gallery_photos/YNIL8hOdhKZGnN1nIM3LwcIIWwnRszhs5qQWCHF8.jpg',
-  'havuz':                      'https://www.goremecavesuites.com/storage/gallery_photos/2zty2Vsvaqsy36IYC7n7p9lLTP9nl8d6ZOl2ejuB.jpg',
-  'oda-deluxe-cift-1':          'https://www.goremecavesuites.com/storage/rooms/cover_images/j1ADOX8l3bDDcScDXOeRCnpyE7T5SyTKYGXdtbBN.jpg',
-  'oda-deluxe-cift-2':          'https://www.goremecavesuites.com/storage/gallery_photos/2SeakXYunlMZhGt3O3RO2PAWgHGErDqAz8KvJyIr.jpg',
-  'oda-deluxe-cift-3':          'https://www.goremecavesuites.com/storage/gallery_photos/7K0s3IK2ThwlkxUBBVH0ew3k6TMmxxmlMJYKYAEA.jpg',
-  'oda-deluxe-cift-4':          'https://www.goremecavesuites.com/storage/gallery_photos/6ishgcIUjhHkbPhWvYmWLAYFPSdu9qe5mllj744Z.jpg',
-  'oda-deluxe-uc-1':            'https://www.goremecavesuites.com/storage/rooms/cover_images/qqVWeomDDBSCjyAtY1Nas3IHqKDfuC62SvWLFm5Y.jpg',
-  'oda-deluxe-uc-2':            'https://www.goremecavesuites.com/storage/gallery_photos/zhae6j2f8xjF81Lf44Sg5333pfFIp9c4drCPTfwz.jpg',
-  'oda-deluxe-uc-3':            'https://www.goremecavesuites.com/storage/gallery_photos/8ue8lCyAw7Eei281c3AlvtrxeRXDR6nNf71kQQKH.jpg',
-  'oda-deluxe-uc-4':            'https://www.goremecavesuites.com/storage/gallery_photos/GtLJXvaVM2FI1VeiUUzWr3gGzzIS0fXQP2gRGKC4.jpg',
-  'oda-junior-suit-1':          'https://www.goremecavesuites.com/storage/rooms/cover_images/nlQLHGEOt2QlY9eeIP6h42N1AoEW1cEirdSyUUZq.jpg',
-  'oda-junior-suit-2':          'https://www.goremecavesuites.com/storage/gallery_photos/mzV91cYPhKeSFdRLM9dco6wxksSXRfPmNLj5tzkY.jpg',
-  'oda-junior-suit-3':          'https://www.goremecavesuites.com/storage/gallery_photos/W5VhC1dhOP4Muli4CZujguByYDkQR3eUyZGE6cQD.jpg',
-  'oda-junior-suit-4':          'https://www.goremecavesuites.com/storage/gallery_photos/2t153aSUDQrtewJAXbhGd32VE7KIDeMWuIjTCwJO.jpg',
-  'oda-junior-suit-hamamli-1':  'https://www.goremecavesuites.com/storage/rooms/cover_images/n6yut5jM5EayA3BAcHb0QeesVsgTZULeGGaCwxwr.jpg',
-  'oda-junior-suit-hamamli-2':  'https://www.goremecavesuites.com/storage/gallery_photos/pM3j1QytAZvkBUACpsaCGrtgng06qgbGV5bSOful.jpg',
-  'oda-junior-suit-hamamli-3':  'https://www.goremecavesuites.com/storage/gallery_photos/SHdI0QPcVimq06RrlYWcd3Lds4cuUONKJrnqXpv3.jpg',
-  'oda-junior-suit-hamamli-4':  'https://www.goremecavesuites.com/storage/gallery_photos/aAlGbqWWtgHIUyCmGsWzVuGqDYBZU6dJ7yN4k0zj.jpg',
-  'oda-havuzlu-1':              'https://www.goremecavesuites.com/storage/rooms/cover_images/NUXw5vZ8t6g288l97SljNk1MP4B0NBILa5tEmzeR.jpg',
-  'oda-havuzlu-3':              'https://www.goremecavesuites.com/storage/gallery_photos/UUqTLR31OCgRojOfTssMVnvmEyn9K4KibzNvLYUu.jpg',
-  'oda-havuzlu-4':              'https://www.goremecavesuites.com/storage/gallery_photos/OWJV1Rv5B3SU8RhYC6IPupRi4DQrl5vi8kfv4pyM.jpg',
-  'oda-ekonomik-cift-1':        'https://www.goremecavesuites.com/storage/rooms/cover_images/0FLPF1lb1XfrLfCjSf6C7HKT9SyIS7LcZH1Wvoup.jpg',
-  'oda-ekonomik-cift-2':        'https://www.goremecavesuites.com/storage/gallery_photos/D09p2akXlPU7fm95ki7AJu8K3XzLXQ5Qq1FqB9C9.jpg',
-  'oda-ekonomik-cift-3':        'https://www.goremecavesuites.com/storage/gallery_photos/uI0ttvaCLgUVJM4WIUf2zjyJ8m4guNwuKhZUSBUb.jpg',
-  'oda-ekonomik-cift-4':        'https://www.goremecavesuites.com/storage/gallery_photos/iF33b9WgXtI8IhbvfedpTTq2s9qDQ1sSyjctHMlo.jpg',
-  'oda-standart-balkonlu-1':    'https://www.goremecavesuites.com/storage/rooms/cover_images/YxtczIAGswhv19FRYU7M67VRRKRQKSJWE3a5hXna.jpg',
-  'oda-standart-balkonlu-3':    'https://www.goremecavesuites.com/storage/gallery_photos/bO2HfBtxMwCyyMAn9LwQd9po2cUPYZh9NCj894R0.jpg',
-  'oda-standart-balkonlu-4':    'https://www.goremecavesuites.com/storage/gallery_photos/UKBeQ3H6dwmD7aGJ2zra60xtJktQ6WCrbbNsKAUw.jpg',
-  'oda-ekonomik-uc-1':          'https://www.goremecavesuites.com/storage/rooms/cover_images/Bv9VqvFReLOU0YQ5ZtTOeCZiEsnELkESlIl0pzXp.jpg',
-  'oda-ekonomik-uc-3':          'https://www.goremecavesuites.com/storage/gallery_photos/Kc04uwYX6HVR4kIUmp72wEVrpYrwFgikCLqBQubd.jpg',
-  'oda-ekonomik-uc-4':          'https://www.goremecavesuites.com/storage/gallery_photos/w0pkuNZZDvg9gYBoeQVmrYCB7I0LXbcZs95Y6fkk.jpg',
-  'oda-saunali-1':              'https://www.goremecavesuites.com/storage/rooms/cover_images/DayRyzjKtVQ2WOGyyvNuUJKfqz6fvQ5yoEpQEWOV.jpg',
-  'oda-saunali-3':              'https://www.goremecavesuites.com/storage/gallery_photos/jN6TsDD4rPp0bjjNGeJiraPCoNEYrHVz3dcMHXFJ.jpg',
-  'oda-saunali-4':              'https://www.goremecavesuites.com/storage/gallery_photos/LHmPZ1AI7lp9yyzdl9jFx9oHmSLQEgXZ5Vh0ls0c.jpg',
-  'oda-queen-cift-1':           'https://www.goremecavesuites.com/storage/rooms/cover_images/Cuj3T9PmL9bx7W1Smm5CGqt9foE2GAQklq9ua3Vt.jpg',
-  'oda-queen-cift-3':           'https://www.goremecavesuites.com/storage/gallery_photos/yWH3CQTTzQTMzUMUijyLdeFg1FBFGVM8SP1sUy0S.jpg',
-  'oda-queen-cift-4':           'https://www.goremecavesuites.com/storage/gallery_photos/GmwXLPOsxwjvW05hEq6WRXSlgi6XdS92Fdin8AjP.jpg',
+  'hero-balon-1':               'img/foto/hero-balon-1.webp',
+  'hero-balon-2':               'img/foto/hero-balon-2.webp',
+  'hero-balon-3':               'img/foto/hero-balon-3.webp',
+  'goreme-gun-batimi':          'img/foto/goreme-gun-batimi.webp',
+  'goreme-gece':                'img/foto/goreme-gece.webp',
+  'teras-1':                    'img/foto/teras-1.webp',
+  'teras-2':                    'img/foto/teras-2.webp',
+  'hamam-1':                    'img/foto/hamam-1.webp',
+  'hamam-2':                    'img/foto/hamam-2.webp',
+  'hamam-3':                    'img/foto/hamam-3.webp',
+  'havuz':                      'img/foto/havuz.webp',
+  'oda-deluxe-cift-1':          'img/foto/oda-deluxe-cift-1.webp',
+  'oda-deluxe-cift-2':          'img/foto/oda-deluxe-cift-2.webp',
+  'oda-deluxe-cift-3':          'img/foto/oda-deluxe-cift-3.webp',
+  'oda-deluxe-cift-4':          'img/foto/oda-deluxe-cift-4.webp',
+  'oda-deluxe-uc-1':            'img/foto/oda-deluxe-uc-1.webp',
+  'oda-deluxe-uc-2':            'img/foto/oda-deluxe-uc-2.webp',
+  'oda-deluxe-uc-3':            'img/foto/oda-deluxe-uc-3.webp',
+  'oda-deluxe-uc-4':            'img/foto/oda-deluxe-uc-4.webp',
+  'oda-junior-suit-1':          'img/foto/oda-junior-suit-1.webp',
+  'oda-junior-suit-2':          'img/foto/oda-junior-suit-2.webp',
+  'oda-junior-suit-3':          'img/foto/oda-junior-suit-3.webp',
+  'oda-junior-suit-4':          'img/foto/oda-junior-suit-4.webp',
+  'oda-junior-suit-hamamli-1':  'img/foto/oda-junior-suit-hamamli-1.webp',
+  'oda-junior-suit-hamamli-2':  'img/foto/oda-junior-suit-hamamli-2.webp',
+  'oda-junior-suit-hamamli-3':  'img/foto/oda-junior-suit-hamamli-3.webp',
+  'oda-junior-suit-hamamli-4':  'img/foto/oda-junior-suit-hamamli-4.webp',
+  'oda-havuzlu-1':              'img/foto/oda-havuzlu-1.webp',
+  'oda-havuzlu-3':              'img/foto/oda-havuzlu-3.webp',
+  'oda-havuzlu-4':              'img/foto/oda-havuzlu-4.webp',
+  'oda-ekonomik-cift-1':        'img/foto/oda-ekonomik-cift-1.webp',
+  'oda-ekonomik-cift-2':        'img/foto/oda-ekonomik-cift-2.webp',
+  'oda-ekonomik-cift-3':        'img/foto/oda-ekonomik-cift-3.webp',
+  'oda-ekonomik-cift-4':        'img/foto/oda-ekonomik-cift-4.webp',
+  'oda-standart-balkonlu-1':    'img/foto/oda-standart-balkonlu-1.webp',
+  'oda-standart-balkonlu-3':    'img/foto/oda-standart-balkonlu-3.webp',
+  'oda-standart-balkonlu-4':    'img/foto/oda-standart-balkonlu-4.webp',
+  'oda-ekonomik-uc-1':          'img/foto/oda-ekonomik-uc-1.webp',
+  'oda-ekonomik-uc-3':          'img/foto/oda-ekonomik-uc-3.webp',
+  'oda-ekonomik-uc-4':          'img/foto/oda-ekonomik-uc-4.webp',
+  'oda-saunali-1':              'img/foto/oda-saunali-1.webp',
+  'oda-saunali-3':              'img/foto/oda-saunali-3.webp',
+  'oda-saunali-4':              'img/foto/oda-saunali-4.webp',
+  'oda-queen-cift-1':           'img/foto/oda-queen-cift-1.webp',
+  'oda-queen-cift-3':           'img/foto/oda-queen-cift-3.webp',
+  'oda-queen-cift-4':           'img/foto/oda-queen-cift-4.webp',
   /* --- Wikimedia Commons (CC BY / CC BY-SA; atıf footer'da) --- */
-  'aktivite-atv':               'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Atv_tour_in_Cappadocia.jpg/960px-Atv_tour_in_Cappadocia.jpg',
-  'aktivite-at-turu':           'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/G%C3%B6reme_-_Cappadocia-7.jpg/960px-G%C3%B6reme_-_Cappadocia-7.jpg',
-  'aktivite-kirmizi-tur':       'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Cappadocia_Red_Valley.jpg/960px-Cappadocia_Red_Valley.jpg',
-  'aktivite-yesil-tur':         'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Ihlara_Valley%2C_Turkey.jpg/960px-Ihlara_Valley%2C_Turkey.jpg',
-  'aktivite-vadi-yuruyusu':     'https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Love_Valley_Cappadocia_%2824885453%29.jpeg/960px-Love_Valley_Cappadocia_%2824885453%29.jpeg',
-  'aktivite-gun-batimi':        'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/The_Mexican_in_Cappadocia.jpg/960px-The_Mexican_in_Cappadocia.jpg',
-  'aktivite-turk-gecesi':       'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Turkish_folk_dancers_%281085290934%29.jpg/960px-Turkish_folk_dancers_%281085290934%29.jpg',
-  'hamam-geleneksel':           'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Hurrem_Sultan_Hamam%2C_Roxelana_Bath_Interior.jpg/960px-Hurrem_Sultan_Hamam%2C_Roxelana_Bath_Interior.jpg',
-  'restoran-kahvalti':          'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Turkish_Breakfast_Spread.jpg/960px-Turkish_Breakfast_Spread.jpg',
+  'aktivite-atv':               'img/foto/aktivite-atv.webp',
+  'aktivite-at-turu':           'img/foto/aktivite-at-turu.webp',
+  'aktivite-kirmizi-tur':       'img/foto/aktivite-kirmizi-tur.webp',
+  'aktivite-yesil-tur':         'img/foto/aktivite-yesil-tur.webp',
+  'aktivite-vadi-yuruyusu':     'img/foto/aktivite-vadi-yuruyusu.webp',
+  'aktivite-gun-batimi':        'img/foto/aktivite-gun-batimi.webp',
+  'aktivite-turk-gecesi':       'img/foto/aktivite-turk-gecesi.webp',
+  'hamam-geleneksel':           'img/foto/hamam-geleneksel.webp',
+  'restoran-kahvalti':          'img/foto/restoran-kahvalti.webp',
 
   /* --- Restoranın kendi yemek fotoğrafları (img/menu klasöründe) [GERÇEK] --- */
   'restoran-testi-kebabi':      'img/menu/testi-kebabi.webp',
@@ -500,36 +508,67 @@ window.SITE_CONTENT = {
   </script>
 
   <title>Göreme Cave Suites · Kapadokya'da Butik Mağara Otel</title>
-  <meta name="description" content="Göreme Cave Suites: Göreme'nin kalbinde, peri bacaları arasında 25 mağara ve taş odalı butik otel." />
+  <meta name="description" content="Göreme Cave Suites: Göreme'nin kalbinde, peri bacaları arasında 25 mağara ve taş odalı butik otel. Hamam, restoran ve balon manzarası." />
   <meta name="theme-color" content="#221A15" />
+  <!-- Güvenlik: yalnızca bu sitenin kendi dosyaları, Google Haritalar ve rezervasyon sayfası.
+       Sunucu başlıkları için _headers (Netlify/Cloudflare) ve .htaccess (cPanel/Apache) dosyalarına bakın. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; media-src 'self'; frame-src https://www.google.com https://maps.google.com; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta name="format-detection" content="telephone=no" />
+
+  <!-- Paylaşım önizlemesi (WhatsApp, Instagram, Facebook, X). Alan adı değişince SITE_URL ile birlikte güncelleyin. -->
+  <link rel="canonical" href="https://serdarkafali.github.io/goreme-cave-suites/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Göreme Cave Suites" />
+  <meta property="og:locale" content="tr_TR" />
+  <meta property="og:title" content="Göreme Cave Suites · Kapadokya'da Butik Mağara Otel" />
+  <meta property="og:description" content="Peri bacalarının arasında 25 mağara ve taş odalı butik otel. Hamam, restoran ve balon manzarası." />
+  <meta property="og:url" content="https://serdarkafali.github.io/goreme-cave-suites/" />
+  <meta property="og:image" content="https://serdarkafali.github.io/goreme-cave-suites/img/paylasim.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Göreme üzerinde gün doğumunda sıcak hava balonları" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png" />
+  <link rel="manifest" href="site.webmanifest" />
+
+  <!-- Google arama sonuçları için otel bilgileri (schema.org) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Hotel",
+    "name": "Göreme Cave Suites",
+    "description": "Göreme'nin kalbinde, peri bacaları arasında 25 mağara ve taş odalı butik otel.",
+    "url": "https://serdarkafali.github.io/goreme-cave-suites/",
+    "image": "https://serdarkafali.github.io/goreme-cave-suites/img/paylasim.jpg",
+    "telephone": "+903842712770",
+    "email": "goremecavesuites@gmail.com",
+    "numberOfRooms": 25,
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Aydınlı Mahallesi, Görçeli Sokak No: 7",
+      "addressLocality": "Göreme",
+      "addressRegion": "Nevşehir",
+      "postalCode": "50180",
+      "addressCountry": "TR"
+    },
+    "geo": { "@type": "GeoCoordinates", "latitude": 38.6413565, "longitude": 34.8277726 },
+    "hasMap": "https://maps.app.goo.gl/Z2ciZ4v8vEnX7CH37",
+    "amenityFeature": [
+      { "@type": "LocationFeatureSpecification", "name": "Hamam", "value": true },
+      { "@type": "LocationFeatureSpecification", "name": "Restoran", "value": true },
+      { "@type": "LocationFeatureSpecification", "name": "Ücretsiz Wi-Fi", "value": true }
+    ],
+    "potentialAction": { "@type": "ReserveAction", "target": "https://www.reseliva.com/booknow/goreme-cave-suites/?lang=tr" }
+  }
+  </script>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Ccircle cx="32" cy="32" r="30.5" fill="none" stroke="#D4AF37" stroke-width="1.2"/%3E%3Ccircle cx="32" cy="32" r="26.8" fill="none" stroke="#D4AF37" stroke-width="0.5" opacity="0.6"/%3E%3Cpath d="M32 9.6c-2.6 0-4.3 2-4.3 4.4 0 2.2 1.6 3.8 3 5h2.6c1.4-1.2 3-2.8 3-5 0-2.4-1.7-4.4-4.3-4.4Z" fill="none" stroke="#D4AF37" stroke-width="0.9"/%3E%3Cpath d="M30.9 19.2l.4 1.4h1.4l.4-1.4" fill="none" stroke="#D4AF37" stroke-width="0.8"/%3E%3Ctext x="32" y="40.5" text-anchor="middle" font-family="Georgia, "Times New Roman", serif" font-size="15.5" letter-spacing="1.4" fill="#D4AF37"%3EGCS%3C/text%3E%3Cpath d="M15 50c2.4-3.6 3.6-6.4 5.6-6.4s1.6 3.6 3.2 3.6 2-5 4-5 2.4 4.2 4 4.2 1.8-2.8 3.4-2.8 2.2 3.6 3.8 3.6 1.8-2.6 3.4-2.6 2.6 3.2 4.2 5.4" fill="none" stroke="#D4AF37" stroke-width="0.9" stroke-linecap="round"/%3E%3C/svg%3E" />
 
-  <!-- Tailwind (CDN) + tema renkleri -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-tailwind.config = {
-  theme: {
-    extend: {
-      colors: {
-        sand: { 50: '#FBF8F3', 100: '#F5EFE6', 200: '#EDE3D4', 300: '#E0D2BC', 400: '#CDB896' },
-        stone: { 500: '#9C8670', 600: '#7A6552', 700: '#5A4A3C' },
-        gold: { DEFAULT: '#D4AF37', light: '#E6C974', dark: '#B08F26' },
-        ink: { DEFAULT: '#2B2622', soft: '#4A3F36' },
-        cocoa: { 800: '#2F251E', 900: '#221A15' }
-      },
-      fontFamily: {
-        serif: ['"Playfair Display"', 'Georgia', 'serif'],
-        sans: ['Montserrat', 'system-ui', 'sans-serif']
-      },
-      letterSpacing: { widest2: '0.32em' }
-    }
-  }
-};
-  </script>
-  <!-- Yazı tipleri: Playfair Display (başlık), Montserrat (metin) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+  <!-- Tasarım (derlenmiş Tailwind + yerel yazı tipleri: Playfair Display, Montserrat).
+       Yeni Tailwind sınıfı eklenirse css/site.css yeniden derlenmelidir (KURULUM.md). -->
+  <link rel="preload" href="fonts/montserrat-normal-latin-1.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="fonts/playfair-display-normal-latin-5.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="css/site.css?v=5" />
 
   <style>
 /* =====================================================================
@@ -941,14 +980,16 @@ dialog.dish-dlg { width: min(940px, 94vw); }
             '<div class="md:col-span-2 lg:col-span-3">' +
               '<h2 class="text-xs uppercase tracking-widest2 text-gold font-semibold">Bülten</h2>' +
               '<p class="mt-6 font-light leading-relaxed text-sand-300/80">Mevsimsel tekliflerden ve balon sezonu ayrıcalıklarından ilk siz haberdar olun.</p>' +
-              '<form id="newsletterForm" class="mt-5" novalidate>' +
-                '<label for="newsEmail" class="sr-only">E-posta adresiniz</label>' +
-                '<div class="flex rounded-full border border-sand-200/25 focus-within:border-gold transition-colors overflow-hidden">' +
-                  '<input id="newsEmail" type="email" required autocomplete="email" placeholder="E-posta adresiniz" class="min-w-0 flex-1 bg-transparent px-5 py-3.5 text-sm text-sand-50 placeholder:text-sand-300/60 focus:outline-none" aria-describedby="newsMsg" />' +
-                  '<button type="submit" class="btn-gold m-1 rounded-full px-5 text-[0.68rem] font-semibold uppercase tracking-[0.18em]">Abone Ol</button>' +
-                '</div>' +
-                '<p id="newsMsg" class="mt-3 min-h-[1.25rem] text-sm" role="status" aria-live="polite"></p>' +
-              '</form>' +
+              (C.NEWSLETTER_ACTION_URL
+                ? '<form id="newsletterForm" class="mt-5" method="post" target="_blank" action="' + esc(C.NEWSLETTER_ACTION_URL) + '" novalidate>' +
+                    '<label for="newsEmail" class="sr-only">E-posta adresiniz</label>' +
+                    '<div class="flex rounded-full border border-sand-200/25 focus-within:border-gold transition-colors overflow-hidden">' +
+                      '<input id="newsEmail" name="email" type="email" required autocomplete="email" placeholder="E-posta adresiniz" class="min-w-0 flex-1 bg-transparent px-5 py-3.5 text-sm text-sand-50 placeholder:text-sand-300/60 focus:outline-none" aria-describedby="newsMsg" />' +
+                      '<button type="submit" class="btn-gold m-1 rounded-full px-5 text-[0.68rem] font-semibold uppercase tracking-[0.18em]">Abone Ol</button>' +
+                    '</div>' +
+                    '<p id="newsMsg" class="mt-3 min-h-[1.25rem] text-sm" role="status" aria-live="polite"></p>' +
+                  '</form>'
+                : '<a href="mailto:' + esc(C.CONTACT.emails[0]) + '?subject=' + encodeURIComponent('Özel teklifler') + '" class="mt-5 inline-flex items-center gap-2 rounded-full border border-sand-200/25 px-6 py-3.5 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-sand-50 hover:border-gold hover:text-gold transition-colors">Teklifleri e-postayla isteyin</a>') +
             '</div>' +
           '</div>' +
           '<div class="mt-16 pt-8 border-t border-sand-200/10 flex flex-col sm:flex-row gap-4 justify-between text-xs text-sand-300/60 tracking-wide">' +
@@ -1596,12 +1637,12 @@ dialog.dish-dlg { width: min(940px, 94vw); }
 
   /* ================= 5. Bülten formu ================= */
   var form = $('#newsletterForm');
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
+  if (form) form.addEventListener('submit', function (e) {
     var input = $('#newsEmail');
     var msg = $('#newsMsg');
     var v = input.value.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) {
+      e.preventDefault();
       msg.textContent = 'Lütfen geçerli bir e-posta adresi girin.';
       msg.className = 'mt-3 min-h-[1.25rem] text-sm text-red-300';
       input.setAttribute('aria-invalid', 'true');
@@ -1609,9 +1650,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       return;
     }
     input.removeAttribute('aria-invalid');
-    msg.textContent = 'Teşekkürler! Özel teklifler ' + v + ' adresine gönderilecek.';
-    msg.className = 'mt-3 min-h-[1.25rem] text-sm text-gold-light';
-    form.reset();
+    msg.textContent = '';
   });
 
   /* ================= 6. Lightbox ================= */

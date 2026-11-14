@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Alan adı değişince bu satırı yeni adresle güncelleyin.
+Sitemap: https://serdarkafali.github.io/goreme-cave-suites/sitemap.xml
