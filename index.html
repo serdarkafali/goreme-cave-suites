@@ -7,8 +7,8 @@
   =====================================================================
   GÖREME CAVE SUITES · WEB SİTESİ (v5)
   ---------------------------------------------------------------------
-  Statik site: bu index.html, yanındaki css/, fonts/, img/, video/ klasörleri
-  ve goreme-hero.mp4 ile birlikte çalışır. Klasörün TAMAMI sunucuya yüklenir
+  Statik site: bu index.html, yanındaki css/, fonts/, img/ ve video/ klasörleriyle
+  birlikte çalışır. Klasörün TAMAMI sunucuya yüklenir
   (kurulum seçenekleri: KURULUM.md). Veritabanı veya PHP gerekmez.
   Sayfalar: Ana sayfa · #odalar · #restoran · #hamam (aynı dosya içinde).
 
@@ -50,8 +50,10 @@ window.SITE_CONFIG = {
      ya da bu HTML ile AYNI klasördeki .mp4 dosyasının adıdır.
      Video bulunamazsa veya boş ('') bırakılırsa HERO_POSTER görseli
      hafif yakınlaşma efektiyle gösterilir; sayfa yine düzgün görünür. */
-  HERO_VIDEO: 'goreme-hero.mp4',        // [YER TUTUCU] geçici video (dosya yanında yoksa poster gösterilir)
-  HERO_POSTER: 'img/foto/hero-balon-1.webp',   // [GERÇEK] otelin sitesindeki balon fotoğrafı
+  HERO_VIDEO: 'video/goreme-hero.mp4?v=3',                 // 1920x1080, gerçek Kapadokya çekimleri (Pexels/Pixabay lisansı)
+  HERO_VIDEO_PORTRAIT: 'video/goreme-hero-dikey.mp4?v=3',  // 1080x1920, dik telefon ekranları için ('' = yatay video)
+  HERO_POSTER: 'video/goreme-hero-poster.jpg?v=3',         // videonun ilk karesi; video yüklenene kadar görünür
+  HERO_POSTER_PORTRAIT: 'video/goreme-hero-dikey-poster.jpg?v=3',
 
   /* ---------- Sosyal medya ve rezervasyon platformları ----------
      Header ve footer'daki ikonlar buradan okunur; hepsi yeni sekmede açılır.
@@ -118,15 +120,24 @@ window.SITE_CONFIG = {
      sonuna "-poster.jpg" eklenmiş dosyadır (ör. video/restoran-giris-poster.jpg).
      RESTAURANT_INTRO_CHAPTERS: videodaki sahnelerin başlangıç saniyesi ve etiketi;
      dish → menüdeki yemeğin img adı (etikete tıklanınca o yemeğin kartı açılır). */
-  RESTAURANT_INTRO_VIDEO: 'video/restoran-giris.mp4?v=2',
-  RESTAURANT_INTRO_VIDEO_PORTRAIT: 'video/restoran-giris-dikey.mp4',
+  RESTAURANT_INTRO_VIDEO: 'video/restoran-giris.mp4?v=3',
+  RESTAURANT_INTRO_VIDEO_PORTRAIT: 'video/restoran-giris-dikey.mp4?v=3',
   RESTAURANT_INTRO_CHAPTERS: [
     { at: 0,     label: 'Göreme · Gün doğumu' },
-    { at: 3.4,   label: 'Testi Kebabı',  dish: 'testi-kebabi' },
-    { at: 6.25,  label: 'Muhammara',     dish: 'muhammara' },
-    { at: 7.55,  label: 'Kuzu Pirzola',  dish: 'kuzu-pirzola' },
-    { at: 8.85,  label: 'Levrek',        dish: 'levrek' },
-    { at: 10.4,  label: 'Uçhisar · Akşam' },
+    { at: 2.3,   label: 'Odun ateşi' },
+    { at: 4.4,   label: 'Közde, ağır ateşte' },
+    { at: 7.2,   label: 'Mangal başında' },
+    { at: 9.8,   label: 'Göreme Vadisi' },
+    { at: 13.4,  label: 'Peri bacaları' },
+    { at: 16.8,  label: 'Göreme · Gün doğumu' }
+  ],
+  // Dikey videonun sahne süreleri farklı olduğu için ayrı liste (boşsa yukarıdaki kullanılır).
+  RESTAURANT_INTRO_CHAPTERS_PORTRAIT: [
+    { at: 0,     label: 'Göreme · Gün doğumu' },
+    { at: 2.1,   label: 'Odun ateşi' },
+    { at: 4.0,   label: 'Közden tabağa' },
+    { at: 6.4,   label: 'Göreme Vadisi' },
+    { at: 9.8,   label: 'Balonlar' },
     { at: 13.2,  label: 'Göreme · Gün doğumu' }
   ],
 
@@ -494,6 +505,8 @@ window.SITE_CONTENT = {
   /* ---------- Görsel kaynakları (lisans gereği footer'da listelenir) ---------- */
   CREDITS: [
     ['Otel fotoğrafları', 'goremecavesuites.com', 'https://www.goremecavesuites.com/'],
+    ['Giriş videoları: Kapadokya, balon, köz ve mangal çekimleri', 'Pexels', 'https://www.pexels.com/license/'],
+    ['Giriş videoları: balon ateşi, köz ve kebap çekimleri', 'Pixabay', 'https://pixabay.com/service/license-summary/'],
     ['ATV turu: Zeynepunuvar, CC BY 4.0', 'Wikimedia Commons', 'https://commons.wikimedia.org/wiki/File:Atv_tour_in_Cappadocia.jpg'],
     ['At turu: Birol Kirac, CC BY-SA 4.0', 'Wikimedia Commons', 'https://commons.wikimedia.org/wiki/File:G%C3%B6reme_-_Cappadocia-7.jpg'],
     ['Kızılçukur Vadisi: Kaan Kosemen, CC BY-SA 4.0', 'Wikimedia Commons', 'https://commons.wikimedia.org/wiki/File:Cappadocia_Red_Valley.jpg'],
@@ -1746,12 +1759,26 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       poster.classList.add('kenburns');
     }
 
-    if (C.HERO_POSTER) { poster.src = C.HERO_POSTER; video.poster = C.HERO_POSTER; }
+    var heroPortraitMQ = window.matchMedia('(max-aspect-ratio: 4/5)');
+    function heroPick(land, port) { return (heroPortraitMQ.matches && port) || land; }
+    var heroPoster = heroPick(C.HERO_POSTER, C.HERO_POSTER_PORTRAIT);
+    if (heroPoster) { poster.src = heroPoster; video.poster = heroPoster; }
     if (!C.HERO_VIDEO) {
       videoFailed();
     } else {
       var source = document.createElement('source');
-      source.src = C.HERO_VIDEO;
+      source.src = heroPick(C.HERO_VIDEO, C.HERO_VIDEO_PORTRAIT);
+      if (C.HERO_VIDEO_PORTRAIT) {
+        heroPortraitMQ.addEventListener('change', function () {
+          var next = heroPick(C.HERO_VIDEO, C.HERO_VIDEO_PORTRAIT);
+          if (failed || source.src.indexOf(next) !== -1) return;
+          var p2 = heroPick(C.HERO_POSTER, C.HERO_POSTER_PORTRAIT);
+          if (p2) { poster.src = p2; video.poster = p2; }
+          source.src = next;
+          video.load();
+          if (!userPaused && !reduceMotion) { var q = video.play(); if (q && q.catch) q.catch(function () {}); }
+        });
+      }
       source.type = 'video/mp4';
       source.addEventListener('error', videoFailed);
       video.appendChild(source);
@@ -2226,6 +2253,9 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       if (src === rSrc) return;
       var t = rv.currentTime || 0;
       rSrc = src;
+      CHAPTERS = (src === C.RESTAURANT_INTRO_VIDEO_PORTRAIT && C.RESTAURANT_INTRO_CHAPTERS_PORTRAIT && C.RESTAURANT_INTRO_CHAPTERS_PORTRAIT.length)
+        ? C.RESTAURANT_INTRO_CHAPTERS_PORTRAIT : (C.RESTAURANT_INTRO_CHAPTERS || []);
+      rChapIdx = -1;
       rPoster.src = src.replace(/\.mp4(\?.*)?$/, '-poster.jpg$1');
       rv.poster = rPoster.src;
       rv.src = src;
