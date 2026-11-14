@@ -68,6 +68,12 @@ window.SITE_CONFIG = {
 
   /* Odalardaki "Rezervasyon" butonları bu adrese gider. */
   BOOKING_URL: 'https://www.reseliva.com/booknow/goreme-cave-suites/?lang=tr',   // [GERÇEK] otelin online rezervasyon sayfası
+  /* Ana sayfadaki rezervasyon kutusu: seçilen tarih ve kişi sayısı BOOKING_URL'e
+     pCheckInDate / pCheckOutDate (GG/AA/YYYY), numAdults ve numRooms olarak eklenir;
+     Reseliva o tarihlerdeki müsait odaları ve fiyatları doğrudan listeler.
+     Ödeme Reseliva'da yapılır, kart bilgisi bu siteye hiç gelmez.
+     Kutunun altındaki kısa vaatler ([] = gösterilmez); otelin gerçekten sunduklarıyla güncelleyin. */
+  HERO_BOOKING_PERKS: ['Doğrudan rezervasyon', 'En iyi fiyat garantisi', 'Güvenli ödeme'],
 
   /* Footer'daki bülten formu. Boş ('') ise form gösterilmez, yerine "teklifleri
      e-postayla isteyin" bağlantısı çıkar (ilk e-posta adresine). Brevo/Mailchimp gibi
@@ -581,7 +587,7 @@ window.SITE_CONTENT = {
        Yeni Tailwind sınıfı eklenirse css/site.css yeniden derlenmelidir (KURULUM.md). -->
   <link rel="preload" href="fonts/montserrat-normal-latin-1.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="fonts/playfair-display-normal-latin-5.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="css/site.css?v=5" />
+  <link rel="stylesheet" href="css/site.css?v=6" />
 
   <style>
 /* =====================================================================
@@ -660,6 +666,51 @@ section[id], footer[id] { scroll-margin-top: 76px; }
 .hero-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .hero-in { opacity: 0; transform: translateY(24px); animation: heroIn 1.2s cubic-bezier(.2, .7, .2, 1) forwards; }
 @keyframes heroIn { to { opacity: 1; transform: none; } }
+/* Hero rezervasyon kutusu: tarih ve kişi seçilir, otelin Reseliva sayfası bu bilgilerle yeni sekmede açılır. */
+.bk { width: 100%; max-width: 54rem; text-shadow: none; }
+.bk-bar { position: relative; display: grid; grid-template-columns: 1fr 1fr; align-items: stretch; text-align: left; padding: .4rem; border-radius: 1.4rem; background: rgba(26, 20, 16, .46); border: 1px solid rgba(226, 194, 102, .38); box-shadow: 0 30px 70px -30px rgba(0, 0, 0, .75), inset 0 1px 0 rgba(255, 255, 255, .08); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); }
+.bk-field { position: relative; display: block; min-width: 0; padding: .75rem 1rem .8rem; border-radius: 1rem; cursor: pointer; transition: background-color .3s ease; }
+.bk-field:hover, .bk-field:focus-within { background: rgba(255, 255, 255, .07); }
+.bk-field + .bk-field::before { content: ''; position: absolute; left: 0; top: 24%; bottom: 24%; width: 1px; background: rgba(226, 194, 102, .28); }
+.bk-guests { grid-column: span 2; }
+.bk-guests::before { left: 1rem !important; right: 1rem; top: 0 !important; bottom: auto !important; width: auto !important; height: 1px; }
+.bk-label { display: flex; align-items: center; gap: .45rem; font-size: .58rem; font-weight: 600; letter-spacing: .26em; text-transform: uppercase; color: #E2C266; }
+.bk-label svg { width: .8rem; height: .8rem; opacity: .9; }
+.bk-nights { color: rgba(245, 239, 230, .6); letter-spacing: .14em; }
+.bk-value { display: block; margin-top: .35rem; font-family: 'Playfair Display', Georgia, serif; font-size: 1.08rem; line-height: 1.25; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bk-date { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; color-scheme: dark; font-size: 16px; }
+.bk-date::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; }
+.bk-trigger { position: absolute; inset: 0; width: 100%; border-radius: 1rem; }
+.bk-submit { grid-column: span 2; margin-top: .4rem; display: inline-flex; align-items: center; justify-content: center; gap: .7rem; padding: 1.05rem 1.6rem; border-radius: 1rem; font-size: .7rem; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; white-space: nowrap; }
+.bk-submit svg { width: 1rem; height: 1rem; transition: transform .35s ease; }
+.bk-submit:hover svg { transform: translateX(4px); }
+.bk-pop { position: absolute; left: .4rem; right: .4rem; bottom: calc(100% + .7rem); z-index: 30; padding: 1.1rem 1.25rem; border-radius: 1.1rem; background: rgba(26, 20, 16, .94); border: 1px solid rgba(226, 194, 102, .35); box-shadow: 0 24px 50px -20px rgba(0, 0, 0, .8); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); text-align: left; transform-origin: bottom center; animation: bkPop .28s cubic-bezier(.2, .7, .2, 1); }
+.bk-pop[hidden] { display: none; }
+@keyframes bkPop { from { opacity: 0; transform: translateY(8px) scale(.98); } }
+.bk-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .55rem 0; }
+.bk-row + .bk-row { border-top: 1px solid rgba(226, 194, 102, .16); }
+.bk-row-name { font-family: 'Playfair Display', Georgia, serif; font-size: 1.05rem; color: #fff; }
+.bk-row-hint { display: block; font-family: 'Montserrat', system-ui, sans-serif; font-size: .68rem; color: rgba(245, 239, 230, .6); margin-top: .1rem; }
+.bk-step { display: flex; align-items: center; gap: .85rem; }
+.bk-step output { min-width: 1.4rem; text-align: center; font-size: 1rem; color: #fff; font-variant-numeric: tabular-nums; }
+.bk-step button { width: 2.3rem; height: 2.3rem; border-radius: 999px; border: 1px solid rgba(226, 194, 102, .5); color: #E2C266; display: flex; align-items: center; justify-content: center; transition: background-color .25s ease, color .25s ease, opacity .25s ease; }
+.bk-step button:hover:not(:disabled) { background: #D4AF37; color: #221A15; }
+.bk-step button:disabled { opacity: .3; cursor: default; }
+.bk-done { margin-top: .6rem; width: 100%; padding: .7rem; border-radius: 999px; font-size: .66rem; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; }
+.bk-perks { margin-top: 1.1rem; display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem 1.4rem; font-size: .62rem; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: rgba(245, 239, 230, .82); text-shadow: 0 1px 10px rgba(0, 0, 0, .5); }
+.bk-perks li { display: inline-flex; align-items: center; gap: .55rem; }
+.bk-perks li::before { content: ''; width: 5px; height: 5px; transform: rotate(45deg); background: #D4AF37; }
+@media (min-width: 768px) {
+  .bk-bar { grid-template-columns: 1.1fr 1.1fr 1.15fr auto; padding: .45rem .45rem .45rem .6rem; border-radius: 999px; }
+  .bk-field { padding: .7rem 1.4rem .75rem; border-radius: 999px; }
+  .bk-trigger { border-radius: 999px; }
+  .bk-guests { grid-column: auto; }
+  .bk-guests::before { left: 0 !important; right: auto; top: 24% !important; bottom: 24% !important; width: 1px !important; height: auto; }
+  .bk-submit { grid-column: auto; margin: 0 0 0 .35rem; border-radius: 999px; padding: 0 2rem; }
+  .bk-pop { left: auto; right: 9rem; width: 19rem; }
+}
+@media (max-width: 767px) and (max-height: 760px) { .hero-sub-optional { display: none; } }
+@media (max-width: 767px), (max-height: 700px) { .hero-scroll-cue { display: none; } }
 .kenburns { animation: kenburns 22s ease-out forwards; transform-origin: 55% 45%; }
 @keyframes kenburns { from { transform: scale(1.12); } to { transform: scale(1); } }
 .scroll-cue { width: 22px; height: 36px; border: 1.5px solid rgba(255, 255, 255, .8); border-radius: 12px; position: relative; }
@@ -1070,14 +1121,53 @@ dialog.dish-dlg { width: min(940px, 94vw); }
         <p class="hero-in divider-ornament text-[0.7rem] sm:text-xs uppercase tracking-widest2 font-medium" style="animation-delay:.2s">Göreme · Kapadokya</p>
         <h1 id="page-title-home" tabindex="-1" data-view-heading class="hero-in mt-6 font-serif text-[2.8rem] leading-[1.05] sm:text-7xl lg:text-[5.6rem] font-normal" style="animation-delay:.4s" data-cfg="HOTEL_NAME">Göreme Cave Suites</h1>
         <p class="hero-in mt-6 max-w-2xl font-serif italic text-xl sm:text-2xl text-sand-100/95" style="animation-delay:.65s" data-cfg="SLOGAN">Kapadokya'nın Kalbinde Zamansız Büyüyü Keşfedin</p>
-        <p class="hero-in mt-4 max-w-xl text-sm sm:text-base font-light text-sand-100/80" style="animation-delay:.8s" data-cfg="HERO_SUBTITLE">Peri bacalarının arasında, 25 mağara ve taş odalı butik otel.</p>
-        <div class="hero-in mt-10 flex flex-col sm:flex-row items-center gap-4" style="animation-delay:1s">
-          <a href="#odalar" class="btn-gold rounded-full px-8 py-4 text-[0.72rem] font-semibold uppercase tracking-[0.22em]">Odaları Keşfedin</a>
-          <a href="#tarihce" class="rounded-full border border-white/60 px-8 py-4 text-[0.72rem] font-semibold uppercase tracking-[0.22em] hover:bg-white hover:text-ink transition-colors">Hikâyemiz</a>
-        </div>
+        <p class="hero-in hero-sub-optional mt-4 max-w-xl text-sm sm:text-base font-light text-sand-100/80" style="animation-delay:.8s" data-cfg="HERO_SUBTITLE">Peri bacalarının arasında, 25 mağara ve taş odalı butik otel.</p>
+
+        <!-- Rezervasyon kutusu (SITE_CONFIG → BOOKING_URL, HERO_BOOKING_PERKS) -->
+        <form id="heroBooking" class="bk hero-in mt-8 sm:mt-10" style="animation-delay:1s" novalidate aria-label="Müsaitlik ve fiyat sorgula">
+          <div class="bk-bar">
+            <label class="bk-field">
+              <span class="bk-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Giriş</span>
+              <span class="bk-value" id="bkInText" aria-hidden="true">–</span>
+              <input class="bk-date" type="date" id="bkIn" name="checkin" required aria-label="Giriş tarihi" />
+            </label>
+            <label class="bk-field">
+              <span class="bk-label">Çıkış <span class="bk-nights" id="bkNights"></span></span>
+              <span class="bk-value" id="bkOutText" aria-hidden="true">–</span>
+              <input class="bk-date" type="date" id="bkOut" name="checkout" required aria-label="Çıkış tarihi" />
+            </label>
+            <div class="bk-field bk-guests">
+              <span class="bk-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5M16 5.2a3 3 0 0 1 0 5.6M18 14.4c1.4.7 2.3 2.2 2.6 4.6"/></svg>Misafir</span>
+              <span class="bk-value" id="bkGuestText">2 Kişi · 1 Oda</span>
+              <button type="button" class="bk-trigger" id="bkGuestBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="bkPop"><span class="sr-only">Kişi ve oda sayısını seç</span></button>
+            </div>
+            <button type="submit" class="bk-submit btn-gold">Müsaitlik Ara<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+
+            <div class="bk-pop" id="bkPop" role="dialog" aria-label="Kişi ve oda sayısı" hidden>
+              <div class="bk-row">
+                <span class="bk-row-name">Kişi<span class="bk-row-hint">Yetişkin ve çocuk</span></span>
+                <span class="bk-step" data-step="adults" data-min="1" data-max="20">
+                  <button type="button" data-d="-1" aria-label="Kişi sayısını azalt"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+                  <output aria-live="polite">2</output>
+                  <button type="button" data-d="1" aria-label="Kişi sayısını artır"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+                </span>
+              </div>
+              <div class="bk-row">
+                <span class="bk-row-name">Oda</span>
+                <span class="bk-step" data-step="rooms" data-min="1" data-max="10">
+                  <button type="button" data-d="-1" aria-label="Oda sayısını azalt"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+                  <output aria-live="polite">1</output>
+                  <button type="button" data-d="1" aria-label="Oda sayısını artır"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+                </span>
+              </div>
+              <button type="button" class="bk-done btn-gold" id="bkDone">Tamam</button>
+            </div>
+          </div>
+          <ul class="bk-perks" id="bkPerks"></ul>
+        </form>
       </div>
 
-      <div class="absolute bottom-8 inset-x-0 z-10 flex justify-center pointer-events-none">
+      <div class="hero-scroll-cue absolute bottom-8 inset-x-0 z-10 flex justify-center pointer-events-none">
         <a href="#tarihce" class="hero-in pointer-events-auto flex flex-col items-center gap-3 text-[0.62rem] uppercase tracking-widest2 text-white/80 hover:text-gold transition-colors" style="animation-delay:1.3s" aria-label="Aşağı kaydır: Tarihçe">
           <span class="scroll-cue" aria-hidden="true"></span><span aria-hidden="true">Keşfet</span>
         </a>
@@ -1808,6 +1898,102 @@ dialog.dish-dlg { width: min(940px, 94vw); }
   /* data-cfg="ANAHTAR" taşıyan öğelerin metni SITE_CONFIG'ten gelir; data-booking bağlantıları BOOKING_URL'e gider. */
   $$('[data-cfg]').forEach(function (el) { var v = C[el.getAttribute('data-cfg')]; if (v) el.textContent = v; });
   $$('[data-booking]').forEach(function (el) { if (C.BOOKING_URL) el.href = C.BOOKING_URL; });
+
+  /* Hero rezervasyon kutusu. Form hiçbir yere gönderilmez (CSP form-action 'self');
+     yalnızca BOOKING_URL'e tarih/kişi parametreleri eklenip yeni sekmede açılır. */
+  (function () {
+    var form = $('#heroBooking');
+    if (!form) return;
+    if (!C.BOOKING_URL) { form.hidden = true; return; }
+    var inEl = $('#bkIn'), outEl = $('#bkOut'), pop = $('#bkPop'), gBtn = $('#bkGuestBtn');
+    var counts = { adults: 2, rooms: 1 };
+    var fmt = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short', weekday: 'short' });
+    var DAY = 864e5;
+
+    function iso(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+    function parse(v) { var p = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ''); return p ? new Date(+p[1], +p[2] - 1, +p[3]) : null; }
+    function addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+    var today = new Date(); today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    var maxDate = addDays(today, 730);
+
+    function render() {
+      var a = parse(inEl.value), b = parse(outEl.value);
+      $('#bkInText').textContent = a ? fmt.format(a) : 'Tarih seçin';
+      $('#bkOutText').textContent = b ? fmt.format(b) : 'Tarih seçin';
+      var n = a && b ? Math.round((b - a) / DAY) : 0;
+      $('#bkNights').textContent = n > 0 ? '· ' + n + ' gece' : '';
+      outEl.min = iso(a ? addDays(a, 1) : addDays(today, 1));
+    }
+    /* Geçmiş tarih seçilemez; çıkış her zaman girişten en az bir gün sonradır.
+       Çıkış girişten önceye alınırsa giriş bir gün öncesine çekilir. */
+    function normalize(changed) {
+      var a = parse(inEl.value), b = parse(outEl.value);
+      if (!a || a < today) a = today;
+      if (a > maxDate) a = maxDate;
+      if (b && b <= a && changed === 'out') { a = addDays(b, -1); if (a < today) a = today; }
+      if (!b || b <= a) b = addDays(a, 1);
+      inEl.value = iso(a); outEl.value = iso(b);
+      render();
+    }
+    inEl.min = iso(today); inEl.max = iso(maxDate); outEl.max = iso(addDays(maxDate, 30));
+    inEl.value = iso(today); outEl.value = iso(addDays(today, 1));
+    render();
+    inEl.addEventListener('change', function () { normalize('in'); });
+    outEl.addEventListener('change', function () { normalize('out'); });
+    [inEl, outEl].forEach(function (el) {
+      el.addEventListener('click', function () { try { if (el.showPicker) el.showPicker(); } catch (e) {} });
+    });
+
+    function syncGuests() {
+      $$('.bk-step', pop).forEach(function (s) {
+        var k = s.getAttribute('data-step'), v = counts[k];
+        $('output', s).textContent = v;
+        s.querySelector('[data-d="-1"]').disabled = v <= +s.getAttribute('data-min');
+        s.querySelector('[data-d="1"]').disabled = v >= +s.getAttribute('data-max');
+      });
+      $('#bkGuestText').textContent = counts.adults + ' Kişi · ' + counts.rooms + ' Oda';
+    }
+    $$('.bk-step', pop).forEach(function (s) {
+      s.addEventListener('click', function (e) {
+        var btn = e.target.closest('button');
+        if (!btn || btn.disabled) return;
+        var k = s.getAttribute('data-step');
+        counts[k] = Math.min(+s.getAttribute('data-max'), Math.max(+s.getAttribute('data-min'), counts[k] + +btn.getAttribute('data-d')));
+        if (counts.rooms > counts.adults) counts[k === 'rooms' ? 'adults' : 'rooms'] = counts[k === 'rooms' ? 'rooms' : 'adults'];
+        syncGuests();
+      });
+    });
+    function openPop(open) {
+      pop.hidden = !open;
+      gBtn.setAttribute('aria-expanded', String(open));
+      if (open) { var first = pop.querySelector('button:not(:disabled)'); if (first) first.focus(); }
+    }
+    gBtn.addEventListener('click', function () { openPop(pop.hidden); });
+    $('#bkDone').addEventListener('click', function () { openPop(false); gBtn.focus(); });
+    document.addEventListener('click', function (e) { if (!pop.hidden && !pop.contains(e.target) && e.target !== gBtn) openPop(false); });
+    pop.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.stopPropagation(); openPop(false); gBtn.focus(); } });
+    syncGuests();
+
+    var perks = C.HERO_BOOKING_PERKS || [];
+    $('#bkPerks').innerHTML = perks.map(function (p) { return '<li>' + esc(p) + '</li>'; }).join('');
+    if (!perks.length) $('#bkPerks').hidden = true;
+
+    function dmy(d) { return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear(); }
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      normalize();
+      var url;
+      try { url = new URL(C.BOOKING_URL); } catch (err) { return; }
+      if (url.protocol !== 'https:') return;
+      url.searchParams.set('pCheckInDate', dmy(parse(inEl.value)));
+      url.searchParams.set('pCheckOutDate', dmy(parse(outEl.value)));
+      url.searchParams.set('numAdults', String(counts.adults));
+      url.searchParams.set('numRooms', String(counts.rooms));
+      var a = document.createElement('a');
+      a.href = url.href; a.target = '_blank'; a.rel = 'noopener';
+      document.body.appendChild(a); a.click(); a.remove();
+    });
+  })();
   var mainPhone = C.CONTACT && C.CONTACT.phones && C.CONTACT.phones[0];
   $$('[data-phone]').forEach(function (el) {
     if (mainPhone) { el.href = 'tel:' + mainPhone.tel; el.textContent = mainPhone.display; } else { el.style.display = 'none'; }
