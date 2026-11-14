@@ -104,6 +104,13 @@ window.SITE_CONFIG = {
     { meal: 'Akşam yemeği', hours: '19:00 – 22:30' }
   ],
 
+  /* ---------- Menü QR kodu (Restoran sayfası) ----------
+     MENU_QR_IMAGE: QR görseli (bu HTML'e göre yol ya da URL). '' ise kart gizlenir.
+     Şimdiki QR bu sitenin #restoran sayfasını açar [YER TUTUCU]; gerçek dijital
+     menü bağlantısı belli olunca yeni QR üretip img/menu-qr.svg ile değiştirin. */
+  MENU_QR_IMAGE: 'img/menu-qr.svg',
+  MENU_QR_LINK: 'https://serdarkafali.github.io/goreme-cave-suites/#restoran',
+
   /* ---------- Nasıl ulaşılır (süreler yaklaşıktır) ----------
      icon: plane | bus | car | shuttle */
   TRANSPORT: [
@@ -182,10 +189,13 @@ window.SITE_CONTENT_IMAGES = {
   'aktivite-turk-gecesi':       'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Turkish_folk_dancers_%281085290934%29.jpg/960px-Turkish_folk_dancers_%281085290934%29.jpg',
   'hamam-geleneksel':           'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Hurrem_Sultan_Hamam%2C_Roxelana_Bath_Interior.jpg/960px-Hurrem_Sultan_Hamam%2C_Roxelana_Bath_Interior.jpg',
   'restoran-kahvalti':          'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Turkish_Breakfast_Spread.jpg/960px-Turkish_Breakfast_Spread.jpg',
-  'restoran-testi-kebabi':      'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/TestiKebabGoreme.jpg/960px-TestiKebabGoreme.jpg',
-  'restoran-turk-kahvesi':      'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Turkish_coffee_in_Istanbul.jpg/960px-Turkish_coffee_in_Istanbul.jpg',
-  /* --- Unsplash --- */
-  'restoran-aksam-yemegi':      'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1600&q=80'
+
+  /* --- Restoranın kendi yemek fotoğrafları (img/menu klasöründe) [GERÇEK] --- */
+  'restoran-testi-kebabi':      'img/menu/testi-kebabi.webp',
+  'restoran-aksam-yemegi':      'img/menu/kuzu-pirzola.webp',
+  'restoran-levrek':            'img/menu/levrek.webp',
+  'restoran-mezeler':           'img/menu/muhammara.webp',
+  'restoran-tatli':             'img/menu/san-sebastian.webp'
 };
 
 /* =====================================================================
@@ -282,41 +292,151 @@ window.SITE_CONTENT = {
       text: 'Halk dansları, semah gösterisi ve yöresel lezzetlerle Anadolu kültürüyle dolu bir akşam.' }
   ],
 
-  /* ---------- Restoran (#restoran) ----------
-     Menü öğeleri ÖRNEKTİR [YER TUTUCU]; gerçek menü geldiğinde değiştirin. */
-  MENU: [
-    { title: 'Kahvaltı', note: 'Tüm odalarda konaklamaya dahildir', items: [
-      ['Serpme köy kahvaltısı', 'Köy peyniri, zeytin, domates, salatalık, tereyağı, bal'],
-      ['Kapadokya pekmezi & tahin', 'Yöresel üzüm pekmezi, taze tahin'],
-      ['Bakır sahanda yumurta', 'Sucuklu veya sade'],
-      ['Gözleme', 'Peynirli, patatesli veya ıspanaklı'],
-      ['Demlik çay & Türk kahvesi', 'İnce belli bardakta']
-    ] },
-    { title: 'Başlangıçlar', note: 'Örnek menü', items: [
-      ['Mercimek çorbası', 'Limon ve kıtır ekmek ile'],
-      ['Meze tabağı', 'Haydari, acılı ezme, humus, yaprak sarma'],
-      ['Sigara böreği', 'Beyaz peynir ve maydanoz'],
-      ['Mevsim salatası', 'Nar ekşisi sosla']
-    ] },
-    { title: 'Ana Yemekler', note: 'Örnek menü', items: [
-      ['Testi kebabı', 'Kapadokya usulü, testide pişmiş et ve sebze'],
-      ['Kayseri mantısı', 'Sarımsaklı yoğurt ve tereyağı sos'],
-      ['Fırında kuzu tandır', 'İç pilav eşliğinde'],
-      ['Sebzeli güveç', 'Toprak kapta, vejetaryen']
-    ] },
-    { title: 'Tatlılar', note: 'Örnek menü', items: [
-      ['Fıstıklı baklava', 'Dondurma ile'],
-      ['Kabak tatlısı', 'Tahin ve ceviz'],
-      ['Fırın sütlaç', 'Tarçın ile'],
-      ['Türk kahvesi & lokum', 'Geleneksel ikram']
-    ] }
+  /* ---------- Restoran menüsü (#restoran) ----------
+     Fotoğraflar restoranındır [GERÇEK]; yemek adları dosya adlarından alınmıştır.
+     Açıklama, köken notu ve eşleşme önerileri ÖRNEKTİR [YER TUTUCU]: şefle kontrol edin.
+
+     MENU_CATEGORIES: menüdeki sekmeler ve başlıklar (sırası menüdeki sıradır).
+     MENU_DISHES alanları:
+       cat    → MENU_CATEGORIES içindeki id
+       img    → img/menu/ klasöründeki dosya adı (uzantısız). Büyük görsel <img>.webp,
+                kare küçük görsel <img>-k.webp. Tam bir URL de yazılabilir.
+       tags   → 'imza' (Şefin İmzası), 'vejetaryen', 'glutensiz'.
+                Hiçbir yemekte kullanılmayan etiketin filtresi görünmez.
+       origin → "Köken notu", pair → "Eşleşme önerisi" ('' ise gösterilmez)
+       price  → '' ise fiyat gösterilmez [YER TUTUCU: gerçek fiyatlar]  */
+  MENU_CATEGORIES: [
+    { id: 'soguk',   title: 'Soğuk Mezeler' },
+    { id: 'sicak',   title: 'Ara Sıcaklar' },
+    { id: 'salata',  title: 'Salatalar' },
+    { id: 'makarna', title: 'Mantı & Makarna' },
+    { id: 'ana',     title: 'Ana Yemekler' },
+    { id: 'tatli',   title: 'Tatlılar' }
+  ],
+  MENU_DISHES: [
+    { cat: 'soguk', img: 'muhammara', name: 'Muhammara', tags: ['vejetaryen'], price: '',
+      desc: 'Közlenmiş kırmızı biber, ceviz ve nar ekşisiyle hafif acı, dokulu bir meze.',
+      origin: 'Güneydoğu Anadolu sofralarının klasiği; biber ve cevizin buluşması.', pair: '' },
+    { cat: 'soguk', img: 'mutebbel', name: 'Mütebbel', tags: ['vejetaryen'], price: '',
+      desc: 'Közde pişmiş patlıcan, tahin, yoğurt ve sarımsak; çıtır yufka eşliğinde.',
+      origin: 'Patlıcan közün dumanını aldıkça tahinle yumuşar.', pair: '' },
+    { cat: 'soguk', img: 'eksi-atom', name: 'Ekşi Atom', tags: ['vejetaryen'], price: '',
+      desc: 'Süzme yoğurt üzerinde tereyağında kızdırılmış kuru biber.',
+      origin: 'Adını yakıcı biberinden alan, meyhane sofralarının sevilen mezesi.', pair: '' },
+    { cat: 'soguk', img: 'kuruccacik', name: 'Kuruccacık', tags: ['vejetaryen'], price: '',
+      desc: 'Süzme yoğurt, taze yeşillikler ve zeytinyağı.',
+      origin: '', pair: '' },
+    { cat: 'soguk', img: 'koz-patlican', name: 'Köz Patlıcan', tags: ['vejetaryen'], price: '',
+      desc: 'Bütün közlenmiş patlıcan, domates, biber ve taze yeşilliklerle.',
+      origin: 'Odun ateşinde közlenen patlıcanın isli aroması.', pair: '' },
+    { cat: 'soguk', img: 'borulce', name: 'Börülce', tags: ['vejetaryen'], price: '',
+      desc: 'Zeytinyağı, limon ve sarımsakla hafifçe soslanmış taze börülce.',
+      origin: 'Ege usulü zeytinyağlı; serin ve ferah bir başlangıç.', pair: '' },
+    { cat: 'soguk', img: 'yaprak-sarma', name: 'Yaprak Sarma', tags: ['vejetaryen'], price: '',
+      desc: 'Asma yaprağında baharatlı pirinç; yoğurt ve domates sosuyla.',
+      origin: 'Kapadokya bağlarının asma yaprağıyla sarılan zeytinyağlı.', pair: '' },
+    { cat: 'soguk', img: 'peynir-tabagi', name: 'Peynir Tabağı', tags: ['vejetaryen'], price: '',
+      desc: 'Seçme peynirler, üzüm, kuru meyve ve bal.',
+      origin: '', pair: 'Kapadokya beyaz şarabı (Emir üzümü)' },
+
+    { cat: 'sicak', img: 'icli-kofte', name: 'İçli Köfte', tags: [], price: '',
+      desc: 'İnce bulgur kabuk içinde cevizli kıyma; süzme yoğurt yatağında.',
+      origin: 'Güneydoğu mutfağının ustalık isteyen el işi.', pair: '' },
+    { cat: 'sicak', img: 'balli-gemici', name: 'Ballı Gemici', tags: [], price: '',
+      desc: 'Çıtır yufka, bal ve antep fıstığı.',
+      origin: '', pair: '' },
+    { cat: 'sicak', img: 'kalamar', name: 'Kalamar', tags: [], price: '',
+      desc: 'Çıtır kalamar halkaları, limon ve özel sos.',
+      origin: '', pair: 'Kapadokya beyaz şarabı (Emir üzümü)' },
+    { cat: 'sicak', img: 'karides', name: 'Karides Güveç', tags: [], price: '',
+      desc: 'Toprak güveçte tereyağı, sarımsak ve domatesle pişen karides.',
+      origin: 'Toprak kap ısıyı tutar; karides kendi suyunda pişer.', pair: 'Kapadokya beyaz şarabı (Emir üzümü)' },
+    { cat: 'sicak', img: 'ahtapot', name: 'Ahtapot Güveç', tags: ['imza'], price: '',
+      desc: 'Yumuşacık ahtapot, bebek patates, domates ve taze otlar.',
+      origin: 'Ağır ateşte, toprak güveçte sabırla pişer.', pair: 'Narince beyaz şarap' },
+    { cat: 'sicak', img: 'yaprak-ciger', name: 'Yaprak Ciğer', tags: [], price: '',
+      desc: 'İnce dilimlenmiş kuzu ciğeri, közlenmiş patlıcan ve taze otlar.',
+      origin: '', pair: 'Kalecik Karası' },
+
+    { cat: 'salata', img: 'roka-salata', name: 'Roka Salata', tags: ['vejetaryen'], price: '',
+      desc: 'Roka, cherry domates, turp ve zeytinyağlı limon sos.',
+      origin: '', pair: '' },
+    { cat: 'salata', img: 'sezar-salata', name: 'Sezar Salata', tags: [], price: '',
+      desc: 'Marul, ızgara tavuk, kruton, parmesan ve sezar sos.',
+      origin: '', pair: '' },
+    { cat: 'salata', img: 'kuzukulagi-salata', name: 'Kuzukulağı Salata', tags: ['vejetaryen'], price: '',
+      desc: 'Ekşimsi kuzukulağı, domates, biber ve nar ekşisi.',
+      origin: 'Baharın ilk yeşilliklerinden; Anadolu yaylalarının otu.', pair: '' },
+    { cat: 'salata', img: 'gavurdagi', name: 'Gavurdağı Salatası', tags: ['vejetaryen'], price: '',
+      desc: 'İnce kıyılmış domates, biber, soğan ve ceviz; nar ekşili sos.',
+      origin: 'Antep sofralarından, cevizle zenginleşen çoban salatası.', pair: '' },
+
+    { cat: 'makarna', img: 'hengel', name: 'Hengel', tags: ['imza'], price: '',
+      desc: 'El açması hamur bohçalar, sarımsaklı yoğurt ve kızgın tereyağı.',
+      origin: 'Doğu Anadolu\'nun ev mutfağından, mantının iri ve cömert kardeşi.', pair: '' },
+    { cat: 'makarna', img: 'tepsi-mantisi', name: 'Tepsi Mantısı', tags: [], price: '',
+      desc: 'Fırında kızaran mantı, yoğurt, domates ve biber sosuyla.',
+      origin: 'Kayseri usulü; tepside kızartılıp suyunu çeker.', pair: '' },
+    { cat: 'makarna', img: 'fettucini', name: 'Fettucini', tags: [], price: '',
+      desc: 'Kremalı sosta fettucini, parmesan ve taze fesleğen.',
+      origin: '', pair: '' },
+    { cat: 'makarna', img: 'karidesli-spagetti', name: 'Karidesli Spagetti', tags: [], price: '',
+      desc: 'Sarımsak, tereyağı ve beyaz şarapla soslanan karidesli spagetti.',
+      origin: '', pair: 'Kapadokya beyaz şarabı (Emir üzümü)' },
+    { cat: 'makarna', img: 'penne', name: 'Penne', tags: [], price: '',
+      desc: 'Domates sosunda penne, parmesan ve fesleğen.',
+      origin: '', pair: '' },
+    { cat: 'makarna', img: 'mini-kofte', name: 'Mini Köfteli Spagetti', tags: [], price: '',
+      desc: 'Domates sosunda spagetti, minik köfteler ve parmesan.',
+      origin: '', pair: '' },
+
+    { cat: 'ana', img: 'testi-kebabi', name: 'Testi Kebabı', tags: ['imza'], price: '',
+      desc: 'Toprak testide sebzelerle ağır ağır pişen et; masada kırılarak servis edilir.',
+      origin: 'Kapadokya\'nın simgesi: testi hamurla mühürlenir, ağır ateşte saatlerce pişer.', pair: 'Öküzgözü – Boğazkere' },
+    { cat: 'ana', img: 'kuzu-pirzola', name: 'Kuzu Pirzola', tags: ['imza'], price: '',
+      desc: 'Izgarada kuzu pirzola, mevsim sebzeleri ve meyveli sos.',
+      origin: '', pair: 'Kalecik Karası' },
+    { cat: 'ana', img: 'bonfile', name: 'Izgara Bonfile', tags: [], price: '',
+      desc: 'Dana bonfile, közlenmiş sebzeler, biber püresi ve yeşil sos.',
+      origin: '', pair: 'Öküzgözü – Boğazkere' },
+    { cat: 'ana', img: 'dana-asado', name: 'Dana Asado', tags: [], price: '',
+      desc: 'Uzun süre pişen dana kaburga, sebzeler ve pilav eşliğinde.',
+      origin: 'Düşük ısıda saatlerce pişerek kemikten ayrılır.', pair: 'Öküzgözü – Boğazkere' },
+    { cat: 'ana', img: 'tavuk-sarma', name: 'Tavuk Sarma', tags: [], price: '',
+      desc: 'Fırında tavuk rulo, pancar püresi ve mevsim sebzeleri.',
+      origin: '', pair: 'Kapadokya beyaz şarabı (Emir üzümü)' },
+    { cat: 'ana', img: 'levrek', name: 'Levrek', tags: [], price: '',
+      desc: 'Izgara levrek fileto, mevsim sebzeleri ve iki renk sos.',
+      origin: '', pair: 'Narince beyaz şarap' },
+    { cat: 'ana', img: 'somon', name: 'Somon', tags: [], price: '',
+      desc: 'Izgara somon, sebzeler ve turunçgil sos.',
+      origin: '', pair: 'Kalecik Karası roze' },
+
+    { cat: 'tatli', img: 'sutlac', name: 'Fırın Sütlaç', tags: ['vejetaryen'], price: '',
+      desc: 'Toprak kapta fırınlanmış, üzeri kızarmış geleneksel sütlaç.',
+      origin: 'Toprak kabın fırında verdiği karamelize yüzey.', pair: '' },
+    { cat: 'tatli', img: 'san-sebastian', name: 'San Sebastian', tags: ['vejetaryen'], price: '',
+      desc: 'Yanık yüzlü, içi kremamsı cheesecake ve çikolata sos.',
+      origin: '', pair: '' },
+    { cat: 'tatli', img: 'krem-brule', name: 'Krem Brüle', tags: ['vejetaryen'], price: '',
+      desc: 'Vanilyalı krema, çıtır karamel kabuk ve taze meyveler.',
+      origin: '', pair: '' },
+    { cat: 'tatli', img: 'visneli-sufle', name: 'Vişneli Sufle', tags: ['vejetaryen'], price: '',
+      desc: 'İçi akışkan çikolatalı sufle, vişne ve dondurma.',
+      origin: '', pair: '' },
+    { cat: 'tatli', img: 'panna-cotta', name: 'Panna Cotta', tags: [], price: '',
+      desc: 'Vanilyalı panna cotta, kırmızı meyve sosu.',
+      origin: '', pair: '' },
+    { cat: 'tatli', img: 'browni', name: 'Brownie', tags: ['vejetaryen'], price: '',
+      desc: 'Yoğun çikolatalı brownie, çilek ve dondurma.',
+      origin: '', pair: '' }
   ],
   RESTAURANT_GALLERY: [
-    { src: 'restoran-kahvalti', alt: 'Serpme Türk kahvaltısı' },
-    { src: 'restoran-testi-kebabi', alt: 'Göreme\'de testi kebabı' },
+    { src: 'restoran-testi-kebabi', alt: 'Testi kebabı' },
     { src: 'teras-2', alt: 'Peri bacası manzaralı teras' },
-    { src: 'restoran-turk-kahvesi', alt: 'Türk kahvesi ikramı' },
-    { src: 'restoran-aksam-yemegi', alt: 'Akşam yemeği sofrası' },
+    { src: 'restoran-mezeler', alt: 'Muhammara' },
+    { src: 'restoran-levrek', alt: 'Izgara levrek' },
+    { src: 'restoran-tatli', alt: 'San Sebastian cheesecake' },
     { src: 'teras-1', alt: 'Teras ve şemsiyeler' }
   ],
 
@@ -356,10 +476,7 @@ window.SITE_CONTENT = {
     ['Gün batımı: Endersenkaya, CC BY-SA 4.0', 'Wikimedia Commons', 'https://commons.wikimedia.org/wiki/File:The_Mexican_in_Cappadocia.jpg'],
     ['Halk dansları: allen watkin, CC BY-SA 2.0', 'Wikimedia Commons', 'https://commons.wikimedia.org/wiki/File:Turkish_folk_dancers_(1085290934).jpg'],
     ['Hamam: Satayman, CC BY-SA 3.0', 'Wikimedia Commons', 'https://commons.wikimedia.org/wiki/File:Hurrem_Sultan_Hamam,_Roxelana_Bath_Interior.jpg'],
-    ['Kahvaltı: Glassmug29, CC BY-SA 4.0', 'Wikimedia Commons', 'https://commons.wikimedia.org/wiki/File:Turkish_Breakfast_Spread.jpg'],
-    ['Testi kebabı: Niels Elgaard Larsen, CC BY-SA 3.0', 'Wikimedia Commons', 'https://commons.wikimedia.org/wiki/File:TestiKebabGoreme.jpg'],
-    ['Türk kahvesi: Tema, CC BY-SA 3.0', 'Wikimedia Commons', 'https://commons.wikimedia.org/wiki/File:Turkish_coffee_in_Istanbul.jpg'],
-    ['Akşam yemeği', 'Unsplash', 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0']
+    ['Kahvaltı: Glassmug29, CC BY-SA 4.0', 'Wikimedia Commons', 'https://commons.wikimedia.org/wiki/File:Turkish_Breakfast_Spread.jpg']
   ]
 };
   </script>
@@ -512,6 +629,70 @@ dialog.lightbox::backdrop { background: rgba(20, 15, 12, .94); }
 
 /* ---------- Harita ---------- */
 .map-frame { border: 0; width: 100%; height: 100%; filter: sepia(.25) saturate(.9); }
+
+/* ---------- Restoran menüsü ---------- */
+.menu-grain { isolation: isolate; }
+.menu-grain::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .035; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.menu-bar { top: var(--hdr-h, 60px); background: rgba(245, 239, 230, .84); backdrop-filter: blur(14px) saturate(1.1); -webkit-backdrop-filter: blur(14px) saturate(1.1); }
+.menu-tab { position: relative; padding: 1.15rem 0 1.05rem; font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; font-weight: 600; color: #7A6552; transition: color .3s ease; }
+.menu-tab:hover, .menu-tab[aria-pressed="true"] { color: #2B2622; }
+@media (max-width: 1023px) {
+  .menu-scroll { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent); }
+}
+.menu-tab-ind { position: absolute; left: 0; bottom: 0; height: 2px; width: 0; border-radius: 2px; background: #D4AF37; transition: transform .5s cubic-bezier(.2, .7, .2, 1), width .5s cubic-bezier(.2, .7, .2, 1); }
+.menu-chip { display: inline-flex; align-items: center; gap: .5rem; border-radius: 999px; border: 1px solid rgba(43, 38, 34, .16); padding: .5rem .95rem; font-size: .64rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: #4A3F36; transition: background-color .3s ease, border-color .3s ease, color .3s ease; }
+.menu-chip:hover { border-color: #B08F26; color: #2B2622; }
+.menu-chip[aria-pressed="true"] { background: #2B2622; border-color: #2B2622; color: #F5EFE6; }
+.tag-dot { width: .45rem; height: .45rem; border-radius: 999px; background: currentColor; }
+.tag-imza { color: #C86D51; }
+.tag-vejetaryen { color: #6E7F4F; }
+.tag-glutensiz { color: #B08F26; }
+.menu-chip[aria-pressed="true"] .tag-dot { box-shadow: 0 0 0 2px rgba(245, 239, 230, .25); }
+
+.menu-list { transition: opacity .22s ease, transform .22s ease; }
+.menu-list.is-fading { opacity: 0; transform: translateY(8px); }
+.menu-group + .menu-group { margin-top: 3.75rem; }
+.dish-btn { position: relative; display: flex; align-items: flex-start; gap: 1.1rem; width: 100%; text-align: left; padding: 1.35rem 0; border-bottom: 1px solid rgba(43, 38, 34, .09); }
+.dish-name { transition: color .35s ease; }
+.dish-btn:hover .dish-name, .dish-btn.is-current .dish-name { color: #B08F26; }
+.dish-leader { flex: 1; min-width: 1.5rem; border-bottom: 1px dotted rgba(43, 38, 34, .25); transform: translateY(-.3rem); }
+.dish-price { font-size: .8rem; letter-spacing: .06em; color: #5A4A3C; white-space: nowrap; }
+.dish-tag { display: inline-flex; align-items: center; gap: .35rem; font-size: .58rem; letter-spacing: .16em; text-transform: uppercase; font-weight: 600; }
+.dish-more { flex-shrink: 0; margin-top: .35rem; width: 1.9rem; height: 1.9rem; border-radius: 999px; border: 1px solid rgba(43, 38, 34, .14); display: flex; align-items: center; justify-content: center; color: #7A6552; transition: background-color .35s ease, color .35s ease, border-color .35s ease, transform .35s ease; }
+.dish-btn:hover .dish-more, .dish-btn.is-current .dish-more { border-color: #D4AF37; color: #B08F26; }
+.dish-btn:hover .dish-more { transform: rotate(90deg); }
+.dish-thumb { position: relative; flex-shrink: 0; width: 4.75rem; height: 4.75rem; border-radius: .85rem; overflow: hidden; background: linear-gradient(160deg, #E9D9BF, #C9AE8C); }
+.dish-thumb img { width: 100%; height: 100%; object-fit: cover; }
+@media (min-width: 1024px) {
+  .dish-btn::before { content: ''; position: absolute; left: -1.6rem; top: 2.15rem; width: 0; height: 1px; background: #D4AF37; transition: width .45s cubic-bezier(.2, .7, .2, 1); }
+  .dish-btn.is-current::before { width: 1rem; }
+}
+
+/* Yemek fotoğraflarını aynı sıcak ışıkta birleştiren çok hafif ton */
+.menu-photo::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(170deg, rgba(212, 175, 55, .10), rgba(200, 109, 81, .12)); mix-blend-mode: soft-light; }
+.menu-show { top: calc(var(--hdr-h, 60px) + var(--bar-h, 58px) + 1.75rem); }
+.menu-show .media > img, .menu-show .media:hover > img { opacity: 0; transform: scale(1); transition: opacity .7s ease, transform 1.6s cubic-bezier(.2, .7, .2, 1); }
+.menu-show .media > img.is-active, .menu-show .media:hover > img.is-active { opacity: 1; transform: scale(1.03); }
+.menu-strip { background: linear-gradient(to top, rgba(26, 20, 16, .86) 0%, rgba(26, 20, 16, .55) 55%, rgba(26, 20, 16, 0) 100%); }
+.menu-strip-text { transition: opacity .3s ease, transform .3s ease; }
+.menu-strip-text.is-swapping { opacity: 0; transform: translateY(6px); }
+
+/* Yemek detay kartı: masaüstünde ortada, mobilde alttan açılan sayfa */
+dialog.dish-dlg { width: min(940px, 94vw); }
+.dish-card { display: flex; flex-direction: column; max-height: 92dvh; border-radius: 1.25rem 1.25rem 0 0; }
+.dish-media { flex-shrink: 0; aspect-ratio: 3 / 2; }
+.dish-body { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.dish-grip { position: absolute; z-index: 2; top: .6rem; left: 50%; width: 2.75rem; height: 4px; margin-left: -1.375rem; border-radius: 4px; background: rgba(245, 239, 230, .85); }
+@media (max-width: 767px) {
+  dialog.dish-dlg { width: 100vw; max-width: 100vw; margin: auto 0 0; }
+  dialog.dish-dlg[open] .dlg-card { animation: sheetUp .5s cubic-bezier(.2, .8, .2, 1); }
+  .dish-card { transition: transform .3s ease; }
+}
+@media (min-width: 768px) {
+  .dish-card { display: grid; grid-template-columns: 1fr 1fr; height: min(600px, 86dvh); border-radius: 1rem; }
+  .dish-media { aspect-ratio: auto; height: 100%; }
+}
+@keyframes sheetUp { from { transform: translateY(100%); } to { transform: none; } }
 
 /* ---------- Hareket azaltma ---------- */
 @media (prefers-reduced-motion: reduce) {
@@ -996,7 +1177,7 @@ dialog.lightbox::backdrop { background: rgba(20, 15, 12, .94); }
     <section class="py-24 sm:py-32 bg-sand-100" aria-labelledby="konsept-title">
       <div class="mx-auto max-w-7xl px-6 sm:px-8 grid gap-14 lg:grid-cols-12 items-center">
         <div class="lg:col-span-6 reveal reveal-left">
-          <div class="media aspect-[4/3]"><img data-img="restoran-testi-kebabi" alt="Göreme'de geleneksel testi kebabı" loading="lazy" onerror="imgFallback(this)" /></div>
+          <div class="media aspect-[4/3]"><img data-img="restoran-testi-kebabi" alt="Toprak testide testi kebabı" loading="lazy" onerror="imgFallback(this)" /></div>
         </div>
         <div class="lg:col-span-6 lg:pl-8">
           <p class="reveal text-xs uppercase tracking-widest2 text-gold-dark font-semibold">Konsept</p>
@@ -1022,7 +1203,7 @@ dialog.lightbox::backdrop { background: rgba(20, 15, 12, .94); }
           <p class="mt-3 text-ink-soft font-light leading-relaxed max-w-lg">Güne köy peynirleri, yöresel reçel ve pekmezler, sıcak gözleme ve demlik çayla başlayın. Kahvaltı tüm oda tiplerinde konaklamaya dahildir.</p>
         </article>
         <article class="reveal group" style="--d:.12s">
-          <div class="media aspect-[16/10]"><img data-img="restoran-aksam-yemegi" alt="Mumlarla hazırlanmış akşam yemeği sofrası" loading="lazy" onerror="imgFallback(this)" /></div>
+          <div class="media aspect-[16/10]"><img data-img="restoran-aksam-yemegi" alt="Kuzu pirzola" loading="lazy" onerror="imgFallback(this)" /></div>
           <p class="mt-7 text-[0.65rem] uppercase tracking-widest2 text-gold-dark font-semibold">Rezervasyon önerilir</p>
           <h3 class="mt-2 font-serif text-3xl text-ink">Akşam yemeği</h3>
           <p class="mt-3 text-ink-soft font-light leading-relaxed max-w-lg">Gün batımının ardından şömine sıcaklığında ya da yıldızların altında, mevsimin tazeliğiyle hazırlanan yöresel ana yemekler ve tatlılar.</p>
@@ -1030,15 +1211,56 @@ dialog.lightbox::backdrop { background: rgba(20, 15, 12, .94); }
       </div>
     </section>
 
-    <!-- ============ ÖRNEK MENÜ (SITE_CONTENT → MENU) ============ -->
-    <section class="py-24 sm:py-32 bg-sand-200/60" aria-labelledby="menu-title">
-      <div class="mx-auto max-w-7xl px-6 sm:px-8">
-        <div class="text-center max-w-2xl mx-auto">
-          <p class="reveal divider-ornament text-xs uppercase tracking-widest2 font-semibold">Menü</p>
-          <h2 id="menu-title" class="reveal mt-5 font-serif text-4xl sm:text-5xl text-ink" style="--d:.08s">Sofradan seçmeler</h2>
-          <p class="reveal mt-5 text-ink-soft font-light" style="--d:.14s">Örnek menüdür; menü mevsime göre değişir.</p>
+    <!-- ============ MENÜ (SITE_CONTENT → MENU_CATEGORIES, MENU_DISHES) ============ -->
+    <section id="yemek-menusu" class="relative bg-sand-200/60 menu-grain" aria-labelledby="menu-title">
+      <div class="mx-auto max-w-7xl px-6 sm:px-8 pt-24 sm:pt-32 pb-12 sm:pb-14 grid gap-10 lg:grid-cols-12 items-end">
+        <div class="lg:col-span-8">
+          <p class="reveal divider-ornament text-xs uppercase tracking-widest2 font-semibold">Kapadokya mutfağı</p>
+          <h2 id="menu-title" class="reveal mt-5 font-serif text-4xl sm:text-5xl lg:text-[3.6rem] text-ink leading-[1.08]" style="--d:.08s">Toprağın, ateşin ve <em class="text-stone-600">zamanın</em> lezzeti</h2>
+          <p class="reveal mt-7 max-w-2xl text-ink-soft font-light leading-relaxed" style="--d:.14s">Testi kebabından zeytinyağlılara, Anadolu'nun klasiklerini mevsimin ürünleriyle ve sade bir sunumla hazırlıyoruz. Her tabak, peri bacalarına bakan sofralarımızda paylaşılmak için.</p>
         </div>
-        <ul id="menuGrid" class="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4"></ul>
+        <div id="menuQr" class="reveal hidden md:flex lg:col-span-4 lg:justify-self-end items-center gap-5 rounded-2xl bg-sand-50 ring-1 ring-ink/5 p-4 pr-7 shadow-[0_18px_40px_-28px_rgba(43,38,34,.55)]" style="--d:.2s">
+          <span class="block h-24 w-24 shrink-0 rounded-xl bg-white p-2.5 ring-1 ring-ink/5"><img id="menuQrImg" alt="Dijital menü QR kodu" class="h-full w-full" /></span>
+          <span>
+            <span class="block text-[0.65rem] uppercase tracking-widest2 text-gold-dark font-semibold">Dijital menü</span>
+            <span class="mt-1.5 block font-serif text-xl text-ink leading-snug">Telefonunuzun<br />kamerasıyla okutun</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Kaydırınca üste yapışan sekme ve filtre çubuğu -->
+      <div id="menuBar" class="menu-bar sticky z-30 border-y border-ink/10">
+        <div class="mx-auto max-w-7xl sm:px-8">
+          <div class="menu-scroll relative flex items-center gap-6 lg:gap-8 overflow-x-auto no-scrollbar px-6 sm:px-0 lg:justify-between">
+            <div id="menuTabs" class="relative flex shrink-0 gap-6 sm:gap-8 whitespace-nowrap" role="group" aria-label="Menü bölümleri"></div>
+            <div id="menuChips" class="flex shrink-0 items-center gap-2 whitespace-nowrap pr-6 sm:pr-0 before:content-[''] before:h-5 before:w-px before:bg-ink/15 before:mr-3 lg:before:hidden" role="group" aria-label="Diyet filtreleri"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mx-auto max-w-7xl px-6 sm:px-8 pt-10 sm:pt-14 pb-24 sm:pb-32 grid gap-12 lg:grid-cols-12">
+        <div class="lg:col-span-7">
+          <div id="menuList" class="menu-list"></div>
+          <p class="mt-14 text-xs text-stone-600 font-light leading-relaxed">Alerjen ve içerik bilgisi için lütfen servis ekibimize danışın. Menü mevsime göre değişebilir.</p>
+        </div>
+        <aside class="hidden lg:block lg:col-span-5" aria-hidden="true">
+          <div id="menuShow" class="menu-show sticky">
+            <div class="media menu-photo aspect-[1/1]">
+              <img class="menu-show-img is-active" alt="" decoding="async" />
+              <img class="menu-show-img" alt="" decoding="async" />
+              <div class="menu-strip absolute inset-x-0 bottom-0 z-10 px-7 pb-7 pt-24 text-sand-50">
+                <div id="showText" class="menu-strip-text">
+                  <p id="showCat" class="text-[0.6rem] uppercase tracking-widest2 text-gold-light font-semibold"></p>
+                  <p id="showName" class="mt-1.5 font-serif text-[1.7rem] leading-tight"></p>
+                  <dl class="mt-4 grid grid-cols-2 gap-5 text-[0.82rem] font-light leading-relaxed">
+                    <div id="showOriginRow"><dt class="text-[0.58rem] uppercase tracking-[0.22em] text-sand-200/70 font-medium">Köken notu</dt><dd id="showOrigin" class="mt-1 text-sand-50/95"></dd></div>
+                    <div id="showPairRow"><dt class="text-[0.58rem] uppercase tracking-[0.22em] text-sand-200/70 font-medium">Eşleşme önerisi</dt><dd id="showPair" class="mt-1 text-sand-50/95"></dd></div>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
       </div>
     </section>
 
@@ -1166,6 +1388,31 @@ dialog.lightbox::backdrop { background: rgba(20, 15, 12, .94); }
       </div>
 
       <button type="button" id="dlgClose" class="absolute top-4 right-4 z-10 h-11 w-11 rounded-full bg-sand-50/90 backdrop-blur flex items-center justify-center text-ink hover:rotate-90 hover:bg-gold transition-all duration-500 shadow" aria-label="Kapat">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+      </button>
+    </div>
+  </dialog>
+
+  <!-- ============ YEMEK DETAY KARTI (mobilde alttan açılır) ============ -->
+  <dialog id="dishDialog" class="dlg dish-dlg" aria-labelledby="dishTitle">
+    <div class="dlg-card dish-card relative overflow-hidden bg-sand-50 shadow-2xl">
+      <div class="dish-media media menu-photo no-zoom !rounded-none !shadow-none">
+        <img id="dishImg" alt="" decoding="async" onerror="imgFallback(this)" />
+        <span class="dish-grip md:hidden" aria-hidden="true"></span>
+      </div>
+      <div class="dish-body p-7 sm:p-9">
+        <p id="dishCat" class="text-[0.65rem] uppercase tracking-widest2 text-gold-dark font-semibold"></p>
+        <h3 id="dishTitle" class="mt-2 font-serif text-3xl sm:text-4xl text-ink pr-12 leading-tight"></h3>
+        <p id="dishTags" class="mt-3 flex flex-wrap gap-1.5"></p>
+        <p id="dishDesc" class="mt-4 text-ink-soft font-light leading-relaxed"></p>
+        <dl class="mt-6 text-sm">
+          <div id="dishOriginRow" class="border-t border-ink/10 py-4"><dt class="text-[0.6rem] uppercase tracking-[0.2em] text-stone-600 font-semibold">Köken notu</dt><dd id="dishOrigin" class="mt-1.5 text-ink leading-relaxed"></dd></div>
+          <div id="dishPairRow" class="border-t border-ink/10 py-4"><dt class="text-[0.6rem] uppercase tracking-[0.2em] text-stone-600 font-semibold">Eşleşme önerisi</dt><dd id="dishPair" class="mt-1.5 text-ink leading-relaxed"></dd></div>
+          <div class="border-t border-ink/10 py-4"><dt class="text-[0.6rem] uppercase tracking-[0.2em] text-stone-600 font-semibold">Alerjenler</dt><dd class="mt-1.5 text-ink-soft font-light leading-relaxed">Alerjen bilgisi için lütfen servis ekibimize danışın.</dd></div>
+        </dl>
+        <p id="dishPrice" class="mt-2 font-serif text-2xl text-ink"></p>
+      </div>
+      <button type="button" id="dishClose" class="absolute top-4 right-4 z-10 h-11 w-11 rounded-full bg-sand-50/90 backdrop-blur flex items-center justify-center text-ink hover:rotate-90 hover:bg-gold transition-all duration-500 shadow" aria-label="Kapat">
         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
       </button>
     </div>
@@ -1600,17 +1847,284 @@ dialog.lightbox::backdrop { background: rgba(20, 15, 12, .94); }
   renderHours($('#restaurantHours'), C.RESTAURANT_HOURS, 'meal');
   renderHours($('#hamamHours'), C.HAMAM_HOURS, 'days');
 
-  var menuEl = $('#menuGrid');
-  if (menuEl && K.MENU) {
-    menuEl.innerHTML = K.MENU.map(function (m) {
-      return '<li class="reveal rounded-2xl bg-sand-50 ring-1 ring-ink/5 p-7 sm:p-8 lift">' +
-        '<p class="text-[0.65rem] uppercase tracking-widest2 text-gold-dark font-semibold">' + esc(m.note) + '</p>' +
-        '<h3 class="mt-2 font-serif text-2xl text-ink">' + esc(m.title) + '</h3>' +
-        '<ul class="mt-5 space-y-4">' + m.items.map(function (it) {
-          return '<li><p class="font-medium text-ink">' + esc(it[0]) + '</p><p class="text-sm text-ink-soft font-light">' + esc(it[1]) + '</p></li>';
-        }).join('') + '</ul></li>';
+  /* Restoran menüsü: sekmeler + diyet filtreleri, masaüstünde üzerine gelince değişen
+     fotoğraf vitrini, tıklayınca (mobilde alttan açılan) yemek detay kartı. */
+  var menuList = $('#menuList');
+  var dishDlg = $('#dishDialog');
+  if (menuList && K.MENU_DISHES) {
+    var CATS = K.MENU_CATEGORIES || [];
+    var DISHES = K.MENU_DISHES;
+    var TAG_LABELS = { imza: 'Şefin İmzası', vejetaryen: 'Vejetaryen', glutensiz: 'Glütensiz' };
+    var catTitle = {};
+    CATS.forEach(function (c) { catTitle[c.id] = c.title; });
+    var menuState = { cat: 'all', tags: [] };
+    var desktopMQ = window.matchMedia('(min-width: 1024px)');
+    var menuBar = $('#menuBar');
+    var menuTabs = $('#menuTabs');
+    var menuChips = $('#menuChips');
+
+    var qrBox = $('#menuQr');
+    if (qrBox) { if (C.MENU_QR_IMAGE) $('#menuQrImg').src = C.MENU_QR_IMAGE; else qrBox.remove(); }
+
+    function dishImg(d, thumb) {
+      if (/[\/.]/.test(d.img)) return d.img;
+      return 'img/menu/' + d.img + (thumb ? '-k' : '') + '.webp';
+    }
+    function dishTags(d) {
+      return (d.tags || []).filter(function (t) { return TAG_LABELS[t]; }).map(function (t) {
+        return '<span class="dish-tag tag-' + t + '"><span class="tag-dot"></span>' + TAG_LABELS[t] + '</span>';
+      }).join('');
+    }
+    function hasTag(d, t) { return (d.tags || []).indexOf(t) > -1; }
+    function matches(d) {
+      return (menuState.cat === 'all' || d.cat === menuState.cat) && menuState.tags.every(function (t) { return hasTag(d, t); });
+    }
+
+    /* Sekmeler ve yalnızca menüde kullanılan etiketlerin filtreleri */
+    menuTabs.innerHTML = [{ id: 'all', title: 'Tümü' }].concat(CATS).map(function (c) {
+      return '<button type="button" class="menu-tab" data-cat="' + esc(c.id) + '" aria-pressed="' + (c.id === 'all') + '">' + esc(c.title) + '</button>';
+    }).join('') + '<span class="menu-tab-ind" aria-hidden="true"></span>';
+    menuChips.innerHTML = Object.keys(TAG_LABELS).filter(function (t) {
+      return DISHES.some(function (d) { return hasTag(d, t); });
+    }).map(function (t) {
+      return '<button type="button" class="menu-chip" data-tag="' + t + '" aria-pressed="false"><span class="tag-dot tag-' + t + '"></span>' + TAG_LABELS[t] + '</button>';
     }).join('');
-    stagger(menuEl, 0.1);
+
+    var tabInd = $('.menu-tab-ind', menuTabs);
+    function moveTabInd(scrollIt) {
+      var b = $('[aria-pressed="true"]', menuTabs);
+      if (!b || !b.offsetWidth) return;
+      tabInd.style.width = b.offsetWidth + 'px';
+      tabInd.style.transform = 'translateX(' + b.offsetLeft + 'px)';
+      if (scrollIt) {
+        var sc = menuTabs.parentNode;
+        sc.scrollTo({ left: menuTabs.offsetLeft + b.offsetLeft - (sc.clientWidth - b.offsetWidth) / 2, behavior: reduceMotion ? 'auto' : 'smooth' });
+      }
+    }
+
+    /* Filtre çubuğu, sabit header'ın hemen altına yapışır (header yüksekliği kayınca değişir). */
+    function syncBarTop() {
+      var root = document.documentElement.style;
+      root.setProperty('--hdr-h', headerEl.offsetHeight + 'px');
+      root.setProperty('--bar-h', menuBar.offsetHeight + 'px');
+    }
+    if ('ResizeObserver' in window) {
+      var ro = new ResizeObserver(function () { syncBarTop(); moveTabInd(false); });
+      ro.observe(headerEl); ro.observe(menuBar); ro.observe(menuTabs);
+    }
+    window.addEventListener('resize', function () { syncBarTop(); moveTabInd(false); });
+    syncBarTop();
+
+    function dishRow(d, i) {
+      var tags = dishTags(d);
+      return '<li><button type="button" class="dish-btn" data-dish="' + i + '">' +
+        '<span class="dish-thumb lg:hidden"><img src="' + esc(dishImg(d, true)) + '" alt="" loading="lazy" decoding="async" onerror="imgFallback(this)" /></span>' +
+        '<span class="min-w-0 flex-1">' +
+          '<span class="flex items-baseline gap-3"><span class="dish-name font-serif text-[1.3rem] sm:text-[1.45rem] text-ink leading-snug">' + esc(d.name) + '</span>' +
+            (d.price ? '<span class="dish-leader" aria-hidden="true"></span><span class="dish-price">' + esc(d.price) + '</span>' : '') + '</span>' +
+          (d.desc ? '<span class="mt-1.5 block text-sm text-ink-soft font-light leading-relaxed">' + esc(d.desc) + '</span>' : '') +
+          (tags ? '<span class="mt-2.5 flex flex-wrap gap-x-4 gap-y-1.5">' + tags + '</span>' : '') +
+        '</span>' +
+        '<span class="dish-more" aria-hidden="true"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></span>' +
+      '</button></li>';
+    }
+
+    var visibleDishes = [];
+    function renderMenu() {
+      visibleDishes = [];
+      var html = CATS.map(function (c) {
+        var rows = '';
+        var n = 0;
+        DISHES.forEach(function (d, i) {
+          if (d.cat !== c.id || !matches(d)) return;
+          rows += dishRow(d, i);
+          visibleDishes.push(i);
+          n++;
+        });
+        if (!n) return '';
+        return '<section class="menu-group" aria-labelledby="mcat-' + esc(c.id) + '">' +
+          '<div class="flex items-center gap-5"><h3 id="mcat-' + esc(c.id) + '" class="font-serif text-[1.75rem] sm:text-3xl text-ink">' + esc(c.title) + '</h3>' +
+          '<span class="h-px flex-1 bg-ink/10" aria-hidden="true"></span><span class="text-[0.65rem] tracking-[0.2em] text-stone-500 font-medium">' + (n < 10 ? '0' : '') + n + '</span></div>' +
+          '<ul class="mt-1">' + rows + '</ul></section>';
+      }).join('');
+      menuList.innerHTML = html || '<div class="py-20 text-center"><p class="font-serif text-2xl text-ink">Bu seçime uygun yemek bulunamadı.</p>' +
+        '<button type="button" data-menu-reset class="btn-outline mt-6 inline-flex rounded-full px-6 py-3 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-ink">Filtreleri temizle</button></div>';
+      syncShow();
+      markCurrent();
+      if (menuSeen) preloadDishes();
+    }
+    /* Vitrin yalnızca masaüstünde ve menü görünür olduktan sonra görsel yükler. */
+    function syncShow() {
+      if (menuSeen && desktopMQ.matches && visibleDishes.length && visibleDishes.indexOf(showIdx) < 0) setShow(visibleDishes[0]);
+    }
+
+    function updateMenu() {
+      if (reduceMotion) { renderMenu(); return; }
+      menuList.style.minHeight = menuList.offsetHeight + 'px';
+      menuList.classList.add('is-fading');
+      setTimeout(function () {
+        renderMenu();
+        var top = menuList.getBoundingClientRect().top - menuBar.getBoundingClientRect().bottom - 24;
+        if (top < 0) window.scrollTo({ top: window.scrollY + top, behavior: 'smooth' });
+        menuList.classList.remove('is-fading');
+        setTimeout(function () { menuList.style.minHeight = ''; }, 450);
+      }, 220);
+    }
+
+    menuTabs.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-cat]');
+      if (!b || b.getAttribute('aria-pressed') === 'true') return;
+      $$('[data-cat]', menuTabs).forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      menuState.cat = b.getAttribute('data-cat');
+      moveTabInd(true);
+      updateMenu();
+    });
+    menuChips.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-tag]');
+      if (!b) return;
+      var on = b.getAttribute('aria-pressed') !== 'true';
+      b.setAttribute('aria-pressed', String(on));
+      menuState.tags = $$('[data-tag][aria-pressed="true"]', menuChips).map(function (x) { return x.getAttribute('data-tag'); });
+      updateMenu();
+    });
+
+    /* Masaüstü vitrini: iki görsel katmanı arasında yumuşak geçiş */
+    var showBox = $('#menuShow');
+    var showImgs = showBox ? $$('.menu-show-img', showBox) : [];
+    var showText = $('#showText');
+    var showIdx = -1;
+    var showFront = 0;
+    var showTextTimer;
+    function setRow(id, v) { var el = $('#' + id); el.textContent = v || ''; el.parentNode.hidden = !v; }
+    function setShow(i) {
+      if (!showBox || i === showIdx) return;
+      showIdx = i;
+      var d = DISHES[i];
+      var next = showImgs[1 - showFront];
+      var done = false;
+      var swap = function () {
+        if (done || showIdx !== i) return;
+        done = true;
+        next.classList.add('is-active');
+        showImgs[showFront].classList.remove('is-active');
+        showFront = 1 - showFront;
+      };
+      next.onload = swap;
+      next.onerror = function () { imgFallback(next); swap(); };
+      next.src = dishImg(d);
+      if (next.complete && next.naturalWidth) swap();
+      showText.classList.add('is-swapping');
+      clearTimeout(showTextTimer);
+      showTextTimer = setTimeout(function () {
+        $('#showCat').textContent = catTitle[d.cat] || '';
+        $('#showName').textContent = d.name;
+        setRow('showOrigin', d.origin);
+        setRow('showPair', d.pair);
+        showText.classList.remove('is-swapping');
+      }, reduceMotion ? 0 : 200);
+      markCurrent();
+    }
+    function markCurrent() {
+      $$('.dish-btn', menuList).forEach(function (b) { b.classList.toggle('is-current', desktopMQ.matches && +b.getAttribute('data-dish') === showIdx); });
+    }
+    function onDishHover(e) {
+      var b = e.target.closest('.dish-btn');
+      if (b && desktopMQ.matches) setShow(+b.getAttribute('data-dish'));
+    }
+    menuList.addEventListener('mouseover', onDishHover);
+    menuList.addEventListener('focusin', onDishHover);
+
+    /* Menü görünür alana yaklaşınca ilk yemeklerin büyük görsellerini önceden yükle */
+    var menuSeen = false;
+    var preloaded = {};
+    function preloadDishes() {
+      if (!desktopMQ.matches) return;
+      visibleDishes.slice(0, 8).forEach(function (i) {
+        var src = dishImg(DISHES[i]);
+        if (preloaded[src]) return;
+        preloaded[src] = true;
+        var im = new Image();
+        im.decoding = 'async';
+        im.src = src;
+      });
+    }
+    function onMenuSeen() {
+      if (menuSeen) return;
+      menuSeen = true;
+      syncShow();
+      preloadDishes();
+    }
+    if ('IntersectionObserver' in window) {
+      var mio = new IntersectionObserver(function (en) {
+        if (en.some(function (x) { return x.isIntersecting; })) { onMenuSeen(); mio.disconnect(); }
+      }, { rootMargin: '800px 0px' });
+      mio.observe(menuList);
+    } else {
+      onMenuSeen();
+    }
+
+    /* Detay kartı */
+    var dishOpener = null;
+    function openDish(i, opener) {
+      var d = DISHES[i];
+      dishOpener = opener;
+      var img = $('#dishImg');
+      img.src = dishImg(d);
+      img.alt = d.name;
+      $('#dishCat').textContent = catTitle[d.cat] || '';
+      $('#dishTitle').textContent = d.name;
+      $('#dishTags').innerHTML = dishTags(d);
+      $('#dishTags').hidden = !d.tags || !d.tags.length;
+      $('#dishDesc').textContent = d.desc || '';
+      setRow('dishOrigin', d.origin);
+      setRow('dishPair', d.pair);
+      $('#dishPrice').textContent = d.price || '';
+      $('#dishPrice').hidden = !d.price;
+      $('.dish-card', dishDlg).style.transform = '';
+      dishDlg.showModal();
+      $('.dish-body', dishDlg).scrollTop = 0;
+    }
+    menuList.addEventListener('click', function (e) {
+      var b = e.target.closest('.dish-btn');
+      if (b) { openDish(+b.getAttribute('data-dish'), b); return; }
+      if (e.target.closest('[data-menu-reset]')) {
+        menuState = { cat: 'all', tags: [] };
+        $$('[data-cat]', menuTabs).forEach(function (x) { x.setAttribute('aria-pressed', String(x.getAttribute('data-cat') === 'all')); });
+        $$('[data-tag]', menuChips).forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
+        moveTabInd(true);
+        updateMenu();
+      }
+    });
+    $('#dishClose').addEventListener('click', function () { dishDlg.close(); });
+    dishDlg.addEventListener('click', function (e) { if (e.target === dishDlg) dishDlg.close(); });
+    dishDlg.addEventListener('close', function () { if (dishOpener) dishOpener.focus({ preventScroll: true }); });
+
+    /* Mobilde kartı aşağı kaydırarak kapatma */
+    var dishCard = $('.dish-card', dishDlg);
+    var dishBody = $('.dish-body', dishDlg);
+    var sheetY = null;
+    var sheetDy = 0;
+    dishCard.addEventListener('touchstart', function (e) {
+      sheetY = (dishBody.scrollTop <= 0 || !dishBody.contains(e.target)) ? e.touches[0].clientY : null;
+      sheetDy = 0;
+    }, { passive: true });
+    dishCard.addEventListener('touchmove', function (e) {
+      if (sheetY === null || desktopMQ.matches) return;
+      sheetDy = Math.max(0, e.touches[0].clientY - sheetY);
+      dishCard.style.transition = 'none';
+      dishCard.style.transform = 'translateY(' + sheetDy + 'px)';
+    }, { passive: true });
+    dishCard.addEventListener('touchend', function () {
+      if (sheetY === null) return;
+      dishCard.style.transition = '';
+      if (sheetDy > 110) dishDlg.close();
+      else dishCard.style.transform = '';
+      sheetY = null;
+    });
+
+    desktopMQ.addEventListener('change', function () { syncShow(); markCurrent(); preloadDishes(); });
+    renderMenu();
+    moveTabInd(false);
   }
 
   var svcEl = $('#hamamServices');
@@ -1660,6 +2174,7 @@ dialog.lightbox::backdrop { background: rgba(20, 15, 12, .94); }
     setMenu(false);
     if (lb.open) lb.close();
     if (roomDlg && roomDlg.open) roomDlg.close();
+    if (dishDlg && dishDlg.open) dishDlg.close();
     if (window.HeroVideo) { if (name === 'home') window.HeroVideo.resume(); else window.HeroVideo.pause(); }
     return true;
   }
