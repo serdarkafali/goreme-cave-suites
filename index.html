@@ -118,7 +118,7 @@ window.SITE_CONFIG = {
      sonuna "-poster.jpg" eklenmiş dosyadır (ör. video/restoran-giris-poster.jpg).
      RESTAURANT_INTRO_CHAPTERS: videodaki sahnelerin başlangıç saniyesi ve etiketi;
      dish → menüdeki yemeğin img adı (etikete tıklanınca o yemeğin kartı açılır). */
-  RESTAURANT_INTRO_VIDEO: 'video/restoran-giris.mp4',
+  RESTAURANT_INTRO_VIDEO: 'video/restoran-giris.mp4?v=2',
   RESTAURANT_INTRO_VIDEO_PORTRAIT: 'video/restoran-giris-dikey.mp4',
   RESTAURANT_INTRO_CHAPTERS: [
     { at: 0,     label: 'Göreme · Gün doğumu' },
@@ -2226,7 +2226,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       if (src === rSrc) return;
       var t = rv.currentTime || 0;
       rSrc = src;
-      rPoster.src = src.replace(/\.mp4$/, '-poster.jpg');
+      rPoster.src = src.replace(/\.mp4(\?.*)?$/, '-poster.jpg$1');
       rv.poster = rPoster.src;
       rv.src = src;
       rv.addEventListener('loadedmetadata', function once() { rv.removeEventListener('loadedmetadata', once); if (t) rv.currentTime = t; });
