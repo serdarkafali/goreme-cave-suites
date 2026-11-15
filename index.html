@@ -685,7 +685,7 @@ window.SITE_CONTENT = {
        Yeni Tailwind sınıfı eklenirse css/site.css yeniden derlenmelidir (KURULUM.md). -->
   <link rel="preload" href="fonts/montserrat-normal-latin-1.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="fonts/playfair-display-normal-latin-5.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="css/site.css?v=9" />
+  <link rel="stylesheet" href="css/site.css?v=10" />
 
   <style>
 /* =====================================================================
@@ -810,19 +810,23 @@ section[id], footer[id] { scroll-margin-top: 76px; }
 }
 @media (max-width: 767px) and (max-height: 760px) { .hero-sub-optional { display: none; } }
 @media (max-width: 767px), (max-height: 700px) { .hero-scroll-cue { display: none; } }
-/* Galeri: yatay sürüklenen film şeridi. Izgara değil; kareler farklı boyda, fareyle çekilir. */
-.reel { position: relative; display: flex; align-items: flex-end; gap: .9rem; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2.2rem max(1.25rem, calc((100% - 80rem) / 2)) .4rem; cursor: grab; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+/* Galeri: eşit boyda kareler, kendiliğinden akar; oklar ve tıklama lightbox'ı açar. */
+.reel-wrap { position: relative; margin-top: 2.2rem; }
+.reel { display: flex; gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; padding: 0 max(1.25rem, calc((100vw - 80rem) / 2)); }
 .reel::-webkit-scrollbar { display: none; }
-.reel.is-drag { cursor: grabbing; scroll-snap-type: none; user-select: none; }
-.reel-card { position: relative; flex: 0 0 auto; height: min(68vh, 560px); scroll-snap-align: start; border: 0; padding: 0; border-radius: 1rem; overflow: hidden; background: #E9D9BF; color: inherit; }
-.reel-card:nth-child(3n+2) { height: min(52vh, 430px); }
-.reel-card img { height: 100%; width: auto; max-width: none; display: block; pointer-events: none; }
+.reel-card { position: relative; flex: 0 0 calc((100% - 2rem) / 3); aspect-ratio: 3 / 2; scroll-snap-align: start; border: 0; padding: 0; border-radius: 1rem; overflow: hidden; background: #E9D9BF; color: inherit; cursor: zoom-in; }
+.reel-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; transition: transform .8s cubic-bezier(.2, .7, .2, 1); }
+.reel-card:hover img { transform: scale(1.05); }
 .reel-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 2.4rem 1rem .85rem; color: #fff; font-size: .75rem; letter-spacing: .03em; text-align: left; background: linear-gradient(transparent, rgba(26, 20, 16, .75)); }
+.reel-arrow { position: absolute; top: 50%; z-index: 2; transform: translateY(-50%); width: 3rem; height: 3rem; border-radius: 999px; border: 1px solid rgba(212, 175, 55, .75); background: rgba(245, 239, 230, .92); color: #221A15; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 12px 30px -16px rgba(34, 26, 21, .7); transition: background-color .3s ease, color .3s ease, transform .3s ease; }
+.reel-arrow svg { width: 1.15rem; height: 1.15rem; }
+.reel-arrow:hover { background: #D4AF37; color: #221A15; }
+.reel-prev { left: max(.6rem, calc((100vw - 80rem) / 2 - .4rem)); }
+.reel-next { right: max(.6rem, calc((100vw - 80rem) / 2 - .4rem)); }
 .reel-track { position: relative; height: 2px; flex: 1; background: rgba(43, 38, 34, .12); border-radius: 2px; overflow: hidden; }
-#reelBar { position: absolute; inset: 0 auto 0 0; width: 8%; background: #D4AF37; }
-@media (max-width: 640px) {
-  .reel-card, .reel-card:nth-child(3n+2) { height: 48vh; }
-}
+#reelBar { position: absolute; inset: 0 auto 0 0; width: 0; background: #D4AF37; transition: width .45s ease; }
+@media (max-width: 1023px) { .reel-card { flex-basis: calc((100% - 1rem) / 2); } }
+@media (max-width: 640px) { .reel-card { flex-basis: 86%; } .reel-prev { left: .5rem; } .reel-next { right: .5rem; } }
 .kenburns { animation: kenburns 22s ease-out forwards; transform-origin: 55% 45%; }
 @keyframes kenburns { from { transform: scale(1.12); } to { transform: scale(1); } }
 .scroll-cue { width: 22px; height: 36px; border: 1.5px solid rgba(255, 255, 255, .8); border-radius: 12px; position: relative; }
@@ -1294,22 +1298,26 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     <!-- ============ HAKKIMIZDA: en fazla 3 fotoğraf ============ -->
     <section id="tarihce" class="relative py-24 sm:py-32 bg-sand-100" aria-labelledby="tarihce-title">
       <div class="mx-auto max-w-7xl px-6 sm:px-8">
-        <div class="grid items-start gap-12 lg:grid-cols-12 lg:gap-16">
-          <div class="lg:sticky lg:top-28 lg:col-span-5">
-            <div class="media aspect-[4/5]">
-              <img data-img="dis-avlu-gunduz" alt="Peri bacasının dibinde otelin havuzu ve avlusu" loading="lazy" onerror="imgFallback(this)" />
-            </div>
+        <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+          <div class="media aspect-[4/3]">
+            <img data-img="dis-avlu-gunduz" alt="Peri bacasının dibinde otelin havuzu ve avlusu" loading="lazy" onerror="imgFallback(this)" />
           </div>
-          <div class="lg:col-span-7">
+          <div>
             <p class="text-xs font-semibold uppercase tracking-widest2 text-gold-dark">Hakkımızda</p>
-            <h2 id="tarihce-title" class="mt-4 font-serif text-4xl leading-[1.12] text-ink sm:text-5xl lg:text-6xl">Peri bacasının dibinde <em class="text-stone-600">bir otel</em></h2>
-            <div class="mt-8 space-y-5 text-[1.02rem] font-light leading-[1.75] text-ink-soft">
+            <h2 id="tarihce-title" class="mt-4 font-serif text-4xl leading-[1.12] text-ink sm:text-5xl">Peri bacasının dibinde <em class="text-stone-600">bir otel</em></h2>
+            <div class="mt-7 space-y-5 text-[1.02rem] font-light leading-[1.75] text-ink-soft">
               <p>Göreme Cave Suites'e bir binanın kapısından girilmez. Bir avluya inilir. Avlunun ortasında, otelle yaşıt değil, ondan çok daha eski bir peri bacası durur. Havuz onun gölgesindedir. Odalar iki yandan, kemer kemer, taşa ve kayaya yaslanır. İlk bakışta anlaşılan şey şudur: burası manzaraya bakan bir otel değildir. Manzaranın içine kurulmuş bir evdir.</p>
               <p>Gün bu avluda bölünür. Sabah, balonlar daha Göreme'nin üstündeyken kahvaltı masası bacanın dibindedir; kalkış alanları birkaç dakika ötededir, siz henüz taşın serinliğindesinizdir. Öğleden sonra avlu gölgelenir, havuz açılır, merdivenler odalara çıkar. Akşam aynı baca aydınlanır. Nazar boncuklu duvar, kemerlerin altındaki masalar ve üst terastaki sandalyeler tek bir ışıkta toplanır. Kapadokya'yı gündüz dışarıda yaşar, gece bu avluda kapatırsınız.</p>
+            </div>
+          </div>
+        </div>
+        <div class="mt-16 grid items-center gap-10 lg:mt-24 lg:grid-cols-2 lg:gap-16">
+          <div>
+            <div class="space-y-5 text-[1.02rem] font-light leading-[1.75] text-ink-soft">
               <p>Yirmi beş oda vardır ve hiçbiri diğerinin kopyası değildir. On ayrı tip, on ayrı avantaj taşır. Birinin içinde sauna ısınır. Birinde mermer bir Türk hamamı odaya aittir. Birinde havuz, mağaranın kayasına oyulmuştur; suyun üstünde taş tavan vardır. Bir süit kemerli duvarı ve şömineyi genişletir. Bir oda peri bacasına bakan balkona açılır. Queen yataklı odalar daha sade, üç kişilik odalar bir aileyi aynı taşın içine alır. Kapıyı değiştirdiğinizde konaklamanın avantajı değişir. Ortak olan, kahvaltı, avlu ve günün sonunda aynı bacanın dibine dönmektir.</p>
               <p>Otel kasabanın içindedir. UNESCO Dünya Mirası Göreme Milli Parkı, açık hava müzesi, vadi patikaları ve balon alanları yürüyüşe ya da kısa bir transfere kalmıştır. Yirmi beş oda, burayı bir tesis değil bir ev ölçeğinde tutar. Resepsiyon gününüzü bilir: sabahın saatini, vadinin hangisi olduğunu, akşamın nerede biteceğini. Booking.com'da 4.9 puan, bu ölçeğin misafirde bıraktığı izdir.</p>
             </div>
-            <div class="mt-10 border-t border-ink/10 pt-8">
+            <div class="mt-8 border-t border-ink/10 pt-7">
               <p class="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-gold-dark">Her odanın kendi avantajı var</p>
               <ul class="mt-5 grid gap-x-8 gap-y-3 text-sm font-light text-ink-soft sm:grid-cols-2">
                 <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-gold" aria-hidden="true"></span>Odaya özel sauna</li>
@@ -1322,17 +1330,11 @@ dialog.dish-dlg { width: min(940px, 94vw); }
               <a href="#odalar" class="btn-outline mt-8 inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-ink">Odaları görün
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
             </div>
-            <dl class="mt-10 grid grid-cols-3 gap-6 border-t border-ink/10 pt-8">
-              <div><dt class="text-[0.65rem] uppercase tracking-[0.18em] text-stone-600">Mağara &amp; taş oda</dt><dd class="mt-1 font-serif text-4xl text-ink">25</dd></div>
-              <div><dt class="text-[0.65rem] uppercase tracking-[0.18em] text-stone-600">Oda tipi</dt><dd class="mt-1 font-serif text-4xl text-ink">10</dd></div>
-              <div><dt class="text-[0.65rem] uppercase tracking-[0.18em] text-stone-600"><span lang="en">Booking.com</span></dt><dd class="mt-1 font-serif text-4xl text-ink">4.9</dd></div>
-            </dl>
+          </div>
+          <div class="media aspect-[4/3]">
+            <img data-img="dis-gece-havuz" alt="Gece aydınlatılmış peri bacası ve havuz" loading="lazy" onerror="imgFallback(this)" />
           </div>
         </div>
-        <ul class="mt-8 grid gap-4 sm:grid-cols-2" aria-label="Otelin avlusu">
-          <li class="media aspect-[16/10]"><img data-img="dis-tas-avlu" alt="Kemerli taş avlu ve peri bacasına çıkan merdiven" loading="lazy" onerror="imgFallback(this)" /></li>
-          <li class="media aspect-[16/10]"><img data-img="dis-gece-havuz" alt="Gece aydınlatılmış peri bacası ve havuz" loading="lazy" onerror="imgFallback(this)" /></li>
-        </ul>
       </div>
     </section>
 
@@ -1360,9 +1362,12 @@ dialog.dish-dlg { width: min(940px, 94vw); }
           <h2 id="galeri-title" class="mt-4 font-serif text-4xl text-ink sm:text-5xl">Avlunun kendisi</h2>
           <p class="mt-4 font-light leading-relaxed text-ink-soft">Buradaki kareler otelimizin. Stok görsel değil; havuz, taş avlu ve peri bacası bizim avlumuz.</p>
         </div>
-        <p id="reelHint" class="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-stone-600">Sürükleyin <span aria-hidden="true">→</span></p>
       </div>
-      <div id="homeReel" class="reel" tabindex="0" role="region" aria-label="Otel fotoğrafları. Yatay sürükleyin ya da ok tuşlarını kullanın."></div>
+      <div class="reel-wrap">
+        <button type="button" id="reelPrev" class="reel-arrow reel-prev" aria-label="Önceki fotoğraflar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg></button>
+        <div id="homeReel" class="reel" tabindex="0" role="region" aria-label="Otel fotoğrafları. Kendiliğinden ilerler; oklarla da geçilir."></div>
+        <button type="button" id="reelNext" class="reel-arrow reel-next" aria-label="Sonraki fotoğraflar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></button>
+      </div>
       <div class="mx-auto mt-6 flex max-w-7xl items-center gap-4 px-6 sm:px-8">
         <div class="reel-track" aria-hidden="true"><span id="reelBar"></span></div>
         <p id="reelCount" class="shrink-0 font-serif text-sm tabular-nums text-stone-600">1 / 9</p>
@@ -2139,61 +2144,90 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     if (mainPhone) { el.href = 'tel:' + mainPhone.tel; el.textContent = mainPhone.display; } else { el.style.display = 'none'; }
   });
 
-  /* Ana sayfa galerisi: ızgara değil, sürüklenen şerit. */
+  /* Galeri: eşit kareler kendiliğinden ilerler. Oklar bir kare kaydırır.
+     Liste sonuna baştaki kareler eklenir; tur bitince sıçrama görünmeden başa döner.
+     Tıklama lightbox'ı açar; orada oklarla diğer fotoğraflara geçilir. */
   (function () {
     var el = $('#homeReel');
     var items = K.HOME_GALLERY;
     if (!el || !items || !items.length) return;
-    el.innerHTML = items.map(function (it, i) {
+    var n = items.length;
+    function cardHtml(it, i) {
       return '<button type="button" class="reel-card" data-lb-index="' + i + '" aria-label="Büyüt: ' + esc(it.alt) + '">' +
         imgTag(it.src, it.alt) + '<span class="reel-cap">' + esc(it.alt) + '</span></button>';
-    }).join('');
-    var bar = $('#reelBar'), count = $('#reelCount'), hint = $('#reelHint');
-    var dragging = false, moved = false, startX = 0, startLeft = 0;
-    function sync() {
-      var max = el.scrollWidth - el.clientWidth;
-      var p = max > 0 ? el.scrollLeft / max : 1;
-      if (bar) bar.style.width = Math.max(8, p * 100) + '%';
-      var i = 0, mark = el.scrollLeft + 48;
-      $$('.reel-card', el).forEach(function (c, n) { if (c.offsetLeft <= mark) i = n; });
-      if (count) count.textContent = (i + 1) + ' / ' + items.length;
     }
-    el.addEventListener('scroll', sync, { passive: true });
-    el.addEventListener('wheel', function (e) {
-      var max = el.scrollWidth - el.clientWidth;
-      if (max <= 8 || Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
-      if ((e.deltaY > 0 && el.scrollLeft >= max - 2) || (e.deltaY < 0 && el.scrollLeft <= 0)) return;
-      el.scrollLeft += e.deltaY;
-      e.preventDefault();
-      if (hint) hint.style.opacity = '0';
-    }, { passive: false });
-    el.addEventListener('pointerdown', function (e) {
-      if (e.pointerType === 'touch' || e.button !== 0) return;
-      dragging = true; moved = false; startX = e.clientX; startLeft = el.scrollLeft;
-      el.classList.add('is-drag');
-      try { el.setPointerCapture(e.pointerId); } catch (err) {}
-    });
-    el.addEventListener('pointermove', function (e) {
-      if (!dragging) return;
-      var dx = e.clientX - startX;
-      if (Math.abs(dx) > 8) moved = true;
-      el.scrollLeft = startLeft - dx;
-    });
-    function endDrag() { dragging = false; el.classList.remove('is-drag'); }
-    el.addEventListener('pointerup', endDrag);
-    el.addEventListener('pointercancel', endDrag);
+    el.innerHTML = (items.map(cardHtml).join('') + items.map(cardHtml).join('')).replace(/loading="lazy"/g, 'loading="eager"');
+    var bar = $('#reelBar'), count = $('#reelCount'), wrap = el.parentNode;
+    var timer = 0, paused = false, seen = false;
+    function stepPx() {
+      var card = el.querySelector('.reel-card');
+      if (!card) return 0;
+      var gap = parseFloat(getComputedStyle(el).columnGap || getComputedStyle(el).gap) || 16;
+      return card.getBoundingClientRect().width + gap;
+    }
+    function sync() {
+      var step = stepPx();
+      if (!step) return;
+      var i = Math.round(el.scrollLeft / step) % n;
+      if (count) count.textContent = (i + 1) + ' / ' + n;
+      if (bar) bar.style.width = ((i + 1) / n * 100) + '%';
+    }
+    function go(dir) {
+      var step = stepPx();
+      if (!step) return;
+      var cycle = step * n;
+      el.style.scrollSnapType = 'none';
+      el.style.scrollBehavior = 'auto';
+      if (dir < 0 && el.scrollLeft <= 2) el.scrollLeft = cycle;
+      if (dir > 0 && el.scrollLeft >= cycle - 2) el.scrollLeft = el.scrollLeft - cycle;
+      el.style.scrollBehavior = '';
+      el.style.scrollSnapType = '';
+      el.scrollBy({ left: dir * step, behavior: reduceMotion ? 'auto' : 'smooth' });
+    }
+    function normalize() {
+      var step = stepPx();
+      if (!step) return;
+      var cycle = step * n;
+      if (el.scrollLeft >= cycle - 1) {
+        el.style.scrollSnapType = 'none';
+        el.style.scrollBehavior = 'auto';
+        el.scrollLeft = el.scrollLeft - cycle;
+        el.style.scrollBehavior = '';
+        el.style.scrollSnapType = '';
+      }
+      sync();
+    }
+    var settle;
+    el.addEventListener('scroll', function () {
+      sync();
+      clearTimeout(settle);
+      settle = setTimeout(normalize, 160);
+    }, { passive: true });
+    function stop() { clearInterval(timer); timer = 0; }
+    function start() {
+      stop();
+      if (reduceMotion || paused || !seen || (lb && lb.open)) return;
+      timer = setInterval(function () { go(1); }, 4200);
+    }
+    $('#reelNext').addEventListener('click', function () { go(1); start(); });
+    $('#reelPrev').addEventListener('click', function () { go(-1); start(); });
+    wrap.addEventListener('mouseenter', function () { paused = true; stop(); });
+    wrap.addEventListener('mouseleave', function () { paused = false; start(); });
     el.addEventListener('click', function (e) {
-      if (moved) { moved = false; e.preventDefault(); e.stopPropagation(); return; }
       var b = e.target.closest('[data-lb-index]');
       if (!b) return;
-      if (hint) hint.style.opacity = '0';
+      stop();
       openLightbox(items, +b.getAttribute('data-lb-index'), b);
     });
     el.addEventListener('keydown', function (e) {
-      var step = el.clientWidth * 0.62;
-      if (e.key === 'ArrowRight') { el.scrollBy({ left: step, behavior: reduceMotion ? 'instant' : 'smooth' }); e.preventDefault(); }
-      if (e.key === 'ArrowLeft') { el.scrollBy({ left: -step, behavior: reduceMotion ? 'instant' : 'smooth' }); e.preventDefault(); }
+      if (e.key === 'ArrowRight') { go(1); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { go(-1); e.preventDefault(); }
     });
+    if (lb) lb.addEventListener('close', start);
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (en) { seen = en[0].isIntersecting; if (seen) start(); else stop(); }, { threshold: 0.4 }).observe(el);
+    } else { seen = true; start(); }
+    window.addEventListener('resize', sync);
     sync();
   })();
 
