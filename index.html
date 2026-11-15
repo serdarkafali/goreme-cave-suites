@@ -685,7 +685,7 @@ window.SITE_CONTENT = {
        Yeni Tailwind sınıfı eklenirse css/site.css yeniden derlenmelidir (KURULUM.md). -->
   <link rel="preload" href="fonts/montserrat-normal-latin-1.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="fonts/playfair-display-normal-latin-5.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="css/site.css?v=10" />
+  <link rel="stylesheet" href="css/site.css?v=11" />
 
   <style>
 /* =====================================================================
@@ -717,22 +717,23 @@ section[id], footer[id] { scroll-margin-top: 76px; }
 .site-header .header-inner { transition: padding .5s ease; }
 .site-header .logo-img { height: 3rem; width: 3rem; transition: height .5s ease, width .5s ease, transform .6s ease; }
 .site-header .brand-sub { color: rgba(255, 255, 255, .78); }
-.site-header.is-solid { background: rgba(240, 231, 217, .95); color: #2B2622; box-shadow: 0 10px 30px -18px rgba(43, 38, 34, .45); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+/* Kaydırınca menü, açık sayfanın tersi: koyu zemin, açık yazı. Kahraman görselinin üstünde şeffaf kalır. */
+.site-header.is-solid { background: rgba(34, 26, 21, .94); color: #F5EFE6; box-shadow: 0 14px 28px -18px rgba(0, 0, 0, .8); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
 .site-header.is-solid .header-inner { padding-top: .6rem; padding-bottom: .6rem; }
 .site-header.is-solid .logo-img { height: 2.5rem; width: 2.5rem; }
-.site-header.is-solid .brand-sub { color: #7A6552; }
-.site-header.menu-open { background: #F0E7D9; color: #2B2622; }
-.site-header.menu-open .brand-sub { color: #7A6552; }
+.site-header.is-solid .brand-sub { color: rgba(245, 239, 230, .72); }
+.site-header.menu-open { background: #221A15; color: #F5EFE6; }
+.site-header.menu-open .brand-sub { color: rgba(245, 239, 230, .72); }
 
 .nav-link { position: relative; padding: .35rem 0; transition: color .3s ease; }
 .nav-link::after { content: ''; position: absolute; left: 50%; right: 50%; bottom: -2px; height: 1px; background: #D4AF37; transition: left .35s ease, right .35s ease; }
 .nav-link:hover::after, .nav-link.is-active::after { left: 0; right: 0; }
 .nav-link.is-active { color: #D4AF37; }
-.site-header.is-solid .nav-link.is-active { color: #B08F26; }
+.site-header.is-solid .nav-link.is-active { color: #E2C266; }
 
 .social-icon { display: inline-flex; align-items: center; justify-content: center; width: 2.25rem; height: 2.25rem; border-radius: 999px; transition: color .3s ease, transform .3s ease, background-color .3s ease; }
 .social-icon:hover { color: #D4AF37; transform: translateY(-2px); }
-.site-header.is-solid .social-icon:hover { color: #B08F26; }
+.site-header.is-solid .social-icon:hover { color: #E2C266; }
 .social-icon svg { width: 18px; height: 18px; }
 .header-sep { width: 1px; height: 1.6rem; margin: 0 1.25rem 0 1rem; background: currentColor; opacity: .25; }
 
@@ -1339,7 +1340,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     </section>
 
     <!-- ============ KAPADOKYA, SONRA AKTİVİTELER ============ -->
-    <section id="aktiviteler" class="bg-sand-200/60 py-24 sm:py-32" aria-labelledby="aktivite-title">
+    <section id="aktiviteler" class="bg-sand-300 py-24 sm:py-32" aria-labelledby="aktivite-title">
       <div class="mx-auto max-w-7xl px-6 sm:px-8">
         <div class="max-w-3xl">
           <p class="text-xs font-semibold uppercase tracking-widest2 text-gold-dark">Kapadokya</p>
@@ -1547,7 +1548,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     </section>
 
     <!-- ============ MENÜ (SITE_CONTENT → MENU_CATEGORIES, MENU_DISHES) ============ -->
-    <section id="yemek-menusu" class="relative bg-sand-200/60 menu-grain" aria-labelledby="menu-title">
+    <section id="yemek-menusu" class="relative bg-sand-200 menu-grain" aria-labelledby="menu-title">
       <div class="mx-auto max-w-7xl px-6 sm:px-8 pt-24 sm:pt-32 pb-12 sm:pb-14 grid gap-10 lg:grid-cols-12 items-end">
         <div class="lg:col-span-8">
           <p class="reveal divider-ornament text-xs uppercase tracking-widest2 font-semibold">Kapadokya mutfağı</p>
@@ -1641,7 +1642,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     </section>
 
     <!-- ============ HİZMETLER (SITE_CONTENT → HAMAM_SERVICES) ============ -->
-    <section class="py-24 sm:py-32 bg-sand-200/60" aria-labelledby="hizmet-title">
+    <section class="py-24 sm:py-32 bg-sand-200" aria-labelledby="hizmet-title">
       <div class="mx-auto max-w-7xl px-6 sm:px-8">
         <div class="text-center max-w-2xl mx-auto">
           <p class="reveal divider-ornament text-xs uppercase tracking-widest2 font-semibold">Hizmetler</p>
@@ -1815,10 +1816,16 @@ dialog.dish-dlg { width: min(940px, 94vw); }
   var burger = $('#burger');
   var panel = $('#mobileMenu');
 
+  /* Koyu girişin üstünde menü açık renkli kalır. Giriş bitince, açık zeminin tersi olan koyu menüye döner. */
   function onScroll() {
-    headerEl.classList.toggle('is-solid', window.scrollY > 40);
+    var view = document.querySelector('[data-view]:not([hidden])');
+    var first = view && view.querySelector('section, article');
+    var dark = first && (first.classList.contains('bg-cocoa-900') || first.classList.contains('text-white'));
+    var limit = dark ? Math.max(0, first.offsetHeight - headerEl.offsetHeight) : 0;
+    headerEl.classList.toggle('is-solid', window.scrollY >= limit);
   }
   window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
   onScroll();
 
   function setMenu(open) {
