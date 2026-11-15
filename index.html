@@ -1927,12 +1927,28 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     : null;
   function observeReveals(root) {
     $$('.reveal', root).forEach(function (el) {
+      if (el.classList.contains('is-visible')) return;
       if (revealObserver) revealObserver.observe(el); else el.classList.add('is-visible');
+    });
+  }
+  /* Dil değişince kartlar yeniden kurulur. Ekranda olanlar kaybolmasın diye hemen görünür yapılır. */
+  function showFreshReveals(root) {
+    $$('.reveal', root).forEach(function (el) {
+      if (el.classList.contains('is-visible')) return;
+      var box = el.getBoundingClientRect();
+      var onScreen = box.width > 0 && box.bottom > 0 && box.top < window.innerHeight;
+      if (onScreen || !revealObserver) {
+        el.style.transition = 'none';
+        el.classList.add('is-visible');
+        void el.offsetWidth;
+        el.style.transition = '';
+      } else if (revealObserver) revealObserver.observe(el);
     });
   }
   /* Sırayla gelen (stagger) kartlar: her öğeye artan gecikme verir. */
   function stagger(container, step) {
     $$(':scope > .reveal', container).forEach(function (el, i) { el.style.setProperty('--d', (i % 4) * (step || 0.1) + 's'); });
+    observeReveals(container);
   }
 
   /* ================= 4. Bildirim (toast) ================= */
@@ -3021,6 +3037,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     if (dishDlg && dishDlg.open) dishDlg.close();
     if (window.HeroVideo) { if (name === 'home') window.HeroVideo.resume(); else window.HeroVideo.pause(); }
     if (RIntro) { if (name === 'restoran') RIntro.enter(); else RIntro.leave(); }
+    requestAnimationFrame(function () { showFreshReveals(views[name] || document); });
     return true;
   }
   function focusHeading() {
@@ -3150,6 +3167,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     applyStatic();
     paints.forEach(function (fn) { try { fn(); } catch (err) { console.error(err); } });
     applyChrome();
+    showFreshReveals(document);
     if (typeof onScroll === 'function') onScroll();
   }
   (function () {
