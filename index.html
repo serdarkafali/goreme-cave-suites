@@ -12,6 +12,12 @@
   (kurulum seçenekleri: KURULUM.md). Veritabanı veya PHP gerekmez.
   Sayfalar: Ana sayfa · #odalar · #restoran · #hamam (aynı dosya içinde).
 
+  DİLLER: Türkçe varsayılan. 2025 Kapadokya konaklama sırasına göre
+  zh (Çin), es (İspanya), en (ABD), ko (Güney Kore), it (İtalya).
+  Yeni görünen metin eklenince js/i18n.js, js/i18n-content.js ve
+  js/i18n-menu.js içindeki beş dile de çevirisi yazılır. Türkçe kaynak
+  bu dosyada kalır.
+
   DÜZENLEME: Aşağıdaki ilk script bloğu tüm ayarları içerir:
     1. SITE_CONFIG          → logo, video, sosyal medya linkleri, adres,
                               harita, iletişim, çalışma saatleri, ulaşım
@@ -686,6 +692,14 @@ window.SITE_CONTENT = {
   <link rel="preload" href="fonts/montserrat-normal-latin-1.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="fonts/playfair-display-normal-latin-5.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="css/site.css?v=11" />
+  <script>
+  try {
+    var qLang = new URLSearchParams(location.search).get('lang');
+    var savedLang = qLang || localStorage.getItem('goreme-lang') || 'tr';
+    if ({ tr: 1, en: 1, zh: 1, es: 1, ko: 1, it: 1 }[savedLang]) document.documentElement.lang = savedLang;
+    if (document.documentElement.lang !== 'tr') document.documentElement.classList.add('i18n-wait');
+  } catch (e) {}
+  </script>
 
   <style>
 /* =====================================================================
@@ -736,6 +750,17 @@ section[id], footer[id] { scroll-margin-top: 76px; }
 .site-header.is-solid .social-icon:hover { color: #E2C266; }
 .social-icon svg { width: 18px; height: 18px; }
 .header-sep { width: 1px; height: 1.6rem; margin: 0 1.25rem 0 1rem; background: currentColor; opacity: .25; }
+html.i18n-wait body { visibility: hidden; }
+html[lang="zh"] body { font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Montserrat, sans-serif; }
+html[lang="zh"] .font-serif { font-family: "Microsoft YaHei", "PingFang SC", "Playfair Display", serif; }
+html[lang="ko"] body, html[lang="ko"] .font-serif { font-family: "Malgun Gothic", "Apple SD Gothic Neo", Montserrat, sans-serif; }
+html[lang="zh"] [class*="tracking-"], html[lang="ko"] [class*="tracking-"] { letter-spacing: .04em; }
+.lang-switch { position: relative; margin-right: .85rem; }
+.lang-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 2.6rem; height: 2.25rem; padding: 0 .7rem; border-radius: 999px; border: 1px solid currentColor; background: transparent; color: inherit; font-size: .68rem; font-weight: 600; letter-spacing: .08em; }
+.lang-menu { position: absolute; right: 0; top: calc(100% + .45rem); z-index: 70; min-width: 9.5rem; margin: 0; padding: .35rem; list-style: none; background: #F5EFE6; color: #2B2622; border-radius: 1rem; box-shadow: 0 18px 40px -24px rgba(0,0,0,.55); }
+.lang-menu[hidden] { display: none; }
+.lang-menu button { display: block; width: 100%; text-align: left; padding: .55rem .75rem; border-radius: .7rem; font-size: .9rem; background: transparent; color: inherit; }
+.lang-menu button[aria-selected="true"], .lang-menu button:hover { background: #221A15; color: #F5EFE6; }
 
 /* Hamburger */
 .burger span { display: block; height: 1.5px; width: 26px; background: currentColor; transition: transform .45s cubic-bezier(.7, 0, .3, 1), opacity .3s ease; transform-origin: center; }
@@ -1053,9 +1078,10 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     return [a.line1, [a.line2, a.country].filter(Boolean).join(', ')].filter(Boolean).map(esc).join(sep);
   }
 
-  function extLink(url, label) {
+  function extLink(url, label, i18nKey) {
     var placeholder = !url || url === '#';
     return '<a href="' + esc(url || '#') + '" target="_blank" rel="noopener" class="hover:text-gold transition-colors"' +
+      (i18nKey ? ' data-i18n="' + esc(i18nKey) + '"' : '') +
       (placeholder ? ' data-placeholder-link="' + esc(label) + '"' : '') + '>' + esc(label) + '</a>';
   }
 
@@ -1068,44 +1094,48 @@ dialog.dish-dlg { width: min(940px, 94vw); }
   /* ---------- HEADER ---------- */
   function header() {
     var desktopNav = NAV.map(function (n) {
-      return '<li><a class="nav-link" data-nav="' + n.id + '" href="' + n.href + '">' + n.label + '</a></li>';
+      return '<li><a class="nav-link" data-nav="' + n.id + '" data-i18n="nav.' + n.id + '" href="' + n.href + '">' + n.label + '</a></li>';
     }).join('');
 
     var mobileNav = NAV.map(function (n, i) {
-      return '<li class="m-item" style="--i:' + i + '"><a href="' + n.href + '" data-nav="' + n.id + '" class="flex items-baseline justify-between border-b border-ink/10 py-4 font-serif text-3xl"><span>' + n.label + '</span><span class="text-xs font-sans tracking-[0.2em] text-stone-600">0' + (i + 1) + '</span></a></li>';
+      return '<li class="m-item" style="--i:' + i + '"><a href="' + n.href + '" data-nav="' + n.id + '" class="flex items-baseline justify-between border-b border-ink/10 py-4 font-serif text-3xl"><span data-i18n="nav.' + n.id + '">' + n.label + '</span><span class="text-xs font-sans tracking-[0.2em] text-stone-600">0' + (i + 1) + '</span></a></li>';
     }).join('');
 
     var phone = (C.CONTACT && C.CONTACT.phones && C.CONTACT.phones[0]) || null;
     var email = (C.CONTACT && C.CONTACT.emails && C.CONTACT.emails[0]) || '';
 
     write(
-      '<a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:bg-gold focus:text-ink focus:px-4 focus:py-2 focus:rounded">İçeriğe geç</a>' +
+      '<a href="#main" data-i18n="skip" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:bg-gold focus:text-ink focus:px-4 focus:py-2 focus:rounded">İçeriğe geç</a>' +
       '<header id="siteHeader" class="site-header fixed inset-x-0 top-0 z-50">' +
         /* Üç bölge: logo solda, menü tam ortada, sosyal medya + rezervasyon sağda.
            OTA ikonları (Booking/Expedia/Trip) header'da yok: doğrudan rezervasyonu öne çıkarmak için
            yalnızca footer'da ve mobil menüde. */
         '<div class="header-inner mx-auto max-w-[88rem] px-5 sm:px-8 xl:px-12 py-5 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-8">' +
-          '<a href="#anasayfa" class="flex items-center gap-3 shrink-0 justify-self-start" aria-label="Göreme Cave Suites ana sayfa">' + logoHtml() + '</a>' +
-          '<nav aria-label="Ana menü" class="hidden lg:block justify-self-center">' +
+          '<a href="#anasayfa" class="flex items-center gap-3 shrink-0 justify-self-start" data-i18n-aria="aria.home" aria-label="Göreme Cave Suites ana sayfa">' + logoHtml() + '</a>' +
+          '<nav data-i18n-aria="aria.nav" aria-label="Ana menü" class="hidden lg:block justify-self-center">' +
             '<ul class="flex items-center gap-8 xl:gap-11 text-[0.74rem] font-medium uppercase tracking-[0.22em]">' + desktopNav + '</ul>' +
           '</nav>' +
           '<div class="flex items-center justify-self-end">' +
-            '<div class="hidden xl:flex items-center gap-1" role="group" aria-label="Sosyal medya">' + socialLinks('social-icon', ['instagram', 'tiktok']) + '</div>' +
+            '<div class="hidden xl:flex items-center gap-1" role="group" data-i18n-aria="aria.social" aria-label="Sosyal medya">' + socialLinks('social-icon', ['instagram', 'tiktok']) + '</div>' +
             '<span class="header-sep hidden xl:block" aria-hidden="true"></span>' +
-            '<a href="' + esc(C.BOOKING_URL || '#iletisim') + '" target="_blank" rel="noopener" class="btn-gold hidden lg:inline-flex items-center gap-2 rounded-full px-6 py-3 text-[0.68rem] font-semibold uppercase tracking-[0.22em] whitespace-nowrap">Rezervasyon</a>' +
-            '<button id="burger" class="burger lg:hidden p-2 -mr-2" type="button" aria-label="Menüyü aç" aria-expanded="false" aria-controls="mobileMenu"><span></span><span></span><span></span></button>' +
+            '<div class="lang-switch" id="langSwitch">' +
+              '<button type="button" class="lang-btn" id="langBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="langMenu" data-i18n-aria="aria.lang" aria-label="Dil">TR</button>' +
+              '<ul class="lang-menu" id="langMenu" role="listbox" hidden></ul>' +
+            '</div>' +
+            '<a data-booking href="' + esc(C.BOOKING_URL || '#iletisim') + '" target="_blank" rel="noopener" class="btn-gold hidden lg:inline-flex items-center gap-2 rounded-full px-6 py-3 text-[0.68rem] font-semibold uppercase tracking-[0.22em] whitespace-nowrap"><span data-i18n="book">Rezervasyon</span></a>' +
+            '<button id="burger" class="burger lg:hidden p-2 -mr-2" type="button" data-i18n-aria="burger.open" aria-label="Menüyü aç" aria-expanded="false" aria-controls="mobileMenu"><span></span><span></span><span></span></button>' +
           '</div>' +
         '</div>' +
         '<div id="mobileMenu" class="mobile-panel lg:hidden absolute inset-x-0 top-full h-[calc(100svh-100%)] bg-sand-100 text-ink overflow-y-auto" aria-hidden="true">' +
-          '<nav aria-label="Mobil menü" class="px-6 pt-8 pb-10 flex flex-col min-h-full">' +
+          '<nav data-i18n-aria="aria.mobile" aria-label="Mobil menü" class="px-6 pt-8 pb-10 flex flex-col min-h-full">' +
             '<ul class="space-y-1">' + mobileNav + '</ul>' +
             '<div class="m-item mt-8" style="--i:5">' +
-              '<p class="text-[0.65rem] uppercase tracking-widest2 text-stone-600 font-semibold">Sosyal medya &amp; rezervasyon</p>' +
+              '<p class="text-[0.65rem] uppercase tracking-widest2 text-stone-600 font-semibold" data-i18n="foot.socialBook">Sosyal medya &amp; rezervasyon</p>' +
               '<div class="mt-3 flex flex-wrap gap-2">' + socialLinks('social-icon h-11 w-11 border border-ink/15') + '</div>' +
             '</div>' +
-            '<div class="m-item pt-8" style="--i:6"><a href="' + esc(C.BOOKING_URL || '#iletisim') + '" target="_blank" rel="noopener" class="btn-gold flex justify-center rounded-full px-6 py-4 text-xs font-semibold uppercase tracking-[0.22em]">Rezervasyon Yap</a></div>' +
+            '<div class="m-item pt-8" style="--i:6"><a data-booking href="' + esc(C.BOOKING_URL || '#iletisim') + '" target="_blank" rel="noopener" class="btn-gold flex justify-center rounded-full px-6 py-4 text-xs font-semibold uppercase tracking-[0.22em]"><span data-i18n="bookNow">Rezervasyon Yap</span></a></div>' +
             '<div class="m-item mt-auto pt-10 text-sm text-stone-700 space-y-1" style="--i:7">' +
-              '<p class="font-serif italic text-lg text-ink">Kapadokya\'nın kalbinde, zamanın dışında.</p>' +
+              '<p class="font-serif italic text-lg text-ink" data-i18n="foot.tagline">Kapadokya\'nın kalbinde, zamanın dışında.</p>' +
               (phone ? '<p><a href="tel:' + esc(phone.tel) + '" class="hover:text-gold-dark">' + esc(phone.display) + '</a></p>' : '') +
               (email ? '<p><a href="mailto:' + esc(email) + '" class="hover:text-gold-dark break-all">' + esc(email) + '</a></p>' : '') +
             '</div>' +
@@ -1119,9 +1149,9 @@ dialog.dish-dlg { width: min(940px, 94vw); }
   function footer() {
     var K = window.SITE_CONTENT || {};
     var contact = C.CONTACT || {};
-    var phones = (contact.phones || []).map(function (p) {
+    var phones = (contact.phones || []).map(function (p, i) {
       return '<p class="flex gap-3">' + ICON_PHONE + '<span><a href="tel:' + esc(p.tel) + '" class="hover:text-gold transition-colors">' + esc(p.display) + '</a>' +
-        (p.label ? ' <span class="text-sand-300/60 text-xs">· ' + esc(p.label) + '</span>' : '') + '</span></p>';
+        (p.label ? ' <span class="text-sand-300/60 text-xs">· <span data-i18n="phone.' + i + '">' + esc(p.label) + '</span></span>' : '') + '</span></p>';
     }).join('');
     var emails = (contact.emails || []).map(function (e) {
       return '<p class="flex gap-3">' + ICON_MAIL + '<a href="mailto:' + esc(e) + '" class="hover:text-gold transition-colors break-words">' + esc(e) + '</a></p>';
@@ -1135,53 +1165,53 @@ dialog.dish-dlg { width: min(940px, 94vw); }
         '<div class="relative mx-auto max-w-7xl px-6 sm:px-8 pt-20 pb-10">' +
           '<div class="grid gap-14 md:grid-cols-2 lg:grid-cols-12">' +
             '<div class="lg:col-span-3">' +
-              '<a href="#anasayfa" class="flex items-center gap-3 text-sand-50" aria-label="Göreme Cave Suites ana sayfa">' +
+              '<a href="#anasayfa" class="flex items-center gap-3 text-sand-50" data-i18n-aria="aria.home" aria-label="Göreme Cave Suites ana sayfa">' +
                 logoMark('h-12 w-12 shrink-0', '') +
                 '<span class="leading-none"><span class="block font-serif text-2xl text-sand-50">Göreme</span><span class="block text-[0.6rem] tracking-widest2 uppercase mt-1 text-sand-400" lang="en">Cave Suites</span></span>' +
               '</a>' +
-              '<p class="mt-6 max-w-xs text-sand-300/80 font-light leading-relaxed">Peri bacalarının arasında, zamanın yavaşladığı butik bir mağara oteli.</p>' +
-              '<div class="mt-8 flex flex-wrap gap-3" role="group" aria-label="Sosyal medya ve rezervasyon platformları">' +
+              '<p class="mt-6 max-w-xs text-sand-300/80 font-light leading-relaxed" data-i18n="foot.blurb">Peri bacalarının arasında, zamanın yavaşladığı butik bir mağara oteli.</p>' +
+              '<div class="mt-8 flex flex-wrap gap-3" role="group" data-i18n-aria="aria.socialBook" aria-label="Sosyal medya ve rezervasyon platformları">' +
                 socialLinks('social flex h-11 w-11 items-center justify-center rounded-full border border-sand-200/25 hover:border-gold hover:text-gold hover:-translate-y-0.5 transition-all [&>svg]:h-[18px] [&>svg]:w-[18px]') +
               '</div>' +
             '</div>' +
             '<div class="lg:col-span-4">' +
-              '<h2 id="iletisim-title" class="text-xs uppercase tracking-widest2 text-gold font-semibold">İletişim</h2>' +
+              '<h2 id="iletisim-title" class="text-xs uppercase tracking-widest2 text-gold font-semibold" data-i18n="foot.contact">İletişim</h2>' +
               '<address class="not-italic mt-6 space-y-4 font-light leading-relaxed">' +
                 '<p class="flex gap-3">' + ICON_PIN + '<a href="' + esc(C.MAPS_LINK || '#') + '" target="_blank" rel="noopener" class="hover:text-gold transition-colors">' + addressText('<br />') + '</a></p>' +
                 phones + emails +
               '</address>' +
             '</div>' +
             '<div class="lg:col-span-2">' +
-              '<h2 class="text-xs uppercase tracking-widest2 text-gold font-semibold">Keşfedin</h2>' +
+              '<h2 class="text-xs uppercase tracking-widest2 text-gold font-semibold" data-i18n="foot.explore">Keşfedin</h2>' +
               '<ul class="mt-6 space-y-3 font-light">' +
-                '<li><a href="#tarihce" class="hover:text-gold transition-colors">Tarihçe</a></li>' +
-                '<li><a href="#odalar" class="hover:text-gold transition-colors">Odalar &amp; Süitler</a></li>' +
-                '<li><a href="#restoran" class="hover:text-gold transition-colors">Restoran</a></li>' +
-                '<li><a href="#hamam" class="hover:text-gold transition-colors">Hamam &amp; Spa</a></li>' +
-                '<li><a href="#ulasim" class="hover:text-gold transition-colors">Adres &amp; Ulaşım</a></li>' +
-                '<li><a href="' + esc(C.BOOKING_URL || '#') + '" target="_blank" rel="noopener" class="hover:text-gold transition-colors">Rezervasyon</a></li>' +
+                '<li><a href="#tarihce" class="hover:text-gold transition-colors" data-i18n="foot.about">Tarihçe</a></li>' +
+                '<li><a href="#odalar" class="hover:text-gold transition-colors" data-i18n="foot.rooms">Odalar &amp; Süitler</a></li>' +
+                '<li><a href="#restoran" class="hover:text-gold transition-colors" data-i18n="foot.rest">Restoran</a></li>' +
+                '<li><a href="#hamam" class="hover:text-gold transition-colors" data-i18n="foot.hamam">Hamam &amp; Spa</a></li>' +
+                '<li><a href="#ulasim" class="hover:text-gold transition-colors" data-i18n="foot.reach">Adres &amp; Ulaşım</a></li>' +
+                '<li><a data-booking href="' + esc(C.BOOKING_URL || '#') + '" target="_blank" rel="noopener" class="hover:text-gold transition-colors" data-i18n="foot.book">Rezervasyon</a></li>' +
               '</ul>' +
             '</div>' +
             '<div class="md:col-span-2 lg:col-span-3">' +
-              '<h2 class="text-xs uppercase tracking-widest2 text-gold font-semibold">Bülten</h2>' +
-              '<p class="mt-6 font-light leading-relaxed text-sand-300/80">Mevsimsel tekliflerden ve balon sezonu ayrıcalıklarından ilk siz haberdar olun.</p>' +
+              '<h2 class="text-xs uppercase tracking-widest2 text-gold font-semibold" data-i18n="foot.news">Bülten</h2>' +
+              '<p class="mt-6 font-light leading-relaxed text-sand-300/80" data-i18n="foot.newsLead">Mevsimsel tekliflerden ve balon sezonu ayrıcalıklarından ilk siz haberdar olun.</p>' +
               (C.NEWSLETTER_ACTION_URL
                 ? '<form id="newsletterForm" class="mt-5" method="post" target="_blank" action="' + esc(C.NEWSLETTER_ACTION_URL) + '" novalidate>' +
-                    '<label for="newsEmail" class="sr-only">E-posta adresiniz</label>' +
+                    '<label for="newsEmail" class="sr-only" data-i18n="foot.email">E-posta adresiniz</label>' +
                     '<div class="flex rounded-full border border-sand-200/25 focus-within:border-gold transition-colors overflow-hidden">' +
-                      '<input id="newsEmail" name="email" type="email" required autocomplete="email" placeholder="E-posta adresiniz" class="min-w-0 flex-1 bg-transparent px-5 py-3.5 text-sm text-sand-50 placeholder:text-sand-300/60 focus:outline-none" aria-describedby="newsMsg" />' +
-                      '<button type="submit" class="btn-gold m-1 rounded-full px-5 text-[0.68rem] font-semibold uppercase tracking-[0.18em]">Abone Ol</button>' +
+                      '<input id="newsEmail" name="email" type="email" required autocomplete="email" data-i18n-ph="foot.emailPh" placeholder="E-posta adresiniz" class="min-w-0 flex-1 bg-transparent px-5 py-3.5 text-sm text-sand-50 placeholder:text-sand-300/60 focus:outline-none" aria-describedby="newsMsg" />' +
+                      '<button type="submit" class="btn-gold m-1 rounded-full px-5 text-[0.68rem] font-semibold uppercase tracking-[0.18em]" data-i18n="foot.sub">Abone Ol</button>' +
                     '</div>' +
                     '<p id="newsMsg" class="mt-3 min-h-[1.25rem] text-sm" role="status" aria-live="polite"></p>' +
                   '</form>'
-                : '<a href="mailto:' + esc(C.CONTACT.emails[0]) + '?subject=' + encodeURIComponent('Özel teklifler') + '" class="mt-5 inline-flex items-center gap-2 rounded-full border border-sand-200/25 px-6 py-3.5 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-sand-50 hover:border-gold hover:text-gold transition-colors">Teklifleri e-postayla isteyin</a>') +
+                : '<a href="mailto:' + esc(C.CONTACT.emails[0]) + '?subject=' + encodeURIComponent('Özel teklifler') + '" class="mt-5 inline-flex items-center gap-2 rounded-full border border-sand-200/25 px-6 py-3.5 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-sand-50 hover:border-gold hover:text-gold transition-colors" data-i18n="foot.ask">Teklifleri e-postayla isteyin</a>') +
             '</div>' +
           '</div>' +
           '<div class="mt-16 pt-8 border-t border-sand-200/10 flex flex-col sm:flex-row gap-4 justify-between text-xs text-sand-300/60 tracking-wide">' +
-            '<p>© 2026 Göreme Cave Suites. Tüm hakları saklıdır.</p>' +
-            '<p class="flex flex-wrap gap-6">' + extLink(C.PRIVACY_URL, 'Gizlilik Politikası') + extLink(C.KVKK_URL, 'KVKK Aydınlatma Metni') + '</p>' +
+            '<p data-i18n="foot.rights">© 2026 Göreme Cave Suites. Tüm hakları saklıdır.</p>' +
+            '<p class="flex flex-wrap gap-6">' + extLink(C.PRIVACY_URL, 'Gizlilik Politikası', 'foot.privacy') + extLink(C.KVKK_URL, 'KVKK Aydınlatma Metni', 'foot.kvkk') + '</p>' +
           '</div>' +
-          (credits ? '<details class="mt-6 text-[0.7rem] text-sand-300/50"><summary class="cursor-pointer hover:text-gold w-max">Görsel kaynakları</summary><ul class="mt-3 space-y-1">' + credits + '</ul></details>' : '') +
+          (credits ? '<details class="mt-6 text-[0.7rem] text-sand-300/50"><summary class="cursor-pointer hover:text-gold w-max" data-i18n="foot.credits">Görsel kaynakları</summary><ul id="creditList" class="mt-3 space-y-1">' + credits + '</ul></details>' : '') +
         '</div>' +
       '</footer>' +
 
@@ -1239,49 +1269,49 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       <div class="absolute inset-0 bg-gradient-to-b from-cocoa-900/60 via-cocoa-900/35 to-cocoa-900/75" aria-hidden="true"></div>
 
       <div class="hero-text relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
-        <p class="hero-in divider-ornament text-[0.7rem] sm:text-xs uppercase tracking-widest2 font-medium" style="animation-delay:.2s">Göreme · Kapadokya</p>
+        <p class="hero-in divider-ornament text-[0.7rem] sm:text-xs uppercase tracking-widest2 font-medium" style="animation-delay:.2s" data-i18n="hero.place">Göreme · Kapadokya</p>
         <h1 id="page-title-home" tabindex="-1" data-view-heading class="hero-in mt-6 font-serif text-[2.8rem] leading-[1.05] sm:text-7xl lg:text-[5.6rem] font-normal" style="animation-delay:.4s" data-cfg="HOTEL_NAME">Göreme Cave Suites</h1>
-        <p class="hero-in mt-6 max-w-2xl font-serif italic text-xl sm:text-2xl text-sand-100/95" style="animation-delay:.65s" data-cfg="SLOGAN">Kapadokya'nın Kalbinde Zamansız Büyüyü Keşfedin</p>
-        <p class="hero-in hero-sub-optional mt-4 max-w-xl text-sm sm:text-base font-light text-sand-100/80" style="animation-delay:.8s" data-cfg="HERO_SUBTITLE">Peri bacalarının arasında, 25 mağara ve taş odalı butik otel.</p>
+        <p class="hero-in mt-6 max-w-2xl font-serif italic text-xl sm:text-2xl text-sand-100/95" style="animation-delay:.65s" data-cfg="SLOGAN" data-i18n="slogan">Kapadokya'nın Kalbinde Zamansız Büyüyü Keşfedin</p>
+        <p class="hero-in hero-sub-optional mt-4 max-w-xl text-sm sm:text-base font-light text-sand-100/80" style="animation-delay:.8s" data-cfg="HERO_SUBTITLE" data-i18n="hero.sub">Peri bacalarının arasında, 25 mağara ve taş odalı butik otel.</p>
 
         <!-- Rezervasyon kutusu (SITE_CONFIG → BOOKING_URL, HERO_BOOKING_PERKS) -->
-        <form id="heroBooking" class="bk hero-in mt-8 sm:mt-10" style="animation-delay:1s" novalidate aria-label="Müsaitlik ve fiyat sorgula">
+        <form id="heroBooking" class="bk hero-in mt-8 sm:mt-10" style="animation-delay:1s" novalidate data-i18n-aria="bk.form" aria-label="Müsaitlik ve fiyat sorgula">
           <div class="bk-bar">
             <label class="bk-field">
-              <span class="bk-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Giriş</span>
+              <span class="bk-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span data-i18n="bk.in">Giriş</span></span>
               <span class="bk-value" id="bkInText" aria-hidden="true">–</span>
-              <input class="bk-date" type="date" id="bkIn" name="checkin" required aria-label="Giriş tarihi" />
+              <input class="bk-date" type="date" id="bkIn" name="checkin" required data-i18n-aria="bk.inDate" aria-label="Giriş tarihi" />
             </label>
             <label class="bk-field">
-              <span class="bk-label">Çıkış <span class="bk-nights" id="bkNights"></span></span>
+              <span class="bk-label"><span data-i18n="bk.out">Çıkış</span> <span class="bk-nights" id="bkNights"></span></span>
               <span class="bk-value" id="bkOutText" aria-hidden="true">–</span>
-              <input class="bk-date" type="date" id="bkOut" name="checkout" required aria-label="Çıkış tarihi" />
+              <input class="bk-date" type="date" id="bkOut" name="checkout" required data-i18n-aria="bk.outDate" aria-label="Çıkış tarihi" />
             </label>
             <div class="bk-field bk-guests">
-              <span class="bk-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5M16 5.2a3 3 0 0 1 0 5.6M18 14.4c1.4.7 2.3 2.2 2.6 4.6"/></svg>Misafir</span>
+              <span class="bk-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5M16 5.2a3 3 0 0 1 0 5.6M18 14.4c1.4.7 2.3 2.2 2.6 4.6"/></svg><span data-i18n="bk.guest">Misafir</span></span>
               <span class="bk-value" id="bkGuestText">2 Kişi · 1 Oda</span>
-              <button type="button" class="bk-trigger" id="bkGuestBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="bkPop"><span class="sr-only">Kişi ve oda sayısını seç</span></button>
+              <button type="button" class="bk-trigger" id="bkGuestBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="bkPop"><span class="sr-only" data-i18n="bk.pick">Kişi ve oda sayısını seç</span></button>
             </div>
-            <button type="submit" class="bk-submit btn-gold">Müsaitlik Ara<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+            <button type="submit" class="bk-submit btn-gold"><span data-i18n="bk.search">Müsaitlik Ara</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
 
-            <div class="bk-pop" id="bkPop" role="dialog" aria-label="Kişi ve oda sayısı" hidden>
+            <div class="bk-pop" id="bkPop" role="dialog" data-i18n-aria="bk.who" aria-label="Kişi ve oda sayısı" hidden>
               <div class="bk-row">
-                <span class="bk-row-name">Kişi<span class="bk-row-hint">Yetişkin ve çocuk</span></span>
+                <span class="bk-row-name"><span data-i18n="bk.adults">Kişi</span><span class="bk-row-hint" data-i18n="bk.adultsHint">Yetişkin ve çocuk</span></span>
                 <span class="bk-step" data-step="adults" data-min="1" data-max="20">
-                  <button type="button" data-d="-1" aria-label="Kişi sayısını azalt"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+                  <button type="button" data-d="-1" data-i18n-aria="bk.lessGuests" aria-label="Kişi sayısını azalt"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/></svg></button>
                   <output aria-live="polite">2</output>
-                  <button type="button" data-d="1" aria-label="Kişi sayısını artır"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+                  <button type="button" data-d="1" data-i18n-aria="bk.moreGuests" aria-label="Kişi sayısını artır"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
                 </span>
               </div>
               <div class="bk-row">
-                <span class="bk-row-name">Oda</span>
+                <span class="bk-row-name" data-i18n="bk.room">Oda</span>
                 <span class="bk-step" data-step="rooms" data-min="1" data-max="10">
-                  <button type="button" data-d="-1" aria-label="Oda sayısını azalt"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+                  <button type="button" data-d="-1" data-i18n-aria="bk.lessRooms" aria-label="Oda sayısını azalt"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/></svg></button>
                   <output aria-live="polite">1</output>
-                  <button type="button" data-d="1" aria-label="Oda sayısını artır"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+                  <button type="button" data-d="1" data-i18n-aria="bk.moreRooms" aria-label="Oda sayısını artır"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
                 </span>
               </div>
-              <button type="button" class="bk-done btn-gold" id="bkDone">Tamam</button>
+              <button type="button" class="bk-done btn-gold" id="bkDone" data-i18n="bk.done">Tamam</button>
             </div>
           </div>
           <ul class="bk-perks" id="bkPerks"></ul>
@@ -1289,8 +1319,8 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       </div>
 
       <div class="hero-scroll-cue absolute bottom-8 inset-x-0 z-10 flex justify-center pointer-events-none">
-        <a href="#tarihce" class="hero-in pointer-events-auto flex flex-col items-center gap-3 text-[0.62rem] uppercase tracking-widest2 text-white/80 hover:text-gold transition-colors" style="animation-delay:1.3s" aria-label="Aşağı kaydır: Tarihçe">
-          <span class="scroll-cue" aria-hidden="true"></span><span aria-hidden="true">Keşfet</span>
+        <a href="#tarihce" class="hero-in pointer-events-auto flex flex-col items-center gap-3 text-[0.62rem] uppercase tracking-widest2 text-white/80 hover:text-gold transition-colors" style="animation-delay:1.3s" data-i18n-aria="scroll" aria-label="Aşağı kaydır: Tarihçe">
+          <span class="scroll-cue" aria-hidden="true"></span><span aria-hidden="true" data-i18n="discover">Keşfet</span>
         </a>
       </div>
       <button id="videoToggle" type="button" class="absolute bottom-8 right-5 sm:right-8 z-10 h-11 w-11 rounded-full border border-white/50 bg-cocoa-900/30 backdrop-blur flex items-center justify-center text-white hover:bg-gold hover:border-gold hover:text-ink transition-colors" aria-label="Videoyu duraklat" aria-pressed="false"></button>
@@ -1301,39 +1331,39 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       <div class="mx-auto max-w-7xl px-6 sm:px-8">
         <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
           <div class="media aspect-[4/3]">
-            <img data-img="dis-avlu-gunduz" alt="Peri bacasının dibinde otelin havuzu ve avlusu" loading="lazy" onerror="imgFallback(this)" />
+            <img data-img="dis-avlu-gunduz" data-i18n-alt="dis-avlu-gunduz" alt="Peri bacasının dibinde otelin havuzu ve avlusu" loading="lazy" onerror="imgFallback(this)" />
           </div>
           <div>
-            <p class="text-xs font-semibold uppercase tracking-widest2 text-gold-dark">Hakkımızda</p>
-            <h2 id="tarihce-title" class="mt-4 font-serif text-4xl leading-[1.12] text-ink sm:text-5xl">Peri bacasının dibinde <em class="text-stone-600">bir otel</em></h2>
+            <p class="text-xs font-semibold uppercase tracking-widest2 text-gold-dark" data-i18n="about.kicker">Hakkımızda</p>
+            <h2 id="tarihce-title" class="mt-4 font-serif text-4xl leading-[1.12] text-ink sm:text-5xl" data-i18n-html="about.title">Peri bacasının dibinde <em class="text-stone-600">bir otel</em></h2>
             <div class="mt-7 space-y-5 text-[1.02rem] font-light leading-[1.75] text-ink-soft">
-              <p>Göreme Cave Suites'e bir binanın kapısından girilmez. Bir avluya inilir. Avlunun ortasında, otelle yaşıt değil, ondan çok daha eski bir peri bacası durur. Havuz onun gölgesindedir. Odalar iki yandan, kemer kemer, taşa ve kayaya yaslanır. İlk bakışta anlaşılan şey şudur: burası manzaraya bakan bir otel değildir. Manzaranın içine kurulmuş bir evdir.</p>
-              <p>Gün bu avluda bölünür. Sabah, balonlar daha Göreme'nin üstündeyken kahvaltı masası bacanın dibindedir; kalkış alanları birkaç dakika ötededir, siz henüz taşın serinliğindesinizdir. Öğleden sonra avlu gölgelenir, havuz açılır, merdivenler odalara çıkar. Akşam aynı baca aydınlanır. Nazar boncuklu duvar, kemerlerin altındaki masalar ve üst terastaki sandalyeler tek bir ışıkta toplanır. Kapadokya'yı gündüz dışarıda yaşar, gece bu avluda kapatırsınız.</p>
+              <p data-i18n="about.p1">Göreme Cave Suites'e bir binanın kapısından girilmez. Bir avluya inilir. Avlunun ortasında, otelle yaşıt değil, ondan çok daha eski bir peri bacası durur. Havuz onun gölgesindedir. Odalar iki yandan, kemer kemer, taşa ve kayaya yaslanır. İlk bakışta anlaşılan şey şudur: burası manzaraya bakan bir otel değildir. Manzaranın içine kurulmuş bir evdir.</p>
+              <p data-i18n="about.p2">Gün bu avluda bölünür. Sabah, balonlar daha Göreme'nin üstündeyken kahvaltı masası bacanın dibindedir; kalkış alanları birkaç dakika ötededir, siz henüz taşın serinliğindesinizdir. Öğleden sonra avlu gölgelenir, havuz açılır, merdivenler odalara çıkar. Akşam aynı baca aydınlanır. Nazar boncuklu duvar, kemerlerin altındaki masalar ve üst terastaki sandalyeler tek bir ışıkta toplanır. Kapadokya'yı gündüz dışarıda yaşar, gece bu avluda kapatırsınız.</p>
             </div>
           </div>
         </div>
         <div class="mt-16 grid items-center gap-10 lg:mt-24 lg:grid-cols-2 lg:gap-16">
           <div>
             <div class="space-y-5 text-[1.02rem] font-light leading-[1.75] text-ink-soft">
-              <p>Yirmi beş oda vardır ve hiçbiri diğerinin kopyası değildir. On ayrı tip, on ayrı avantaj taşır. Birinin içinde sauna ısınır. Birinde mermer bir Türk hamamı odaya aittir. Birinde havuz, mağaranın kayasına oyulmuştur; suyun üstünde taş tavan vardır. Bir süit kemerli duvarı ve şömineyi genişletir. Bir oda peri bacasına bakan balkona açılır. Queen yataklı odalar daha sade, üç kişilik odalar bir aileyi aynı taşın içine alır. Kapıyı değiştirdiğinizde konaklamanın avantajı değişir. Ortak olan, kahvaltı, avlu ve günün sonunda aynı bacanın dibine dönmektir.</p>
-              <p>Otel kasabanın içindedir. UNESCO Dünya Mirası Göreme Milli Parkı, açık hava müzesi, vadi patikaları ve balon alanları yürüyüşe ya da kısa bir transfere kalmıştır. Yirmi beş oda, burayı bir tesis değil bir ev ölçeğinde tutar. Resepsiyon gününüzü bilir: sabahın saatini, vadinin hangisi olduğunu, akşamın nerede biteceğini. Booking.com'da 4.9 puan, bu ölçeğin misafirde bıraktığı izdir.</p>
+              <p data-i18n="about.p3">Yirmi beş oda vardır ve hiçbiri diğerinin kopyası değildir. On ayrı tip, on ayrı avantaj taşır. Birinin içinde sauna ısınır. Birinde mermer bir Türk hamamı odaya aittir. Birinde havuz, mağaranın kayasına oyulmuştur; suyun üstünde taş tavan vardır. Bir süit kemerli duvarı ve şömineyi genişletir. Bir oda peri bacasına bakan balkona açılır. Queen yataklı odalar daha sade, üç kişilik odalar bir aileyi aynı taşın içine alır. Kapıyı değiştirdiğinizde konaklamanın avantajı değişir. Ortak olan, kahvaltı, avlu ve günün sonunda aynı bacanın dibine dönmektir.</p>
+              <p data-i18n="about.p4">Otel kasabanın içindedir. UNESCO Dünya Mirası Göreme Milli Parkı, açık hava müzesi, vadi patikaları ve balon alanları yürüyüşe ya da kısa bir transfere kalmıştır. Yirmi beş oda, burayı bir tesis değil bir ev ölçeğinde tutar. Resepsiyon gününüzü bilir: sabahın saatini, vadinin hangisi olduğunu, akşamın nerede biteceğini. Booking.com'da 4.9 puan, bu ölçeğin misafirde bıraktığı izdir.</p>
             </div>
             <div class="mt-8 border-t border-ink/10 pt-7">
-              <p class="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-gold-dark">Her odanın kendi avantajı var</p>
+              <p class="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-gold-dark" data-i18n="about.adv">Her odanın kendi avantajı var</p>
               <ul class="mt-5 grid gap-x-8 gap-y-3 text-sm font-light text-ink-soft sm:grid-cols-2">
-                <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-gold" aria-hidden="true"></span>Odaya özel sauna</li>
-                <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-gold" aria-hidden="true"></span>Mermer Türk hamamı</li>
-                <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-gold" aria-hidden="true"></span>Kayaya oyulmuş özel havuz</li>
-                <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-gold" aria-hidden="true"></span>Peri bacasına bakan balkon</li>
-                <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-gold" aria-hidden="true"></span>Şömineli kemerli süit</li>
-                <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-gold" aria-hidden="true"></span>Üç kişilik aile odası</li>
+                <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-gold" aria-hidden="true"></span><span data-i18n="about.a1">Odaya özel sauna</span></li>
+                <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-gold" aria-hidden="true"></span><span data-i18n="about.a2">Mermer Türk hamamı</span></li>
+                <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-gold" aria-hidden="true"></span><span data-i18n="about.a3">Kayaya oyulmuş özel havuz</span></li>
+                <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-gold" aria-hidden="true"></span><span data-i18n="about.a4">Peri bacasına bakan balkon</span></li>
+                <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-gold" aria-hidden="true"></span><span data-i18n="about.a5">Şömineli kemerli süit</span></li>
+                <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-gold" aria-hidden="true"></span><span data-i18n="about.a6">Üç kişilik aile odası</span></li>
               </ul>
-              <a href="#odalar" class="btn-outline mt-8 inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-ink">Odaları görün
+              <a href="#odalar" class="btn-outline mt-8 inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-ink"><span data-i18n="about.rooms">Odaları görün</span>
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
             </div>
           </div>
           <div class="media aspect-[4/3]">
-            <img data-img="dis-gece-havuz" alt="Gece aydınlatılmış peri bacası ve havuz" loading="lazy" onerror="imgFallback(this)" />
+            <img data-img="dis-gece-havuz" data-i18n-alt="dis-gece-havuz" alt="Gece aydınlatılmış peri bacası ve havuz" loading="lazy" onerror="imgFallback(this)" />
           </div>
         </div>
       </div>
@@ -1343,12 +1373,12 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     <section id="aktiviteler" class="bg-sand-300 py-24 sm:py-32" aria-labelledby="aktivite-title">
       <div class="mx-auto max-w-7xl px-6 sm:px-8">
         <div class="max-w-3xl">
-          <p class="text-xs font-semibold uppercase tracking-widest2 text-gold-dark">Kapadokya</p>
-          <h2 id="aktivite-title" class="mt-4 font-serif text-4xl leading-tight text-ink sm:text-5xl">Önce vadi, sonra avlu</h2>
+          <p class="text-xs font-semibold uppercase tracking-widest2 text-gold-dark" data-i18n="act.kicker">Kapadokya</p>
+          <h2 id="aktivite-title" class="mt-4 font-serif text-4xl leading-tight text-ink sm:text-5xl" data-i18n="act.title">Önce vadi, sonra avlu</h2>
           <div class="mt-7 space-y-5 font-light leading-[1.75] text-ink-soft">
-            <p>Kapadokya, yanardağ külünün milyonlarca yıl boyunca rüzgâra ve suya bırakılmasıdır. Yumuşak tüf oyulmuş, sert bazalt şapka gibi kalmıştır; ortaya peri bacaları, kaya kiliseleri ve yerin altına inen şehirler çıkmıştır. Göreme bu coğrafyanın ortasındadır. Kartpostaldaki vadi, otelin kapısının önündeki vadidir.</p>
-            <p>Bir günün ritmi bellidir. Hava aydınlanmadan balonlar yükselir ve vadi üstten okunur. Kuşluk, açık hava müzesinin fresklerine ya da bir vadinin patikasına ayrılır. Öğleden sonra ya güneye, Ihlara'nın yeşil yarığına inilir ya da atın ve ATV'nin gittiği patikada kalınır. Akşam gökyüzü Kızılçukur'da döner; isteyen o saati otelin kendi bacasının dibinde, teras masasında kapatır.</p>
-            <p>Bunların hiçbiri kendiliğinden sıraya girmez. Saati, kontenjanı ve transferi resepsiyon tutar. Siz yalnızca o günün Kapadokya'sını seçersiniz. Tur bitince bırakıldığınız yer yine aynı avludur: havuz, hamam ve taş, günün tozunu almak için oradadır.</p>
+            <p data-i18n="act.p1">Kapadokya, yanardağ külünün milyonlarca yıl boyunca rüzgâra ve suya bırakılmasıdır. Yumuşak tüf oyulmuş, sert bazalt şapka gibi kalmıştır; ortaya peri bacaları, kaya kiliseleri ve yerin altına inen şehirler çıkmıştır. Göreme bu coğrafyanın ortasındadır. Kartpostaldaki vadi, otelin kapısının önündeki vadidir.</p>
+            <p data-i18n="act.p2">Bir günün ritmi bellidir. Hava aydınlanmadan balonlar yükselir ve vadi üstten okunur. Kuşluk, açık hava müzesinin fresklerine ya da bir vadinin patikasına ayrılır. Öğleden sonra ya güneye, Ihlara'nın yeşil yarığına inilir ya da atın ve ATV'nin gittiği patikada kalınır. Akşam gökyüzü Kızılçukur'da döner; isteyen o saati otelin kendi bacasının dibinde, teras masasında kapatır.</p>
+            <p data-i18n="act.p3">Bunların hiçbiri kendiliğinden sıraya girmez. Saati, kontenjanı ve transferi resepsiyon tutar. Siz yalnızca o günün Kapadokya'sını seçersiniz. Tur bitince bırakıldığınız yer yine aynı avludur: havuz, hamam ve taş, günün tozunu almak için oradadır.</p>
           </div>
         </div>
         <ul id="activities" class="mt-16 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4"></ul>
@@ -1359,15 +1389,15 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     <section id="galeri" class="overflow-hidden bg-sand-50 py-24 sm:py-28" aria-labelledby="galeri-title">
       <div class="mx-auto flex max-w-7xl flex-wrap items-end justify-between gap-6 px-6 sm:px-8">
         <div class="max-w-xl">
-          <p class="text-xs font-semibold uppercase tracking-widest2 text-gold-dark">Galeri</p>
-          <h2 id="galeri-title" class="mt-4 font-serif text-4xl text-ink sm:text-5xl">Avlunun kendisi</h2>
-          <p class="mt-4 font-light leading-relaxed text-ink-soft">Buradaki kareler otelimizin. Stok görsel değil; havuz, taş avlu ve peri bacası bizim avlumuz.</p>
+          <p class="text-xs font-semibold uppercase tracking-widest2 text-gold-dark" data-i18n="gal.kicker">Galeri</p>
+          <h2 id="galeri-title" class="mt-4 font-serif text-4xl text-ink sm:text-5xl" data-i18n="gal.title">Avlunun kendisi</h2>
+          <p class="mt-4 font-light leading-relaxed text-ink-soft" data-i18n="gal.lead">Buradaki kareler otelimizin. Stok görsel değil; havuz, taş avlu ve peri bacası bizim avlumuz.</p>
         </div>
       </div>
       <div class="reel-wrap">
-        <button type="button" id="reelPrev" class="reel-arrow reel-prev" aria-label="Önceki fotoğraflar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg></button>
-        <div id="homeReel" class="reel" tabindex="0" role="region" aria-label="Otel fotoğrafları. Kendiliğinden ilerler; oklarla da geçilir."></div>
-        <button type="button" id="reelNext" class="reel-arrow reel-next" aria-label="Sonraki fotoğraflar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></button>
+        <button type="button" id="reelPrev" class="reel-arrow reel-prev" data-i18n-aria="reel.prev" aria-label="Önceki fotoğraflar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg></button>
+        <div id="homeReel" class="reel" tabindex="0" role="region" data-i18n-aria="reel.region" aria-label="Otel fotoğrafları. Kendiliğinden ilerler; oklarla da geçilir."></div>
+        <button type="button" id="reelNext" class="reel-arrow reel-next" data-i18n-aria="reel.next" aria-label="Sonraki fotoğraflar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></button>
       </div>
       <div class="mx-auto mt-6 flex max-w-7xl items-center gap-4 px-6 sm:px-8">
         <div class="reel-track" aria-hidden="true"><span id="reelBar"></span></div>
@@ -1379,8 +1409,8 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     <section id="ulasim" class="py-24 sm:py-32 bg-sand-100" aria-labelledby="ulasim-title">
       <div class="mx-auto max-w-7xl px-6 sm:px-8">
         <div class="max-w-2xl">
-          <p class="reveal text-xs uppercase tracking-widest2 text-gold-dark font-semibold">Adres &amp; Ulaşım</p>
-          <h2 id="ulasim-title" class="reveal mt-4 font-serif text-4xl sm:text-5xl text-ink" style="--d:.08s">Bize nasıl ulaşırsınız?</h2>
+          <p class="reveal text-xs uppercase tracking-widest2 text-gold-dark font-semibold" data-i18n="reach.kicker">Adres &amp; Ulaşım</p>
+          <h2 id="ulasim-title" class="reveal mt-4 font-serif text-4xl sm:text-5xl text-ink" style="--d:.08s" data-i18n="reach.title">Bize nasıl ulaşırsınız?</h2>
         </div>
 
         <div class="mt-12 grid gap-6 lg:grid-cols-12">
@@ -1389,24 +1419,24 @@ dialog.dish-dlg { width: min(940px, 94vw); }
             <span class="h-14 w-14 rounded-full border border-gold/60 text-gold flex items-center justify-center" aria-hidden="true">
               <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z" /><circle cx="12" cy="9.5" r="2.5" /></svg>
             </span>
-            <p class="mt-6 text-[0.65rem] uppercase tracking-widest2 text-gold font-semibold">Adresimiz</p>
-            <a data-maps-link href="#" target="_blank" rel="noopener" class="mt-3 font-serif text-2xl sm:text-[1.7rem] leading-snug text-sand-50 hover:text-gold transition-colors" aria-label="Adresi Google Haritalar'da aç (yeni sekme)">
+            <p class="mt-6 text-[0.65rem] uppercase tracking-widest2 text-gold font-semibold" data-i18n="reach.our">Adresimiz</p>
+            <a data-maps-link href="#" target="_blank" rel="noopener" class="mt-3 font-serif text-2xl sm:text-[1.7rem] leading-snug text-sand-50 hover:text-gold transition-colors" data-i18n-aria="reach.open" aria-label="Adresi Google Haritalar'da aç (yeni sekme)">
               <address class="not-italic" data-address-text>Aydınlı Mahallesi, Görçeli Sokak No: 7<br />50180 Göreme / Nevşehir, Türkiye</address>
             </a>
-            <p class="mt-5 text-sm font-light text-sand-200/80">Resepsiyon 7/24 · <a data-phone href="#" class="hover:text-gold transition-colors"></a></p>
+            <p class="mt-5 text-sm font-light text-sand-200/80"><span data-i18n="reach.reception">Resepsiyon 7/24 · </span><a data-phone href="#" class="hover:text-gold transition-colors"></a></p>
             <div class="mt-auto pt-8 flex flex-wrap gap-3">
               <a data-maps-link href="#" target="_blank" rel="noopener" class="btn-gold inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.2em]">
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 11 21 3l-8 18-2-8-8-2Z" /></svg>Yol Tarifi Al</a>
-              <a href="#iletisim" class="inline-flex items-center rounded-full border border-sand-200/30 px-6 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.2em] hover:border-gold hover:text-gold transition-colors">İletişim</a>
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 11 21 3l-8 18-2-8-8-2Z" /></svg><span data-i18n="reach.dir">Yol Tarifi Al</span></a>
+              <a href="#iletisim" class="inline-flex items-center rounded-full border border-sand-200/30 px-6 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.2em] hover:border-gold hover:text-gold transition-colors" data-i18n="reach.contact">İletişim</a>
             </div>
           </div>
           <!-- Harita (SITE_CONFIG → MAP_EMBED_URL) -->
           <div class="reveal reveal-right lg:col-span-7 media no-zoom aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto lg:min-h-[420px]">
-            <iframe id="mapFrame" class="map-frame absolute inset-0" title="Göreme Cave Suites konum haritası" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+            <iframe id="mapFrame" class="map-frame absolute inset-0" data-i18n-title="map.title" title="Göreme Cave Suites konum haritası" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
           </div>
         </div>
 
-        <h3 class="reveal mt-16 text-xs uppercase tracking-widest2 text-stone-600 font-semibold">Nasıl ulaşılır <span class="normal-case tracking-normal font-light">(süreler yaklaşıktır)</span></h3>
+        <h3 class="reveal mt-16 text-xs uppercase tracking-widest2 text-stone-600 font-semibold"><span data-i18n="reach.how">Nasıl ulaşılır</span> <span class="normal-case tracking-normal font-light" data-i18n="reach.approx">(süreler yaklaşıktır)</span></h3>
         <ul id="transport" class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-5"></ul>
       </div>
     </section>
@@ -1427,23 +1457,23 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       <img class="hero-media kenburns" data-img="oda-junior-suit-hamamli-1" alt="" loading="lazy" onerror="imgFallback(this)" />
       <div class="absolute inset-0 bg-gradient-to-b from-cocoa-900/60 via-cocoa-900/20 to-cocoa-900/70" aria-hidden="true"></div>
       <div class="relative z-10 flex h-full flex-col items-center justify-end pb-16 sm:pb-20 px-6 text-center">
-        <p class="hero-in divider-ornament text-[0.7rem] sm:text-xs uppercase tracking-widest2 font-medium" style="animation-delay:.2s">25 oda · 10 oda tipi</p>
-        <h1 id="page-title-odalar" tabindex="-1" data-view-heading class="hero-in mt-5 font-serif text-5xl sm:text-6xl lg:text-7xl" style="animation-delay:.4s">Odalar &amp; Süitler</h1>
-        <p class="hero-in mt-5 max-w-xl font-light text-sand-100/85" style="animation-delay:.6s">Volkanik kayaya oyulmuş mağara odalardan özel hamamlı ve havuzlu süitlere.</p>
+        <p class="hero-in divider-ornament text-[0.7rem] sm:text-xs uppercase tracking-widest2 font-medium" style="animation-delay:.2s" data-i18n="rooms.eyebrow">25 oda · 10 oda tipi</p>
+        <h1 id="page-title-odalar" tabindex="-1" data-view-heading class="hero-in mt-5 font-serif text-5xl sm:text-6xl lg:text-7xl" style="animation-delay:.4s" data-i18n="rooms.title">Odalar &amp; Süitler</h1>
+        <p class="hero-in mt-5 max-w-xl font-light text-sand-100/85" style="animation-delay:.6s" data-i18n="rooms.lead">Volkanik kayaya oyulmuş mağara odalardan özel hamamlı ve havuzlu süitlere.</p>
       </div>
     </section>
 
     <!-- ============ TÜM ODALARDA ============ -->
     <section class="bg-sand-50 border-b border-ink/5" aria-labelledby="dahil-title">
       <div class="mx-auto max-w-7xl px-6 sm:px-8 py-10 flex flex-col lg:flex-row lg:items-center gap-6 lg:gap-12">
-        <h2 id="dahil-title" class="reveal shrink-0 text-xs uppercase tracking-widest2 text-gold-dark font-semibold">Tüm odalarda</h2>
+        <h2 id="dahil-title" class="reveal shrink-0 text-xs uppercase tracking-widest2 text-gold-dark font-semibold" data-i18n="amen.title">Tüm odalarda</h2>
         <ul class="reveal grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-wrap gap-x-8 gap-y-4 text-sm text-ink-soft" style="--d:.1s">
-          <li class="flex items-center gap-2.5"><svg class="h-5 w-5 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 10h13v3a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-3Z"/><path d="M17 11h1.5a2.5 2.5 0 0 1 0 5H16"/></svg>Kahvaltı dahil</li>
-          <li class="flex items-center gap-2.5"><svg class="h-5 w-5 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M12 3v8M8 11h8l1 9H7l1-9Z"/></svg>Günlük oda temizliği</li>
-          <li class="flex items-center gap-2.5"><svg class="h-5 w-5 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.3a9.5 9.5 0 0 1 13 0M8.6 15.5a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg>Ücretsiz Wi-Fi</li>
-          <li class="flex items-center gap-2.5"><svg class="h-5 w-5 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="7" rx="2"/><path d="M6 9h12M12 15v4.5"/></svg>Klima</li>
-          <li class="flex items-center gap-2.5"><svg class="h-5 w-5 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 10h14"/></svg>Minibar</li>
-          <li class="flex items-center gap-2.5"><svg class="h-5 w-5 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M14 9a5 5 0 1 1-5-5h11v6h-6"/><path d="M8 14l1.5 7h3L11 14"/></svg>Saç kurutma makinesi</li>
+          <li class="flex items-center gap-2.5"><svg class="h-5 w-5 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 10h13v3a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-3Z"/><path d="M17 11h1.5a2.5 2.5 0 0 1 0 5H16"/></svg><span data-i18n="amen.breakfast">Kahvaltı dahil</span></li>
+          <li class="flex items-center gap-2.5"><svg class="h-5 w-5 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M12 3v8M8 11h8l1 9H7l1-9Z"/></svg><span data-i18n="amen.clean">Günlük oda temizliği</span></li>
+          <li class="flex items-center gap-2.5"><svg class="h-5 w-5 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.3a9.5 9.5 0 0 1 13 0M8.6 15.5a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg><span data-i18n="amen.wifi">Ücretsiz Wi-Fi</span></li>
+          <li class="flex items-center gap-2.5"><svg class="h-5 w-5 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="7" rx="2"/><path d="M6 9h12M12 15v4.5"/></svg><span data-i18n="amen.ac">Klima</span></li>
+          <li class="flex items-center gap-2.5"><svg class="h-5 w-5 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 10h14"/></svg><span data-i18n="amen.minibar">Minibar</span></li>
+          <li class="flex items-center gap-2.5"><svg class="h-5 w-5 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M14 9a5 5 0 1 1-5-5h11v6h-6"/><path d="M8 14l1.5 7h3L11 14"/></svg><span data-i18n="amen.hair">Saç kurutma makinesi</span></li>
         </ul>
       </div>
     </section>
@@ -1453,10 +1483,10 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       <div class="mx-auto max-w-7xl px-6 sm:px-8">
         <div class="grid gap-6 lg:grid-cols-12 items-end">
           <div class="lg:col-span-7">
-            <p class="reveal text-xs uppercase tracking-widest2 text-gold-dark font-semibold">Konaklama</p>
-            <h2 id="odalar-title" class="reveal mt-4 font-serif text-4xl sm:text-5xl text-ink leading-tight" style="--d:.08s">Hamamlı, havuzlu ve <em class="text-stone-600">saunalı odalar</em></h2>
+            <p class="reveal text-xs uppercase tracking-widest2 text-gold-dark font-semibold" data-i18n="stay.kicker">Konaklama</p>
+            <h2 id="odalar-title" class="reveal mt-4 font-serif text-4xl sm:text-5xl text-ink leading-tight" style="--d:.08s" data-i18n-html="stay.title">Hamamlı, havuzlu ve <em class="text-stone-600">saunalı odalar</em></h2>
           </div>
-          <p class="reveal lg:col-span-4 lg:col-start-9 text-ink-soft font-light leading-relaxed" style="--d:.16s">Her oda tipinin fotoğraflarını, kapasitesini ve olanaklarını görmek için kartlardaki “Detayları İncele” butonunu kullanın.</p>
+          <p class="reveal lg:col-span-4 lg:col-start-9 text-ink-soft font-light leading-relaxed" style="--d:.16s" data-i18n="stay.lead">Her oda tipinin fotoğraflarını, kapasitesini ve olanaklarını görmek için kartlardaki “Detayları İncele” butonunu kullanın.</p>
         </div>
         <ul id="roomsGrid" class="mt-14 grid gap-7 sm:grid-cols-2 lg:grid-cols-3"></ul>
       </div>
@@ -1465,11 +1495,11 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     <!-- ============ ÇAĞRI ============ -->
     <section class="relative overflow-hidden bg-cocoa-900 text-sand-100 grain" aria-labelledby="cta-title">
       <div class="relative mx-auto max-w-5xl px-6 sm:px-8 py-20 text-center">
-        <p class="reveal divider-ornament text-xs uppercase tracking-widest2 font-semibold">Rezervasyon</p>
-        <h2 id="cta-title" class="reveal mt-5 font-serif text-3xl sm:text-5xl text-sand-50" style="--d:.08s">Size en uygun odayı birlikte seçelim</h2>
-        <p class="reveal mt-5 text-sand-200/80 font-light" style="--d:.14s">Balon sezonu, aile konaklamaları ve özel günler için resepsiyonumuz 7/24 hizmetinizde.</p>
+        <p class="reveal divider-ornament text-xs uppercase tracking-widest2 font-semibold" data-i18n="cta.kicker">Rezervasyon</p>
+        <h2 id="cta-title" class="reveal mt-5 font-serif text-3xl sm:text-5xl text-sand-50" style="--d:.08s" data-i18n="cta.title">Size en uygun odayı birlikte seçelim</h2>
+        <p class="reveal mt-5 text-sand-200/80 font-light" style="--d:.14s" data-i18n="cta.lead">Balon sezonu, aile konaklamaları ve özel günler için resepsiyonumuz 7/24 hizmetinizde.</p>
         <div class="reveal mt-9 flex flex-col sm:flex-row justify-center gap-4" style="--d:.2s">
-          <a data-booking href="#" target="_blank" rel="noopener" class="btn-gold rounded-full px-8 py-4 text-[0.72rem] font-semibold uppercase tracking-[0.22em]">Online Rezervasyon</a>
+          <a data-booking href="#" target="_blank" rel="noopener" class="btn-gold rounded-full px-8 py-4 text-[0.72rem] font-semibold uppercase tracking-[0.22em]" data-i18n="cta.book">Online Rezervasyon</a>
           <a data-phone href="#" class="rounded-full border border-sand-200/40 px-8 py-4 text-[0.72rem] font-semibold uppercase tracking-[0.18em] hover:border-gold hover:text-gold transition-colors"></a>
         </div>
       </div>
@@ -1487,21 +1517,21 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       <video id="rIntroVideo" class="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-1000" muted loop playsinline preload="none" aria-hidden="true"></video>
       <div class="absolute inset-0 bg-gradient-to-t from-cocoa-900/90 via-cocoa-900/10 to-cocoa-900/45" aria-hidden="true"></div>
       <div class="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-end px-6 sm:px-8 pb-32 sm:pb-24">
-        <p class="r-intro-line text-[0.68rem] sm:text-xs uppercase tracking-widest2 text-gold-light font-semibold" style="--i:0">Göreme Cave Suites · Restoran</p>
+        <p class="r-intro-line text-[0.68rem] sm:text-xs uppercase tracking-widest2 text-gold-light font-semibold" style="--i:0" data-i18n="rest.kicker">Göreme Cave Suites · Restoran</p>
         <h1 id="page-title-restoran" tabindex="-1" data-view-heading class="mt-5 font-serif text-[3.4rem] leading-[1.02] sm:text-7xl lg:text-[6.6rem]">
-          <span class="r-word"><span style="--i:1">Kapadokya,</span></span>
-          <span class="r-word"><em class="text-gold-light" style="--i:2">tabakta.</em></span>
+          <span class="r-word"><span style="--i:1" data-i18n="rest.l1">Kapadokya,</span></span>
+          <span class="r-word"><em class="text-gold-light" style="--i:2" data-i18n="rest.l2">tabakta.</em></span>
         </h1>
-        <p class="r-intro-line mt-6 max-w-md font-light text-sand-100/85 leading-relaxed" style="--i:3">Yöresel tariflerin ve modern yorumların, peri bacalarının ülkesinde buluştuğu sofra.</p>
+        <p class="r-intro-line mt-6 max-w-md font-light text-sand-100/85 leading-relaxed" style="--i:3" data-i18n="rest.lead">Yöresel tariflerin ve modern yorumların, peri bacalarının ülkesinde buluştuğu sofra.</p>
         <div class="r-intro-line mt-9" style="--i:4">
-          <a href="#yemek-menusu" class="btn-gold inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.2em]">Menüyü keşfedin
+          <a href="#yemek-menusu" class="btn-gold inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.2em]"><span data-i18n="rest.menu">Menüyü keşfedin</span>
             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
         </div>
       </div>
       <!-- Videodaki sahneyle eş zamanlı değişen etiket; yemek sahnesinde tıklanınca yemeğin kartını açar -->
       <div class="r-intro-line absolute z-10 bottom-7 right-6 sm:right-8 flex items-center gap-4" style="--i:5">
         <button type="button" id="rIntroChapter" class="r-chapter text-right disabled:cursor-default" disabled>
-          <span class="block text-[0.56rem] uppercase tracking-[0.28em] text-sand-200/60">Şu an</span>
+          <span class="block text-[0.56rem] uppercase tracking-[0.28em] text-sand-200/60" data-i18n="rest.now">Şu an</span>
           <span id="rIntroChapterName" class="r-chapter-name block font-serif text-lg sm:text-xl text-sand-50"></span>
         </button>
         <button type="button" id="rIntroToggle" class="h-11 w-11 shrink-0 rounded-full border border-white/40 text-white flex items-center justify-center hover:border-gold hover:text-gold transition-colors" aria-label="Videoyu duraklat"></button>
@@ -1516,13 +1546,13 @@ dialog.dish-dlg { width: min(940px, 94vw); }
           <div class="media aspect-[4/3]"><img data-img="restoran-testi-kebabi" alt="Toprak testide testi kebabı" loading="lazy" onerror="imgFallback(this)" /></div>
         </div>
         <div class="lg:col-span-6 lg:pl-8">
-          <p class="reveal text-xs uppercase tracking-widest2 text-gold-dark font-semibold">Konsept</p>
-          <h2 id="konsept-title" class="reveal mt-4 font-serif text-4xl sm:text-5xl text-ink leading-tight" style="--d:.08s">Taş duvarlar arasında <em class="text-stone-600">Anadolu mutfağı</em></h2>
-          <p class="reveal mt-7 text-ink-soft font-light leading-relaxed" style="--d:.16s">Yöresel taş yapılar ve geleneksel mimarinin zarif bir birleşimi olan restoranımızda, taze ve organik malzemelerle hazırlanan, bölgenin en lezzetli yemeklerini tadabilirsiniz.</p>
-          <p class="reveal mt-4 text-ink-soft font-light leading-relaxed" style="--d:.2s">Testide pişen kebaplardan ev yapımı mantıya, yöresel pekmezden bakır sahanda yumurtaya kadar Kapadokya'nın mutfak mirasını sofranıza taşıyoruz. Oda servisi de mevcuttur.</p>
+          <p class="reveal text-xs uppercase tracking-widest2 text-gold-dark font-semibold" data-i18n="concept.kicker">Konsept</p>
+          <h2 id="konsept-title" class="reveal mt-4 font-serif text-4xl sm:text-5xl text-ink leading-tight" style="--d:.08s" data-i18n-html="concept.title">Taş duvarlar arasında <em class="text-stone-600">Anadolu mutfağı</em></h2>
+          <p class="reveal mt-7 text-ink-soft font-light leading-relaxed" style="--d:.16s" data-i18n="concept.p1">Yöresel taş yapılar ve geleneksel mimarinin zarif bir birleşimi olan restoranımızda, taze ve organik malzemelerle hazırlanan, bölgenin en lezzetli yemeklerini tadabilirsiniz.</p>
+          <p class="reveal mt-4 text-ink-soft font-light leading-relaxed" style="--d:.2s" data-i18n="concept.p2">Testide pişen kebaplardan ev yapımı mantıya, yöresel pekmezden bakır sahanda yumurtaya kadar Kapadokya'nın mutfak mirasını sofranıza taşıyoruz. Oda servisi de mevcuttur.</p>
           <div class="reveal mt-10 rounded-2xl bg-sand-50 ring-1 ring-ink/5 p-6 sm:p-7" style="--d:.26s">
             <h3 class="flex items-center gap-3 text-[0.65rem] uppercase tracking-widest2 text-stone-600 font-semibold">
-              <svg class="h-4 w-4 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Servis saatleri</h3>
+              <svg class="h-4 w-4 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span data-i18n="concept.hours">Servis saatleri</span></h3>
             <ul id="restaurantHours" class="mt-3"></ul>
           </div>
         </div>
@@ -1533,16 +1563,16 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     <section class="pb-24 sm:pb-32 bg-sand-100" aria-label="Kahvaltı ve akşam yemeği">
       <div class="mx-auto max-w-7xl px-6 sm:px-8 grid gap-8 md:grid-cols-2">
         <article class="reveal group">
-          <div class="media aspect-[16/10]"><img data-img="restoran-kahvalti" alt="Serpme Türk kahvaltısı" loading="lazy" onerror="imgFallback(this)" /></div>
-          <p class="mt-7 text-[0.65rem] uppercase tracking-widest2 text-gold-dark font-semibold">Tüm odalarda dahil</p>
-          <h3 class="mt-2 font-serif text-3xl text-ink">Kahvaltı</h3>
-          <p class="mt-3 text-ink-soft font-light leading-relaxed max-w-lg">Güne köy peynirleri, yöresel reçel ve pekmezler, sıcak gözleme ve demlik çayla başlayın. Kahvaltı tüm oda tiplerinde konaklamaya dahildir.</p>
+          <div class="media aspect-[16/10]"><img data-img="restoran-kahvalti" data-i18n-alt="restoran-kahvalti" alt="Serpme Türk kahvaltısı" loading="lazy" onerror="imgFallback(this)" /></div>
+          <p class="mt-7 text-[0.65rem] uppercase tracking-widest2 text-gold-dark font-semibold" data-i18n="brk.kicker">Tüm odalarda dahil</p>
+          <h3 class="mt-2 font-serif text-3xl text-ink" data-i18n="brk.title">Kahvaltı</h3>
+          <p class="mt-3 text-ink-soft font-light leading-relaxed max-w-lg" data-i18n="brk.lead">Güne köy peynirleri, yöresel reçel ve pekmezler, sıcak gözleme ve demlik çayla başlayın. Kahvaltı tüm oda tiplerinde konaklamaya dahildir.</p>
         </article>
         <article class="reveal group" style="--d:.12s">
-          <div class="media aspect-[16/10]"><img data-img="restoran-aksam-yemegi" alt="Kuzu pirzola" loading="lazy" onerror="imgFallback(this)" /></div>
-          <p class="mt-7 text-[0.65rem] uppercase tracking-widest2 text-gold-dark font-semibold">Rezervasyon önerilir</p>
-          <h3 class="mt-2 font-serif text-3xl text-ink">Akşam yemeği</h3>
-          <p class="mt-3 text-ink-soft font-light leading-relaxed max-w-lg">Gün batımının ardından şömine sıcaklığında, mevsimin tazeliğiyle hazırlanan yöresel ana yemekler ve tatlılar.</p>
+          <div class="media aspect-[16/10]"><img data-img="restoran-aksam-yemegi" data-i18n-alt="restoran-aksam-yemegi" alt="Kuzu pirzola" loading="lazy" onerror="imgFallback(this)" /></div>
+          <p class="mt-7 text-[0.65rem] uppercase tracking-widest2 text-gold-dark font-semibold" data-i18n="din.kicker">Rezervasyon önerilir</p>
+          <h3 class="mt-2 font-serif text-3xl text-ink" data-i18n="din.title">Akşam yemeği</h3>
+          <p class="mt-3 text-ink-soft font-light leading-relaxed max-w-lg" data-i18n="din.lead">Gün batımının ardından şömine sıcaklığında, mevsimin tazeliğiyle hazırlanan yöresel ana yemekler ve tatlılar.</p>
         </article>
       </div>
     </section>
@@ -1551,15 +1581,15 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     <section id="yemek-menusu" class="relative bg-sand-200 menu-grain" aria-labelledby="menu-title">
       <div class="mx-auto max-w-7xl px-6 sm:px-8 pt-24 sm:pt-32 pb-12 sm:pb-14 grid gap-10 lg:grid-cols-12 items-end">
         <div class="lg:col-span-8">
-          <p class="reveal divider-ornament text-xs uppercase tracking-widest2 font-semibold">Kapadokya mutfağı</p>
-          <h2 id="menu-title" class="reveal mt-5 font-serif text-4xl sm:text-5xl lg:text-[3.6rem] text-ink leading-[1.08]" style="--d:.08s">Toprağın, ateşin ve <em class="text-stone-600">zamanın</em> lezzeti</h2>
-          <p class="reveal mt-7 max-w-2xl text-ink-soft font-light leading-relaxed" style="--d:.14s">Testi kebabından zeytinyağlılara, Anadolu'nun klasiklerini mevsimin ürünleriyle ve sade bir sunumla hazırlıyoruz. Her tabak, sofrada paylaşılmak için.</p>
+          <p class="reveal divider-ornament text-xs uppercase tracking-widest2 font-semibold" data-i18n="menu.kicker">Kapadokya mutfağı</p>
+          <h2 id="menu-title" class="reveal mt-5 font-serif text-4xl sm:text-5xl lg:text-[3.6rem] text-ink leading-[1.08]" style="--d:.08s" data-i18n-html="menu.title">Toprağın, ateşin ve <em class="text-stone-600">zamanın</em> lezzeti</h2>
+          <p class="reveal mt-7 max-w-2xl text-ink-soft font-light leading-relaxed" style="--d:.14s" data-i18n="menu.lead">Testi kebabından zeytinyağlılara, Anadolu'nun klasiklerini mevsimin ürünleriyle ve sade bir sunumla hazırlıyoruz. Her tabak, sofrada paylaşılmak için.</p>
         </div>
         <div id="menuQr" class="reveal hidden md:flex lg:col-span-4 lg:justify-self-end items-center gap-5 rounded-2xl bg-sand-50 ring-1 ring-ink/5 p-4 pr-7 shadow-[0_18px_40px_-28px_rgba(43,38,34,.55)]" style="--d:.2s">
-          <span class="block h-24 w-24 shrink-0 rounded-xl bg-white p-2.5 ring-1 ring-ink/5"><img id="menuQrImg" alt="Dijital menü QR kodu" class="h-full w-full" /></span>
+          <span class="block h-24 w-24 shrink-0 rounded-xl bg-white p-2.5 ring-1 ring-ink/5"><img id="menuQrImg" data-i18n-alt="menu.qrAlt" alt="Dijital menü QR kodu" class="h-full w-full" /></span>
           <span>
-            <span class="block text-[0.65rem] uppercase tracking-widest2 text-gold-dark font-semibold">Dijital menü</span>
-            <span class="mt-1.5 block font-serif text-xl text-ink leading-snug">Telefonunuzun<br />kamerasıyla okutun</span>
+            <span class="block text-[0.65rem] uppercase tracking-widest2 text-gold-dark font-semibold" data-i18n="menu.qr">Dijital menü</span>
+            <span class="mt-1.5 block font-serif text-xl text-ink leading-snug" data-i18n="menu.qrLead">Telefonunuzun kamerasıyla okutun</span>
           </span>
         </div>
       </div>
@@ -1577,7 +1607,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       <div class="mx-auto max-w-7xl px-6 sm:px-8 pt-10 sm:pt-14 pb-24 sm:pb-32 grid gap-12 lg:grid-cols-12">
         <div class="lg:col-span-7">
           <div id="menuList" class="menu-list"></div>
-          <p class="mt-14 text-xs text-stone-600 font-light leading-relaxed">Alerjen ve içerik bilgisi için lütfen servis ekibimize danışın. Menü mevsime göre değişebilir.</p>
+          <p class="mt-14 text-xs text-stone-600 font-light leading-relaxed" data-i18n="menu.note">Alerjen ve içerik bilgisi için lütfen servis ekibimize danışın. Menü mevsime göre değişebilir.</p>
         </div>
         <aside class="hidden lg:block lg:col-span-5" aria-hidden="true">
           <div id="menuShow" class="menu-show sticky">
@@ -1589,8 +1619,8 @@ dialog.dish-dlg { width: min(940px, 94vw); }
                   <p id="showCat" class="text-[0.6rem] uppercase tracking-widest2 text-gold-light font-semibold"></p>
                   <p id="showName" class="mt-1.5 font-serif text-[1.7rem] leading-tight"></p>
                   <dl class="mt-4 grid grid-cols-2 gap-5 text-[0.82rem] font-light leading-relaxed">
-                    <div id="showOriginRow"><dt class="text-[0.58rem] uppercase tracking-[0.22em] text-sand-200/70 font-medium">Köken notu</dt><dd id="showOrigin" class="mt-1 text-sand-50/95"></dd></div>
-                    <div id="showPairRow"><dt class="text-[0.58rem] uppercase tracking-[0.22em] text-sand-200/70 font-medium">Eşleşme önerisi</dt><dd id="showPair" class="mt-1 text-sand-50/95"></dd></div>
+                    <div id="showOriginRow"><dt class="text-[0.58rem] uppercase tracking-[0.22em] text-sand-200/70 font-medium" data-i18n="menu.origin">Köken notu</dt><dd id="showOrigin" class="mt-1 text-sand-50/95"></dd></div>
+                    <div id="showPairRow"><dt class="text-[0.58rem] uppercase tracking-[0.22em] text-sand-200/70 font-medium" data-i18n="menu.pair">Eşleşme önerisi</dt><dd id="showPair" class="mt-1 text-sand-50/95"></dd></div>
                   </dl>
                 </div>
               </div>
@@ -1603,8 +1633,8 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     <!-- ============ GALERİ ============ -->
     <section class="py-24 sm:py-32 bg-sand-50" aria-labelledby="rgal-title">
       <div class="mx-auto max-w-7xl px-6 sm:px-8">
-        <p class="reveal text-xs uppercase tracking-widest2 text-gold-dark font-semibold">Galeri</p>
-        <h2 id="rgal-title" class="reveal mt-4 font-serif text-4xl sm:text-5xl text-ink" style="--d:.08s">Sofradan kareler</h2>
+        <p class="reveal text-xs uppercase tracking-widest2 text-gold-dark font-semibold" data-i18n="rgal.kicker">Galeri</p>
+        <h2 id="rgal-title" class="reveal mt-4 font-serif text-4xl sm:text-5xl text-ink" style="--d:.08s" data-i18n="rgal.title">Sofradan kareler</h2>
         <ul id="restaurantGallery" class="mt-12 grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5" aria-label="Restoran fotoğraf galerisi"></ul>
       </div>
     </section>
@@ -1620,9 +1650,9 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       <img class="hero-media kenburns" data-img="hamam-1" alt="" loading="lazy" onerror="imgFallback(this)" />
       <div class="absolute inset-0 bg-gradient-to-b from-cocoa-900/60 via-cocoa-900/25 to-cocoa-900/75" aria-hidden="true"></div>
       <div class="relative z-10 flex h-full flex-col items-center justify-end pb-16 sm:pb-20 px-6 text-center">
-        <p class="hero-in divider-ornament text-[0.7rem] sm:text-xs uppercase tracking-widest2 font-medium" style="animation-delay:.2s"><span lang="en">Spa &amp; Wellness</span></p>
-        <h1 id="page-title-hamam" tabindex="-1" data-view-heading class="hero-in mt-5 font-serif text-5xl sm:text-6xl lg:text-7xl" style="animation-delay:.4s">Hamam &amp; Spa</h1>
-        <p class="hero-in mt-5 max-w-xl font-light text-sand-100/85" style="animation-delay:.6s">Sıcak mermer, ipek kese ve bulut gibi köpük: yüzyıllık bir arınma ritüeli.</p>
+        <p class="hero-in divider-ornament text-[0.7rem] sm:text-xs uppercase tracking-widest2 font-medium" style="animation-delay:.2s" data-i18n="ham.kicker">Spa &amp; Wellness</p>
+        <h1 id="page-title-hamam" tabindex="-1" data-view-heading class="hero-in mt-5 font-serif text-5xl sm:text-6xl lg:text-7xl" style="animation-delay:.4s" data-i18n="ham.title">Hamam &amp; Spa</h1>
+        <p class="hero-in mt-5 max-w-xl font-light text-sand-100/85" style="animation-delay:.6s" data-i18n="ham.lead">Sıcak mermer, ipek kese ve bulut gibi köpük: yüzyıllık bir arınma ritüeli.</p>
       </div>
     </section>
 
@@ -1633,10 +1663,10 @@ dialog.dish-dlg { width: min(940px, 94vw); }
           <div class="media aspect-[4/3]"><img data-img="hamam-geleneksel" alt="Mermer göbek taşı ve kubbeli tavanıyla geleneksel Türk hamamı" style="object-position:center 45%" loading="lazy" onerror="imgFallback(this)" /></div>
         </div>
         <div class="lg:col-span-6 lg:pr-8">
-          <p class="reveal text-xs uppercase tracking-widest2 text-gold-dark font-semibold">Geleneksel Türk hamamı</p>
-          <h2 id="gelenek-title" class="reveal mt-4 font-serif text-4xl sm:text-5xl text-ink leading-tight" style="--d:.08s">Rahatlamaya <em class="text-stone-600">daha iyi başlayın</em></h2>
-          <p class="reveal mt-7 text-ink-soft font-light leading-relaxed" style="--d:.16s">Kapadokya'nın taşını ve mermerin sıcaklığını buluşturan hamamımızda, gün boyu vadilerde yürümenin ya da balon sabahının yorgunluğunu geride bırakın. Göbek taşında ısınan beden, kese ve köpükle arınır; ritüel, dinlenme ve ikramla tamamlanır.</p>
-          <p class="reveal mt-4 text-ink-soft font-light leading-relaxed" style="--d:.2s">Mahremiyet isteyen misafirlerimiz için <a href="#odalar" class="text-ink underline decoration-gold underline-offset-4 hover:text-gold-dark">Junior Suit Hamamlı</a> odamızda özel Türk hamamı, saunalı ve havuzlu odalarımızda da kendinize ait bir wellness köşesi sizi bekliyor.</p>
+          <p class="reveal text-xs uppercase tracking-widest2 text-gold-dark font-semibold" data-i18n="ham.trad">Geleneksel Türk hamamı</p>
+          <h2 id="gelenek-title" class="reveal mt-4 font-serif text-4xl sm:text-5xl text-ink leading-tight" style="--d:.08s" data-i18n-html="ham.title2">Rahatlamaya <em class="text-stone-600">daha iyi başlayın</em></h2>
+          <p class="reveal mt-7 text-ink-soft font-light leading-relaxed" style="--d:.16s" data-i18n="ham.p1">Kapadokya'nın taşını ve mermerin sıcaklığını buluşturan hamamımızda, gün boyu vadilerde yürümenin ya da balon sabahının yorgunluğunu geride bırakın. Göbek taşında ısınan beden, kese ve köpükle arınır; ritüel, dinlenme ve ikramla tamamlanır.</p>
+          <p class="reveal mt-4 text-ink-soft font-light leading-relaxed" style="--d:.2s" data-i18n-html="ham.p2">Mahremiyet isteyen misafirlerimiz için <a href="#odalar" class="text-ink underline decoration-gold underline-offset-4 hover:text-gold-dark">Junior Suit Hamamlı</a> odamızda özel Türk hamamı, saunalı ve havuzlu odalarımızda da kendinize ait bir wellness köşesi sizi bekliyor.</p>
         </div>
       </div>
     </section>
@@ -1645,9 +1675,9 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     <section class="py-24 sm:py-32 bg-sand-200" aria-labelledby="hizmet-title">
       <div class="mx-auto max-w-7xl px-6 sm:px-8">
         <div class="text-center max-w-2xl mx-auto">
-          <p class="reveal divider-ornament text-xs uppercase tracking-widest2 font-semibold">Hizmetler</p>
-          <h2 id="hizmet-title" class="reveal mt-5 font-serif text-4xl sm:text-5xl text-ink" style="--d:.08s">Hamam ritüelleri</h2>
-          <p class="reveal mt-5 text-ink-soft font-light" style="--d:.14s">Süreler yaklaşıktır; fiyat ve randevu için resepsiyona danışın.</p>
+          <p class="reveal divider-ornament text-xs uppercase tracking-widest2 font-semibold" data-i18n="svc.kicker">Hizmetler</p>
+          <h2 id="hizmet-title" class="reveal mt-5 font-serif text-4xl sm:text-5xl text-ink" style="--d:.08s" data-i18n="svc.title">Hamam ritüelleri</h2>
+          <p class="reveal mt-5 text-ink-soft font-light" style="--d:.14s" data-i18n="svc.note">Süreler yaklaşıktır; fiyat ve randevu için resepsiyona danışın.</p>
         </div>
         <ul id="hamamServices" class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></ul>
       </div>
@@ -1657,11 +1687,11 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     <section class="py-24 sm:py-32 bg-sand-100" aria-labelledby="saat-title">
       <div class="mx-auto max-w-7xl px-6 sm:px-8 grid gap-10 lg:grid-cols-12 items-stretch">
         <div class="lg:col-span-5 reveal reveal-left rounded-2xl bg-cocoa-900 text-sand-100 p-8 sm:p-10 relative overflow-hidden grain flex flex-col">
-          <p class="text-xs uppercase tracking-widest2 text-gold font-semibold">Çalışma saatleri</p>
-          <h2 id="saat-title" class="mt-4 font-serif text-3xl sm:text-4xl text-sand-50">Randevunuzu planlayın</h2>
+          <p class="text-xs uppercase tracking-widest2 text-gold font-semibold" data-i18n="hrs.kicker">Çalışma saatleri</p>
+          <h2 id="saat-title" class="mt-4 font-serif text-3xl sm:text-4xl text-sand-50" data-i18n="hrs.title">Randevunuzu planlayın</h2>
           <ul id="hamamHours" class="mt-6 [&_li]:border-sand-200/15 [&_span]:!text-sand-100"></ul>
-          <p class="mt-6 text-sm font-light text-sand-200/80 leading-relaxed">Hamam seansları için randevu almanızı öneririz. Resepsiyon: <a data-phone href="#" class="text-gold hover:text-gold-light"></a></p>
-          <div class="mt-auto pt-8"><a href="#iletisim" class="btn-gold inline-flex rounded-full px-7 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.2em]">İletişime Geçin</a></div>
+          <p class="mt-6 text-sm font-light text-sand-200/80 leading-relaxed"><span data-i18n="hrs.note">Hamam seansları için randevu almanızı öneririz. Resepsiyon: </span><a data-phone href="#" class="text-gold hover:text-gold-light"></a></p>
+          <div class="mt-auto pt-8"><a href="#iletisim" class="btn-gold inline-flex rounded-full px-7 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.2em]" data-i18n="hrs.contact">İletişime Geçin</a></div>
         </div>
         <div class="lg:col-span-7 reveal reveal-right media aspect-[4/3] lg:aspect-auto lg:min-h-[420px]">
           <img data-img="havuz" alt="Kemerli taş tavan altında kapalı havuz" loading="lazy" onerror="imgFallback(this)" />
@@ -1672,8 +1702,8 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     <!-- ============ GALERİ ============ -->
     <section class="pb-24 sm:pb-32 bg-sand-100" aria-labelledby="hgal-title">
       <div class="mx-auto max-w-7xl px-6 sm:px-8">
-        <p class="reveal text-xs uppercase tracking-widest2 text-gold-dark font-semibold">Galeri</p>
-        <h2 id="hgal-title" class="reveal mt-4 font-serif text-4xl sm:text-5xl text-ink" style="--d:.08s">Mermer, buhar ve sessizlik</h2>
+        <p class="reveal text-xs uppercase tracking-widest2 text-gold-dark font-semibold" data-i18n="hgal.kicker">Galeri</p>
+        <h2 id="hgal-title" class="reveal mt-4 font-serif text-4xl sm:text-5xl text-ink" style="--d:.08s" data-i18n="hgal.title">Mermer, buhar ve sessizlik</h2>
         <ul id="hamamGallery" class="mt-12 grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5" aria-label="Hamam fotoğraf galerisi"></ul>
       </div>
     </section>
@@ -1699,14 +1729,14 @@ dialog.dish-dlg { width: min(940px, 94vw); }
         <h3 id="dlgTitle" class="mt-3 font-serif text-3xl sm:text-4xl text-ink pr-10"></h3>
         <p id="dlgDesc" class="mt-4 text-ink-soft font-light leading-relaxed"></p>
         <dl class="mt-6 grid grid-cols-2 gap-4 rounded-xl bg-sand-100 p-4 text-sm">
-          <div class="flex items-center gap-3"><svg class="h-5 w-5 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 19.5c.6-3.3 3-5 6-5s5.4 1.7 6 5M16 5.2a3 3 0 0 1 0 5.6M18 14.8c1.6.7 2.6 2.3 3 4.7"/></svg><div><dt class="text-[0.6rem] uppercase tracking-[0.18em] text-stone-600">Kapasite</dt><dd id="dlgGuests" class="font-medium text-ink"></dd></div></div>
-          <div class="flex items-center gap-3"><svg class="h-5 w-5 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 9V4h5M20 15v5h-5M4 4l6 6M20 20l-6-6"/></svg><div><dt class="text-[0.6rem] uppercase tracking-[0.18em] text-stone-600">Büyüklük</dt><dd id="dlgSize" class="font-medium text-ink"></dd></div></div>
+          <div class="flex items-center gap-3"><svg class="h-5 w-5 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 19.5c.6-3.3 3-5 6-5s5.4 1.7 6 5M16 5.2a3 3 0 0 1 0 5.6M18 14.8c1.6.7 2.6 2.3 3 4.7"/></svg><div><dt class="text-[0.6rem] uppercase tracking-[0.18em] text-stone-600" data-i18n="dlg.capacity">Kapasite</dt><dd id="dlgGuests" class="font-medium text-ink"></dd></div></div>
+          <div class="flex items-center gap-3"><svg class="h-5 w-5 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 9V4h5M20 15v5h-5M4 4l6 6M20 20l-6-6"/></svg><div><dt class="text-[0.6rem] uppercase tracking-[0.18em] text-stone-600" data-i18n="dlg.size">Büyüklük</dt><dd id="dlgSize" class="font-medium text-ink"></dd></div></div>
         </dl>
-        <h4 class="mt-7 text-[0.65rem] uppercase tracking-widest2 text-stone-600 font-semibold">Oda olanakları</h4>
+        <h4 class="mt-7 text-[0.65rem] uppercase tracking-widest2 text-stone-600 font-semibold" data-i18n="dlg.amenities">Oda olanakları</h4>
         <ul id="dlgFeatures" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 text-sm text-ink-soft"></ul>
         <div class="mt-8 pt-6 border-t border-ink/10 flex flex-wrap items-end justify-between gap-4">
-          <p><span class="block text-[0.6rem] uppercase tracking-[0.2em] text-stone-600">Gecelik</span><span id="dlgPrice" class="font-serif text-2xl text-ink"></span></p>
-          <a id="dlgBook" href="#" target="_blank" rel="noopener" class="btn-gold rounded-full px-7 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.2em]">Rezervasyon</a>
+          <p><span class="block text-[0.6rem] uppercase tracking-[0.2em] text-stone-600" data-i18n="dlg.night">Gecelik</span><span id="dlgPrice" class="font-serif text-2xl text-ink"></span></p>
+          <a id="dlgBook" data-booking href="#" target="_blank" rel="noopener" class="btn-gold rounded-full px-7 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.2em]" data-i18n="dlg.book">Rezervasyon</a>
         </div>
       </div>
 
@@ -1729,9 +1759,9 @@ dialog.dish-dlg { width: min(940px, 94vw); }
         <p id="dishTags" class="mt-3 flex flex-wrap gap-1.5"></p>
         <p id="dishDesc" class="mt-4 text-ink-soft font-light leading-relaxed"></p>
         <dl class="mt-6 text-sm">
-          <div id="dishOriginRow" class="border-t border-ink/10 py-4"><dt class="text-[0.6rem] uppercase tracking-[0.2em] text-stone-600 font-semibold">Köken notu</dt><dd id="dishOrigin" class="mt-1.5 text-ink leading-relaxed"></dd></div>
-          <div id="dishPairRow" class="border-t border-ink/10 py-4"><dt class="text-[0.6rem] uppercase tracking-[0.2em] text-stone-600 font-semibold">Eşleşme önerisi</dt><dd id="dishPair" class="mt-1.5 text-ink leading-relaxed"></dd></div>
-          <div class="border-t border-ink/10 py-4"><dt class="text-[0.6rem] uppercase tracking-[0.2em] text-stone-600 font-semibold">Alerjenler</dt><dd class="mt-1.5 text-ink-soft font-light leading-relaxed">Alerjen bilgisi için lütfen servis ekibimize danışın.</dd></div>
+          <div id="dishOriginRow" class="border-t border-ink/10 py-4"><dt class="text-[0.6rem] uppercase tracking-[0.2em] text-stone-600 font-semibold" data-i18n="menu.origin">Köken notu</dt><dd id="dishOrigin" class="mt-1.5 text-ink leading-relaxed"></dd></div>
+          <div id="dishPairRow" class="border-t border-ink/10 py-4"><dt class="text-[0.6rem] uppercase tracking-[0.2em] text-stone-600 font-semibold" data-i18n="menu.pair">Eşleşme önerisi</dt><dd id="dishPair" class="mt-1.5 text-ink leading-relaxed"></dd></div>
+          <div class="border-t border-ink/10 py-4"><dt class="text-[0.6rem] uppercase tracking-[0.2em] text-stone-600 font-semibold" data-i18n="menu.allergens">Alerjenler</dt><dd class="mt-1.5 text-ink-soft font-light leading-relaxed" data-i18n="menu.ask">Alerjen bilgisi için lütfen servis ekibimize danışın.</dd></div>
         </dl>
         <p id="dishPrice" class="mt-2 font-serif text-2xl text-ink"></p>
       </div>
@@ -1741,6 +1771,9 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     </div>
   </dialog>
 
+  <script src="js/i18n.js"></script>
+  <script src="js/i18n-content.js"></script>
+  <script src="js/i18n-menu.js"></script>
   <script>
 /* =====================================================================
    GÖREME CAVE SUITES · ETKİLEŞİMLER VE İÇERİK OLUŞTURMA
@@ -1763,6 +1796,43 @@ dialog.dish-dlg { width: min(940px, 94vw); }
   var C = window.SITE_CONFIG || {};
   var K = window.SITE_CONTENT || {};
   var esc = window.Layout.esc;
+  var paints = [];
+  function langCode() { return document.documentElement.lang || 'tr'; }
+  function U(key, fallback) { return window.ui ? window.ui(key, fallback) : fallback; }
+  function TX(bucket, id, field, fallback) { return window.tx ? window.tx(bucket, id, field, fallback) : fallback; }
+  function altOf(key, fallback) {
+    var fromUi = window.ui ? window.ui(key, '') : '';
+    if (fromUi && fromUi !== key) return fromUi;
+    var fromAlt = TX('alts', key, null, '');
+    return fromAlt || fallback;
+  }
+  function guestLine(adults, rooms) {
+    var code = langCode();
+    if (code === 'zh') return adults + '位客人 · ' + rooms + '间房';
+    if (code === 'ko') return '투숙객 ' + adults + ' · 객실 ' + rooms;
+    if (code === 'es') return adults + (adults === 1 ? ' persona' : ' personas') + ' · ' + rooms + (rooms === 1 ? ' habitación' : ' habitaciones');
+    if (code === 'it') return adults + (adults === 1 ? ' ospite' : ' ospiti') + ' · ' + rooms + (rooms === 1 ? ' camera' : ' camere');
+    if (code === 'en') return adults + (adults === 1 ? ' guest' : ' guests') + ' · ' + rooms + (rooms === 1 ? ' room' : ' rooms');
+    return adults + ' Kişi · ' + rooms + ' Oda';
+  }
+  function nightLine(n) {
+    if (!(n > 0)) return '';
+    var code = langCode();
+    if (code === 'zh') return '· ' + n + '晚';
+    if (code === 'ko') return '· ' + n + '박';
+    if (code === 'es') return '· ' + n + (n === 1 ? ' noche' : ' noches');
+    if (code === 'it') return '· ' + n + (n === 1 ? ' notte' : ' notti');
+    if (code === 'en') return '· ' + n + (n === 1 ? ' night' : ' nights');
+    return '· ' + n + ' gece';
+  }
+  function bookHref() {
+    try {
+      var u = new URL(C.BOOKING_URL);
+      var map = (window.I18N && window.I18N.bookLang) || {};
+      u.searchParams.set('lang', map[langCode()] || 'en');
+      return u.href;
+    } catch (e) { return C.BOOKING_URL || '#'; }
+  }
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ================= 1. Yardımcılar ================= */
@@ -1830,7 +1900,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
 
   function setMenu(open) {
     burger.setAttribute('aria-expanded', String(open));
-    burger.setAttribute('aria-label', open ? 'Menüyü kapat' : 'Menüyü aç');
+    burger.setAttribute('aria-label', open ? U('burger.close', 'Menüyü kapat') : U('burger.open', 'Menüyü aç'));
     panel.classList.toggle('is-open', open);
     panel.setAttribute('aria-hidden', String(!open));
     if (open) panel.removeAttribute('inert'); else panel.setAttribute('inert', '');
@@ -1887,7 +1957,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     var a = e.target.closest('[data-placeholder-link]');
     if (!a) return;
     e.preventDefault();
-    showToast(a.getAttribute('data-placeholder-link'), 'Bu bağlantı yakında eklenecek.');
+    showToast(a.getAttribute('data-placeholder-link'), U('toast.soon', 'Bu bağlantı yakında eklenecek.'));
   });
 
   /* ================= 5. Bülten formu ================= */
@@ -1898,7 +1968,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     var v = input.value.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) {
       e.preventDefault();
-      msg.textContent = 'Lütfen geçerli bir e-posta adresi girin.';
+      msg.textContent = U('toast.badEmail', 'Lütfen geçerli bir e-posta adresi girin.');
       msg.className = 'mt-3 min-h-[1.25rem] text-sm text-red-300';
       input.setAttribute('aria-invalid', 'true');
       input.focus();
@@ -1959,9 +2029,11 @@ dialog.dish-dlg { width: min(940px, 94vw); }
   function renderGallery(el, items) {
     if (!el || !items) return;
     var aspect = el.getAttribute('data-aspect') || 'aspect-[4/3]';
-    el.innerHTML = items.map(function (it, i) {
+    var shown = items.map(function (it) { return { src: it.src, alt: altOf(it.src, it.alt) }; });
+    el._lbItems = shown;
+    el.innerHTML = shown.map(function (it, i) {
       return '<li class="reveal">' +
-        '<button type="button" class="group block w-full text-left" data-lb-index="' + i + '" aria-label="Büyüt: ' + esc(it.alt) + '">' +
+        '<button type="button" class="group block w-full text-left" data-lb-index="' + i + '" aria-label="' + esc(U('zoom', 'Büyüt')) + ': ' + esc(it.alt) + '">' +
           '<span class="media block ' + aspect + '">' + imgTag(it.src, it.alt) +
             '<span class="absolute inset-0 bg-cocoa-900/0 group-hover:bg-cocoa-900/25 transition-colors duration-500 flex items-center justify-center" aria-hidden="true">' +
               '<span class="h-11 w-11 rounded-full bg-sand-50/90 text-ink flex items-center justify-center opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-500">' +
@@ -1972,10 +2044,13 @@ dialog.dish-dlg { width: min(940px, 94vw); }
         '</button></li>';
     }).join('');
     stagger(el, 0.08);
-    el.addEventListener('click', function (e) {
-      var b = e.target.closest('[data-lb-index]');
-      if (b) openLightbox(items, +b.getAttribute('data-lb-index'), b);
-    });
+    if (!el._lbBound) {
+      el._lbBound = true;
+      el.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-lb-index]');
+        if (b) openLightbox(el._lbItems, +b.getAttribute('data-lb-index'), b);
+      });
+    }
   }
 
   /* ================= 7. Hero video ================= */
@@ -1989,7 +2064,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     function syncToggle() {
       var playing = !video.paused;
       toggle.innerHTML = playing ? PAUSE : PLAY;
-      toggle.setAttribute('aria-label', playing ? 'Videoyu duraklat' : 'Videoyu oynat');
+      toggle.setAttribute('aria-label', playing ? U('video.pause', 'Videoyu duraklat') : U('video.play', 'Videoyu oynat'));
       toggle.setAttribute('aria-pressed', String(!playing));
     }
     var userPaused = false;
@@ -2038,6 +2113,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
         if (p && p.catch) p.catch(function () { syncToggle(); });
       }
       syncToggle();
+      paints.push(syncToggle);
     }
     /* Ana sayfadan çıkınca video durur, dönünce (kullanıcı durdurmadıysa) devam eder. */
     window.HeroVideo = {
@@ -2059,7 +2135,10 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     if (!C.BOOKING_URL) { form.hidden = true; return; }
     var inEl = $('#bkIn'), outEl = $('#bkOut'), pop = $('#bkPop'), gBtn = $('#bkGuestBtn');
     var counts = { adults: 2, rooms: 1 };
-    var fmt = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short', weekday: 'short' });
+    function formatDate(d) {
+      var loc = (window.I18N && window.I18N.locale && window.I18N.locale[langCode()]) || 'tr-TR';
+      return new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'short', weekday: 'short' }).format(d);
+    }
     var DAY = 864e5;
 
     function iso(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
@@ -2070,10 +2149,10 @@ dialog.dish-dlg { width: min(940px, 94vw); }
 
     function render() {
       var a = parse(inEl.value), b = parse(outEl.value);
-      $('#bkInText').textContent = a ? fmt.format(a) : 'Tarih seçin';
-      $('#bkOutText').textContent = b ? fmt.format(b) : 'Tarih seçin';
+      $('#bkInText').textContent = a ? formatDate(a) : U('bk.pickDate', 'Tarih seçin');
+      $('#bkOutText').textContent = b ? formatDate(b) : U('bk.pickDate', 'Tarih seçin');
       var n = a && b ? Math.round((b - a) / DAY) : 0;
-      $('#bkNights').textContent = n > 0 ? '· ' + n + ' gece' : '';
+      $('#bkNights').textContent = nightLine(n);
       outEl.min = iso(a ? addDays(a, 1) : addDays(today, 1));
     }
     /* Geçmiş tarih seçilemez; çıkış her zaman girişten en az bir gün sonradır.
@@ -2103,7 +2182,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
         s.querySelector('[data-d="-1"]').disabled = v <= +s.getAttribute('data-min');
         s.querySelector('[data-d="1"]').disabled = v >= +s.getAttribute('data-max');
       });
-      $('#bkGuestText').textContent = counts.adults + ' Kişi · ' + counts.rooms + ' Oda';
+      $('#bkGuestText').textContent = guestLine(counts.adults, counts.rooms);
     }
     $$('.bk-step', pop).forEach(function (s) {
       s.addEventListener('click', function (e) {
@@ -2126,9 +2205,13 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     pop.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.stopPropagation(); openPop(false); gBtn.focus(); } });
     syncGuests();
 
-    var perks = C.HERO_BOOKING_PERKS || [];
-    $('#bkPerks').innerHTML = perks.map(function (p) { return '<li>' + esc(p) + '</li>'; }).join('');
-    if (!perks.length) $('#bkPerks').hidden = true;
+    function paintPerks() {
+      var perks = C.HERO_BOOKING_PERKS || [];
+      $('#bkPerks').innerHTML = perks.map(function (p, i) { return '<li>' + esc(U('perk.' + i, p)) + '</li>'; }).join('');
+      if (!perks.length) $('#bkPerks').hidden = true;
+    }
+    paintPerks();
+    paints.push(function () { render(); syncGuests(); paintPerks(); });
 
     function dmy(d) { return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear(); }
     form.addEventListener('submit', function (e) {
@@ -2141,6 +2224,8 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       url.searchParams.set('pCheckOutDate', dmy(parse(outEl.value)));
       url.searchParams.set('numAdults', String(counts.adults));
       url.searchParams.set('numRooms', String(counts.rooms));
+      var bookMap = (window.I18N && window.I18N.bookLang) || {};
+      url.searchParams.set('lang', bookMap[langCode()] || 'en');
       var a = document.createElement('a');
       a.href = url.href; a.target = '_blank'; a.rel = 'noopener';
       document.body.appendChild(a); a.click(); a.remove();
@@ -2159,11 +2244,20 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     var items = K.HOME_GALLERY;
     if (!el || !items || !items.length) return;
     var n = items.length;
+    function shownItems() {
+      return items.map(function (it) { return { src: it.src, alt: altOf(it.src, it.alt) }; });
+    }
     function cardHtml(it, i) {
-      return '<button type="button" class="reel-card" data-lb-index="' + i + '" aria-label="Büyüt: ' + esc(it.alt) + '">' +
+      return '<button type="button" class="reel-card" data-lb-index="' + i + '" aria-label="' + esc(U('zoom', 'Büyüt')) + ': ' + esc(it.alt) + '">' +
         imgTag(it.src, it.alt) + '<span class="reel-cap">' + esc(it.alt) + '</span></button>';
     }
-    el.innerHTML = (items.map(cardHtml).join('') + items.map(cardHtml).join('')).replace(/loading="lazy"/g, 'loading="eager"');
+    function paintReel() {
+      var shown = shownItems();
+      el._reelItems = shown;
+      el.innerHTML = (shown.map(cardHtml).join('') + shown.map(cardHtml).join('')).replace(/loading="lazy"/g, 'loading="eager"');
+    }
+    paintReel();
+    paints.push(paintReel);
     var bar = $('#reelBar'), count = $('#reelCount'), wrap = el.parentNode;
     var timer = 0, paused = false, seen = false;
     function stepPx() {
@@ -2224,7 +2318,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       var b = e.target.closest('[data-lb-index]');
       if (!b) return;
       stop();
-      openLightbox(items, +b.getAttribute('data-lb-index'), b);
+      openLightbox(el._reelItems || items, +b.getAttribute('data-lb-index'), b);
     });
     el.addEventListener('keydown', function (e) {
       if (e.key === 'ArrowRight') { go(1); e.preventDefault(); }
@@ -2239,70 +2333,83 @@ dialog.dish-dlg { width: min(940px, 94vw); }
   })();
 
   var actEl = $('#activities');
-  if (actEl && K.ACTIVITIES) {
+  function paintActivities() {
+    if (!actEl || !K.ACTIVITIES) return;
     actEl.innerHTML = K.ACTIVITIES.map(function (a) {
+      var title = TX('activities', a.slug, 'title', a.title);
       return '<li class="reveal">' +
         '<a href="#aktivite/' + esc(a.slug) + '" class="group block">' +
-          '<div class="media aspect-[4/3]">' + imgTag(a.img, a.title, a.pos ? ' style="object-position:' + esc(a.pos) + '"' : '') +
+          '<div class="media aspect-[4/3]">' + imgTag(a.img, title, a.pos ? ' style="object-position:' + esc(a.pos) + '"' : '') +
             '<span class="pointer-events-none absolute bottom-3 right-3 z-[1] inline-flex h-9 w-9 items-center justify-center rounded-full bg-sand-50/90 text-ink opacity-0 transition-opacity duration-300 group-hover:opacity-100" aria-hidden="true"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>' +
-          '<p class="mt-4 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-gold-dark">' + esc(a.kicker) + ' · ' + esc(a.time) + '</p>' +
-          '<h3 class="mt-1 font-serif text-2xl text-ink">' + esc(a.title) + '</h3>' +
-          '<p class="mt-2 text-sm font-light leading-relaxed text-ink-soft">' + esc(a.lead) + '</p>' +
+          '<p class="mt-4 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-gold-dark">' + esc(TX('activities', a.slug, 'kicker', a.kicker)) + ' · ' + esc(TX('activities', a.slug, 'time', a.time)) + '</p>' +
+          '<h3 class="mt-1 font-serif text-2xl text-ink">' + esc(title) + '</h3>' +
+          '<p class="mt-2 text-sm font-light leading-relaxed text-ink-soft">' + esc(TX('activities', a.slug, 'lead', a.lead)) + '</p>' +
         '</a></li>';
     }).join('');
     stagger(actEl, 0.08);
   }
+  paintActivities();
+  paints.push(paintActivities);
 
   /* Aktivite sayfası: #aktivite/<slug>. Fotoğraflar lightbox'ta büyür. */
+  var currentActivity = null;
   function renderActivity(slug) {
     var list = K.ACTIVITIES || [];
     var a = null;
     for (var i = 0; i < list.length; i++) if (list[i].slug === slug) a = list[i];
     var root = $('#activityPage');
     if (!a || !root) return false;
-    var shots = a.images || [];
+    currentActivity = slug;
+    var alts = TX('activities', a.slug, 'alts', null);
+    var shots = (a.images || []).map(function (s, n) {
+      return { src: s.src, alt: (alts && alts[n]) || s.alt };
+    });
+    var title = TX('activities', a.slug, 'title', a.title);
+    var body = TX('activities', a.slug, 'body', a.body) || [];
     var gallery = shots.map(function (s, n) {
-      return '<li class="' + (n === 0 ? 'sm:col-span-2' : '') + '"><button type="button" data-act-shot="' + n + '" class="media aspect-[4/3] w-full cursor-zoom-in" aria-label="' + esc(s.alt) + ' – büyüt">' +
+      return '<li class="' + (n === 0 ? 'sm:col-span-2' : '') + '"><button type="button" data-act-shot="' + n + '" class="media aspect-[4/3] w-full cursor-zoom-in" aria-label="' + esc(s.alt) + '">' +
         imgTag(s.src, s.alt) + '</button></li>';
     }).join('');
     var others = list.filter(function (x) { return x.slug !== slug; }).map(function (x) {
+      var xt = TX('activities', x.slug, 'title', x.title);
       return '<li><a href="#aktivite/' + esc(x.slug) + '" class="group block">' +
-        '<div class="media aspect-[4/3]">' + imgTag(x.img, x.title) + '</div>' +
-        '<p class="mt-3 font-serif text-lg text-ink">' + esc(x.title) + '</p></a></li>';
+        '<div class="media aspect-[4/3]">' + imgTag(x.img, xt) + '</div>' +
+        '<p class="mt-3 font-serif text-lg text-ink">' + esc(xt) + '</p></a></li>';
     }).join('');
     root.innerHTML =
       '<div class="mx-auto max-w-6xl px-6 pb-4 pt-28 sm:px-8 sm:pt-32">' +
-        '<a href="#aktiviteler" class="inline-flex items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-stone-600 hover:text-gold-dark">‹ Kapadokya, otelimizle</a>' +
-        '<p class="mt-8 text-xs font-semibold uppercase tracking-widest2 text-gold-dark">' + esc(a.kicker) + ' · ' + esc(a.time) + '</p>' +
-        '<h1 id="page-title-aktivite" tabindex="-1" data-view-heading class="mt-3 font-serif text-5xl leading-[1.05] text-ink sm:text-6xl">' + esc(a.title) + '</h1>' +
-        '<p class="mt-5 max-w-2xl font-serif text-xl italic text-stone-600 sm:text-2xl">' + esc(a.lead) + '</p>' +
+        '<a href="#aktiviteler" class="inline-flex items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-stone-600 hover:text-gold-dark">' + esc(U('act.back', '‹ Kapadokya, otelimizle')) + '</a>' +
+        '<p class="mt-8 text-xs font-semibold uppercase tracking-widest2 text-gold-dark">' + esc(TX('activities', a.slug, 'kicker', a.kicker)) + ' · ' + esc(TX('activities', a.slug, 'time', a.time)) + '</p>' +
+        '<h1 id="page-title-aktivite" tabindex="-1" data-view-heading class="mt-3 font-serif text-5xl leading-[1.05] text-ink sm:text-6xl">' + esc(title) + '</h1>' +
+        '<p class="mt-5 max-w-2xl font-serif text-xl italic text-stone-600 sm:text-2xl">' + esc(TX('activities', a.slug, 'lead', a.lead)) + '</p>' +
       '</div>' +
       '<div class="mx-auto grid max-w-6xl gap-10 px-6 sm:px-8 lg:grid-cols-12 lg:gap-14">' +
         '<div class="space-y-5 text-[1.02rem] font-light leading-relaxed text-ink-soft lg:col-span-7">' +
-          (a.body || []).map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') +
+          body.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') +
           '<ul class="mt-2 grid gap-3 sm:grid-cols-2">' + gallery + '</ul>' +
         '</div>' +
         '<aside class="lg:col-span-5">' +
           '<div class="overflow-hidden rounded-2xl bg-cocoa-900 text-sand-100 lg:sticky lg:top-28">' +
-            '<div class="media aspect-[16/10] !rounded-none !shadow-none">' + imgTag(a.hotel.src, a.hotel.alt) + '</div>' +
+            '<div class="media aspect-[16/10] !rounded-none !shadow-none">' + imgTag(a.hotel.src, altOf(a.hotel.src, a.hotel.alt)) + '</div>' +
             '<div class="p-7 sm:p-8">' +
-              '<p class="text-[0.65rem] font-semibold uppercase tracking-widest2 text-gold">Otelimizin ayrıcalığı</p>' +
-              '<p class="mt-4 font-light leading-relaxed text-sand-100/90">' + esc(a.privilege) + '</p>' +
-              '<a href="#iletisim" class="btn-gold mt-6 inline-flex rounded-full px-6 py-3 text-[0.68rem] font-semibold uppercase tracking-[0.2em]">Resepsiyona sorun</a>' +
+              '<p class="text-[0.65rem] font-semibold uppercase tracking-widest2 text-gold">' + esc(U('act.privilege', 'Otelimizin ayrıcalığı')) + '</p>' +
+              '<p class="mt-4 font-light leading-relaxed text-sand-100/90">' + esc(TX('activities', a.slug, 'privilege', a.privilege)) + '</p>' +
+              '<a href="#iletisim" class="btn-gold mt-6 inline-flex rounded-full px-6 py-3 text-[0.68rem] font-semibold uppercase tracking-[0.2em]">' + esc(U('act.ask', 'Resepsiyona sorun')) + '</a>' +
             '</div>' +
           '</div>' +
         '</aside>' +
       '</div>' +
       '<div class="mx-auto mt-20 max-w-6xl px-6 sm:px-8">' +
-        '<p class="text-xs font-semibold uppercase tracking-widest2 text-gold-dark">Diğerleri</p>' +
+        '<p class="text-xs font-semibold uppercase tracking-widest2 text-gold-dark">' + esc(U('act.others', 'Diğerleri')) + '</p>' +
         '<ul class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">' + others + '</ul>' +
       '</div>';
     $$('[data-act-shot]', root).forEach(function (btn) {
       btn.addEventListener('click', function () { openLightbox(shots, +btn.getAttribute('data-act-shot'), btn); });
     });
-    document.title = a.title + ' · Göreme Cave Suites';
+    document.title = title + ' · Göreme Cave Suites';
     return true;
   }
+  paints.push(function () { if (currentActivity && currentView === 'aktivite') renderActivity(currentActivity); });
 
   $$('[data-address-text]').forEach(function (el) { el.innerHTML = window.Layout.addressText('<br />'); });
   $$('[data-maps-link]').forEach(function (el) { el.href = C.MAPS_LINK || '#'; });
@@ -2310,62 +2417,78 @@ dialog.dish-dlg { width: min(940px, 94vw); }
   if (mapFrame && C.MAP_EMBED_URL) mapFrame.src = C.MAP_EMBED_URL;
 
   var trEl = $('#transport');
-  if (trEl && C.TRANSPORT) {
-    trEl.innerHTML = C.TRANSPORT.map(function (t) {
+  function paintTransport() {
+    if (!trEl || !C.TRANSPORT) return;
+    trEl.innerHTML = C.TRANSPORT.map(function (t, i) {
+      var row = TX('transport', String(i), null, null) || t;
+      var title = row.title || t.title, time = row.time || t.time, text = row.text || t.text;
       return '<li class="reveal group rounded-2xl bg-sand-50 ring-1 ring-ink/5 p-6 lift flex flex-col">' +
         '<span class="icon-ring h-12 w-12 rounded-full border border-gold/50 text-gold-dark flex items-center justify-center">' + icon(t.icon, 'h-6 w-6') + '</span>' +
-        '<h3 class="mt-5 font-serif text-lg text-ink leading-snug">' + esc(t.title) + '</h3>' +
-        '<p class="mt-2 text-xs uppercase tracking-[0.16em] text-gold-dark font-semibold">' + esc(t.time) + '</p>' +
-        '<p class="mt-3 text-sm text-ink-soft font-light leading-relaxed flex-1">' + esc(t.text) + '</p>' +
-        (t.cta ? '<a href="#iletisim" class="mt-4 inline-flex items-center gap-2 text-xs uppercase tracking-[0.18em] font-semibold text-ink hover:text-gold-dark">Bize ulaşın <span aria-hidden="true">→</span></a>' : '') +
+        '<h3 class="mt-5 font-serif text-lg text-ink leading-snug">' + esc(title) + '</h3>' +
+        '<p class="mt-2 text-xs uppercase tracking-[0.16em] text-gold-dark font-semibold">' + esc(time) + '</p>' +
+        '<p class="mt-3 text-sm text-ink-soft font-light leading-relaxed flex-1">' + esc(text) + '</p>' +
+        (t.cta ? '<a href="#iletisim" class="mt-4 inline-flex items-center gap-2 text-xs uppercase tracking-[0.18em] font-semibold text-ink hover:text-gold-dark">' + esc(U('transport.cta', 'Bize ulaşın')) + ' <span aria-hidden="true">→</span></a>' : '') +
         '</li>';
     }).join('');
     stagger(trEl, 0.08);
   }
+  paintTransport();
+  paints.push(paintTransport);
 
   /* ================= 9. Odalar sayfası ================= */
   var roomsEl = $('#roomsGrid');
   var roomDlg = $('#roomDialog');
   if (roomsEl && K.ROOMS) {
-    roomsEl.innerHTML = K.ROOMS.map(function (r, i) {
-      return '<li class="reveal">' +
-        '<article class="group lift h-full rounded-2xl bg-sand-50 ring-1 ring-ink/5 overflow-hidden flex flex-col">' +
-          '<div class="media aspect-[4/3] !rounded-none !shadow-none">' + imgTag(r.images[0], r.name) +
-            '<span class="absolute top-4 left-4 rounded-full bg-sand-50/90 backdrop-blur px-3 py-1.5 text-[0.65rem] uppercase tracking-[0.16em] font-semibold text-ink">' + esc(r.guests) + (r.size ? ' · ' + esc(r.size) : '') + '</span>' +
-            '<span class="absolute bottom-4 left-4 text-sand-50 text-sm drop-shadow"><span class="font-serif text-xl">' + (r.price ? esc(r.price) : 'Fiyat için sorunuz') + '</span></span>' +
-            '<span class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-cocoa-900/60 to-transparent pointer-events-none" aria-hidden="true"></span>' +
-          '</div>' +
-          '<div class="p-6 sm:p-7 flex flex-1 flex-col">' +
-            '<p class="text-[0.65rem] uppercase tracking-widest2 text-gold-dark font-semibold" lang="en">' + esc(r.en) + '</p>' +
-            '<h2 class="mt-2 font-serif text-2xl text-ink">' + esc(r.name) + '</h2>' +
-            '<p class="mt-3 text-sm text-ink-soft font-light leading-relaxed flex-1">' + esc(r.short) + '</p>' +
-            '<ul class="mt-5 flex flex-wrap gap-2 text-stone-600" aria-label="Öne çıkan özellikler">' +
-              r.features.slice(0, 4).map(function (f) {
-                return '<li class="h-9 w-9 rounded-full border border-ink/10 flex items-center justify-center" title="' + esc(FEATURE_LABELS[f]) + '">' + icon(f, 'h-4 w-4') + '<span class="sr-only">' + esc(FEATURE_LABELS[f]) + '</span></li>';
-              }).join('') +
-            '</ul>' +
-            '<button type="button" data-room="' + i + '" class="btn-outline mt-6 inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-ink">Detayları İncele ' +
-              '<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>' +
-          '</div>' +
-        '</article></li>';
-    }).join('');
-    stagger(roomsEl, 0.1);
+    function roomName(r) { return TX('rooms', r.id, 'name', r.name); }
+    function roomGuests(r) { return TX('rooms', r.id, 'guests', r.guests); }
+    function roomShort(r) { return TX('rooms', r.id, 'short', r.short); }
+    function roomTag(r) { return langCode() === 'tr' ? r.en : r.name; }
+    function featLabel(f) { return U('feat.' + f, FEATURE_LABELS[f] || f); }
+    function paintRooms() {
+      roomsEl.innerHTML = K.ROOMS.map(function (r, i) {
+        return '<li class="reveal">' +
+          '<article class="group lift h-full rounded-2xl bg-sand-50 ring-1 ring-ink/5 overflow-hidden flex flex-col">' +
+            '<div class="media aspect-[4/3] !rounded-none !shadow-none">' + imgTag(r.images[0], roomName(r)) +
+              '<span class="absolute top-4 left-4 rounded-full bg-sand-50/90 backdrop-blur px-3 py-1.5 text-[0.65rem] uppercase tracking-[0.16em] font-semibold text-ink">' + esc(roomGuests(r)) + (r.size ? ' · ' + esc(r.size) : '') + '</span>' +
+              '<span class="absolute bottom-4 left-4 text-sand-50 text-sm drop-shadow"><span class="font-serif text-xl">' + (r.price ? esc(r.price) : esc(U('dlg.askPrice', 'Fiyat için sorunuz'))) + '</span></span>' +
+              '<span class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-cocoa-900/60 to-transparent pointer-events-none" aria-hidden="true"></span>' +
+            '</div>' +
+            '<div class="p-6 sm:p-7 flex flex-1 flex-col">' +
+              '<p class="text-[0.65rem] uppercase tracking-widest2 text-gold-dark font-semibold">' + esc(roomTag(r)) + '</p>' +
+              '<h2 class="mt-2 font-serif text-2xl text-ink">' + esc(roomName(r)) + '</h2>' +
+              '<p class="mt-3 text-sm text-ink-soft font-light leading-relaxed flex-1">' + esc(roomShort(r)) + '</p>' +
+              '<ul class="mt-5 flex flex-wrap gap-2 text-stone-600" aria-label="' + esc(U('room.features', 'Öne çıkan özellikler')) + '">' +
+                r.features.slice(0, 4).map(function (f) {
+                  return '<li class="h-9 w-9 rounded-full border border-ink/10 flex items-center justify-center" title="' + esc(featLabel(f)) + '">' + icon(f, 'h-4 w-4') + '<span class="sr-only">' + esc(featLabel(f)) + '</span></li>';
+                }).join('') +
+              '</ul>' +
+              '<button type="button" data-room="' + i + '" class="btn-outline mt-6 inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-ink">' + esc(U('room.details', 'Detayları İncele')) + ' ' +
+                '<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>' +
+            '</div>' +
+          '</article></li>';
+      }).join('');
+      stagger(roomsEl, 0.1);
+    }
+    paintRooms();
+    paints.push(paintRooms);
 
     var track = $('#dlgTrack');
     var dots = $('#dlgDots');
     var roomOpener = null;
 
+    var openRoomIndex = -1;
     function openRoom(i, opener) {
       var r = K.ROOMS[i];
+      openRoomIndex = i;
       roomOpener = opener;
-      $('#dlgTag').textContent = r.en;
-      $('#dlgTitle').textContent = r.name;
-      $('#dlgDesc').textContent = r.short;
-      $('#dlgGuests').textContent = r.guests;
-      $('#dlgSize').textContent = r.size || 'Bilgi eklenecek';
-      $('#dlgPrice').textContent = r.price || 'Fiyat için sorunuz';
+      $('#dlgTag').textContent = roomTag(r);
+      $('#dlgTitle').textContent = roomName(r);
+      $('#dlgDesc').textContent = roomShort(r);
+      $('#dlgGuests').textContent = roomGuests(r);
+      $('#dlgSize').textContent = r.size || U('dlg.sizeSoon', 'Bilgi eklenecek');
+      $('#dlgPrice').textContent = r.price || U('dlg.askPrice', 'Fiyat için sorunuz');
       $('#dlgFeatures').innerHTML = r.features.map(function (f) {
-        return '<li class="flex items-center gap-3"><span class="h-8 w-8 shrink-0 rounded-full bg-gold/10 text-gold-dark flex items-center justify-center">' + icon(f, 'h-4 w-4') + '</span>' + esc(FEATURE_LABELS[f]) + '</li>';
+        return '<li class="flex items-center gap-3"><span class="h-8 w-8 shrink-0 rounded-full bg-gold/10 text-gold-dark flex items-center justify-center">' + icon(f, 'h-4 w-4') + '</span>' + esc(featLabel(f)) + '</li>';
       }).join('');
       track.innerHTML = r.images.map(function (src, n) {
         return '<li class="relative h-full w-full shrink-0">' +
@@ -2410,17 +2533,33 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       var b = e.target.closest('[data-room]');
       if (b) openRoom(+b.getAttribute('data-room'), b);
     });
+    paints.push(function () { if (roomDlg.open && openRoomIndex > -1) openRoom(openRoomIndex, roomOpener); });
   }
 
   /* ================= 10. Restoran & hamam sayfaları ================= */
+  function hourName(raw) {
+    if (raw === 'Kahvaltı') return U('meal.breakfast', raw);
+    if (raw === 'Akşam yemeği') return U('meal.dinner', raw);
+    if (raw === 'Her gün') return U('hours.daily', raw);
+    if (raw === 'Özel seans') return U('hours.private', raw);
+    return raw;
+  }
+  function hourValue(raw) {
+    if (raw === 'Rezervasyon ile') return U('hours.byRequest', raw);
+    return raw;
+  }
   function renderHours(el, rows, keyA) {
     if (!el || !rows) return;
     el.innerHTML = rows.map(function (h) {
-      return '<li class="flex items-baseline justify-between gap-6 border-b border-ink/10 py-3"><span class="text-ink-soft">' + esc(h[keyA]) + '</span><span class="font-serif text-lg text-ink">' + esc(h.hours) + '</span></li>';
+      return '<li class="flex items-baseline justify-between gap-6 border-b border-ink/10 py-3"><span class="text-ink-soft">' + esc(hourName(h[keyA])) + '</span><span class="font-serif text-lg text-ink">' + esc(hourValue(h.hours)) + '</span></li>';
     }).join('');
   }
-  renderHours($('#restaurantHours'), C.RESTAURANT_HOURS, 'meal');
-  renderHours($('#hamamHours'), C.HAMAM_HOURS, 'days');
+  function paintHours() {
+    renderHours($('#restaurantHours'), C.RESTAURANT_HOURS, 'meal');
+    renderHours($('#hamamHours'), C.HAMAM_HOURS, 'days');
+  }
+  paintHours();
+  paints.push(paintHours);
 
   /* Restoran menüsü: sekmeler + diyet filtreleri, masaüstünde üzerine gelince değişen
      fotoğraf vitrini, tıklayınca (mobilde alttan açılan) yemek detay kartı. */
@@ -2431,6 +2570,9 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     var CATS = K.MENU_CATEGORIES || [];
     var DISHES = K.MENU_DISHES;
     var TAG_LABELS = { imza: 'Şefin İmzası', vejetaryen: 'Vejetaryen', glutensiz: 'Glütensiz' };
+    function tagLabel(t) { return U('tag.' + t, TAG_LABELS[t]); }
+    function dishF(d, field) { return TX('dishes', d.img, field, d[field] || ''); }
+    function catName(id, fallback) { return TX('cats', id, null, fallback); }
     var catTitle = {};
     CATS.forEach(function (c) { catTitle[c.id] = c.title; });
     var menuState = { cat: 'all', tags: [] };
@@ -2448,7 +2590,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     }
     function dishTags(d) {
       return (d.tags || []).filter(function (t) { return TAG_LABELS[t]; }).map(function (t) {
-        return '<span class="dish-tag tag-' + t + '"><span class="tag-dot"></span>' + TAG_LABELS[t] + '</span>';
+        return '<span class="dish-tag tag-' + t + '"><span class="tag-dot"></span>' + tagLabel(t) + '</span>';
       }).join('');
     }
     function hasTag(d, t) { return (d.tags || []).indexOf(t) > -1; }
@@ -2457,15 +2599,20 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     }
 
     /* Sekmeler ve yalnızca menüde kullanılan etiketlerin filtreleri */
-    menuTabs.innerHTML = [{ id: 'all', title: 'Tümü' }].concat(CATS).map(function (c) {
-      return '<button type="button" class="menu-tab" data-cat="' + esc(c.id) + '" aria-pressed="' + (c.id === 'all') + '">' + esc(c.title) + '</button>';
-    }).join('') + '<span class="menu-tab-ind" aria-hidden="true"></span>';
-    menuChips.innerHTML = Object.keys(TAG_LABELS).filter(function (t) {
-      return DISHES.some(function (d) { return hasTag(d, t); });
-    }).map(function (t) {
-      return '<button type="button" class="menu-chip" data-tag="' + t + '" aria-pressed="false"><span class="tag-dot tag-' + t + '"></span>' + TAG_LABELS[t] + '</button>';
-    }).join('');
-
+    function paintMenuChrome() {
+      menuTabs.innerHTML = [{ id: 'all', title: U('menu.all', 'Tümü') }].concat(CATS).map(function (c) {
+        var title = c.id === 'all' ? U('menu.all', 'Tümü') : catName(c.id, c.title);
+        return '<button type="button" class="menu-tab" data-cat="' + esc(c.id) + '" aria-pressed="' + (c.id === menuState.cat) + '">' + esc(title) + '</button>';
+      }).join('') + '<span class="menu-tab-ind" aria-hidden="true"></span>';
+      tabInd = $('.menu-tab-ind', menuTabs);
+      menuChips.innerHTML = Object.keys(TAG_LABELS).filter(function (t) {
+        return DISHES.some(function (d) { return hasTag(d, t); });
+      }).map(function (t) {
+        var on = menuState.tags.indexOf(t) > -1;
+        return '<button type="button" class="menu-chip" data-tag="' + t + '" aria-pressed="' + on + '"><span class="tag-dot tag-' + t + '"></span>' + tagLabel(t) + '</button>';
+      }).join('');
+    }
+    paintMenuChrome();
     var tabInd = $('.menu-tab-ind', menuTabs);
     function moveTabInd(scrollIt) {
       var b = $('[aria-pressed="true"]', menuTabs);
@@ -2496,9 +2643,9 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       return '<li><button type="button" class="dish-btn" data-dish="' + i + '">' +
         '<span class="dish-thumb lg:hidden"><img src="' + esc(dishImg(d, true)) + '" alt="" loading="lazy" decoding="async" onerror="imgFallback(this)" /></span>' +
         '<span class="min-w-0 flex-1">' +
-          '<span class="flex items-baseline gap-3"><span class="dish-name font-serif text-[1.3rem] sm:text-[1.45rem] text-ink leading-snug">' + esc(d.name) + '</span>' +
+          '<span class="flex items-baseline gap-3"><span class="dish-name font-serif text-[1.3rem] sm:text-[1.45rem] text-ink leading-snug">' + esc(dishF(d, 'name')) + '</span>' +
             (d.price ? '<span class="dish-leader" aria-hidden="true"></span><span class="dish-price">' + esc(d.price) + '</span>' : '') + '</span>' +
-          (d.desc ? '<span class="mt-1.5 block text-sm text-ink-soft font-light leading-relaxed">' + esc(d.desc) + '</span>' : '') +
+          (d.desc ? '<span class="mt-1.5 block text-sm text-ink-soft font-light leading-relaxed">' + esc(dishF(d, 'desc')) + '</span>' : '') +
           (tags ? '<span class="mt-2.5 flex flex-wrap gap-x-4 gap-y-1.5">' + tags + '</span>' : '') +
         '</span>' +
         '<span class="dish-more" aria-hidden="true"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></span>' +
@@ -2519,12 +2666,12 @@ dialog.dish-dlg { width: min(940px, 94vw); }
         });
         if (!n) return '';
         return '<section class="menu-group" aria-labelledby="mcat-' + esc(c.id) + '">' +
-          '<div class="flex items-center gap-5"><h3 id="mcat-' + esc(c.id) + '" class="font-serif text-[1.75rem] sm:text-3xl text-ink">' + esc(c.title) + '</h3>' +
+          '<div class="flex items-center gap-5"><h3 id="mcat-' + esc(c.id) + '" class="font-serif text-[1.75rem] sm:text-3xl text-ink">' + esc(catName(c.id, c.title)) + '</h3>' +
           '<span class="h-px flex-1 bg-ink/10" aria-hidden="true"></span><span class="text-[0.65rem] tracking-[0.2em] text-stone-500 font-medium">' + (n < 10 ? '0' : '') + n + '</span></div>' +
           '<ul class="mt-1">' + rows + '</ul></section>';
       }).join('');
-      menuList.innerHTML = html || '<div class="py-20 text-center"><p class="font-serif text-2xl text-ink">Bu seçime uygun yemek bulunamadı.</p>' +
-        '<button type="button" data-menu-reset class="btn-outline mt-6 inline-flex rounded-full px-6 py-3 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-ink">Filtreleri temizle</button></div>';
+      menuList.innerHTML = html || '<div class="py-20 text-center"><p class="font-serif text-2xl text-ink">' + esc(U('menu.empty', 'Bu seçime uygun yemek bulunamadı.')) + '</p>' +
+        '<button type="button" data-menu-reset class="btn-outline mt-6 inline-flex rounded-full px-6 py-3 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-ink">' + esc(U('menu.clear', 'Filtreleri temizle')) + '</button></div>';
       syncShow();
       markCurrent();
       if (menuSeen) preloadDishes();
@@ -2592,10 +2739,10 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       showText.classList.add('is-swapping');
       clearTimeout(showTextTimer);
       showTextTimer = setTimeout(function () {
-        $('#showCat').textContent = catTitle[d.cat] || '';
-        $('#showName').textContent = d.name;
-        setRow('showOrigin', d.origin);
-        setRow('showPair', d.pair);
+        $('#showCat').textContent = catName(d.cat, catTitle[d.cat] || '');
+        $('#showName').textContent = dishF(d, 'name');
+        setRow('showOrigin', dishF(d, 'origin'));
+        setRow('showPair', dishF(d, 'pair'));
         showText.classList.remove('is-swapping');
       }, reduceMotion ? 0 : 200);
       markCurrent();
@@ -2641,19 +2788,21 @@ dialog.dish-dlg { width: min(940px, 94vw); }
 
     /* Detay kartı */
     var dishOpener = null;
+    var openDishIndex = -1;
     function openDish(i, opener) {
       var d = DISHES[i];
+      openDishIndex = i;
       dishOpener = opener;
       var img = $('#dishImg');
       img.src = dishImg(d);
-      img.alt = d.name;
-      $('#dishCat').textContent = catTitle[d.cat] || '';
-      $('#dishTitle').textContent = d.name;
+      img.alt = dishF(d, 'name');
+      $('#dishCat').textContent = catName(d.cat, catTitle[d.cat] || '');
+      $('#dishTitle').textContent = dishF(d, 'name');
       $('#dishTags').innerHTML = dishTags(d);
       $('#dishTags').hidden = !d.tags || !d.tags.length;
-      $('#dishDesc').textContent = d.desc || '';
-      setRow('dishOrigin', d.origin);
-      setRow('dishPair', d.pair);
+      $('#dishDesc').textContent = dishF(d, 'desc') || '';
+      setRow('dishOrigin', dishF(d, 'origin'));
+      setRow('dishPair', dishF(d, 'pair'));
       $('#dishPrice').textContent = d.price || '';
       $('#dishPrice').hidden = !d.price;
       $('.dish-card', dishDlg).style.transform = '';
@@ -2701,6 +2850,12 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     desktopMQ.addEventListener('change', function () { syncShow(); markCurrent(); preloadDishes(); });
     renderMenu();
     moveTabInd(false);
+    paints.push(function () {
+      paintMenuChrome();
+      renderMenu();
+      moveTabInd(false);
+      if (dishDlg.open && openDishIndex > -1) openDish(openDishIndex, dishOpener);
+    });
     openDishBySlug = function (slug, opener) {
       for (var n = 0; n < DISHES.length; n++) if (DISHES[n].img === slug) { openDish(n, opener); return; }
     };
@@ -2740,7 +2895,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     function rSync() {
       var playing = !rv.paused;
       rToggle.innerHTML = playing ? R_PAUSE : R_PLAY;
-      rToggle.setAttribute('aria-label', playing ? 'Videoyu duraklat' : 'Videoyu oynat');
+      rToggle.setAttribute('aria-label', playing ? U('video.pause', 'Videoyu duraklat') : U('video.play', 'Videoyu oynat'));
     }
     function rUpdate() {
       if (!rActive) return;
@@ -2753,9 +2908,11 @@ dialog.dish-dlg { width: min(940px, 94vw); }
         var ch = CHAPTERS[idx];
         rChapName.classList.add('is-swap');
         setTimeout(function () {
-          rChapName.textContent = ch.label;
+          var chapBucket = (rSrc === C.RESTAURANT_INTRO_VIDEO_PORTRAIT) ? 'chaptersP' : 'chapters';
+          var chapLabel = TX(chapBucket, String(idx), null, ch.label);
+          rChapName.textContent = chapLabel;
           rChapBtn.disabled = !(ch.dish && openDishBySlug);
-          rChapBtn.setAttribute('aria-label', ch.dish ? ch.label + ' – yemek detayını aç' : ch.label);
+          rChapBtn.setAttribute('aria-label', chapLabel);
           rChapName.classList.remove('is-swap');
         }, reduceMotion ? 0 : 250);
       }
@@ -2787,6 +2944,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
       }, { threshold: 0.15 }).observe(rIntro);
     }
     if (reduceMotion) rToggle.style.display = 'none';
+    paints.push(function () { rChapIdx = -1; rUpdate(); rSync(); });
 
     RIntro = {
       enter: function () {
@@ -2805,19 +2963,27 @@ dialog.dish-dlg { width: min(940px, 94vw); }
   }
 
   var svcEl = $('#hamamServices');
-  if (svcEl && K.HAMAM_SERVICES) {
+  function paintHamam() {
+    if (!svcEl || !K.HAMAM_SERVICES) return;
     svcEl.innerHTML = K.HAMAM_SERVICES.map(function (s) {
+      var row = TX('hamam', s.icon, null, null) || s;
       return '<li class="reveal group rounded-2xl bg-sand-50 ring-1 ring-ink/5 p-7 lift">' +
         '<span class="icon-ring h-12 w-12 rounded-full border border-gold/50 text-gold-dark flex items-center justify-center">' + icon(s.icon, 'h-6 w-6') + '</span>' +
-        '<h3 class="mt-5 font-serif text-xl text-ink">' + esc(s.title) + '</h3>' +
-        '<p class="mt-1 text-xs uppercase tracking-[0.16em] text-gold-dark font-semibold">' + esc(s.time) + '</p>' +
-        '<p class="mt-3 text-sm text-ink-soft font-light leading-relaxed">' + esc(s.text) + '</p></li>';
+        '<h3 class="mt-5 font-serif text-xl text-ink">' + esc(row.title || s.title) + '</h3>' +
+        '<p class="mt-1 text-xs uppercase tracking-[0.16em] text-gold-dark font-semibold">' + esc(row.time || s.time) + '</p>' +
+        '<p class="mt-3 text-sm text-ink-soft font-light leading-relaxed">' + esc(row.text || s.text) + '</p></li>';
     }).join('');
     stagger(svcEl, 0.1);
   }
+  paintHamam();
+  paints.push(paintHamam);
 
-  renderGallery($('#restaurantGallery'), K.RESTAURANT_GALLERY);
-  renderGallery($('#hamamGallery'), K.HAMAM_GALLERY);
+  function paintGalleries() {
+    renderGallery($('#restaurantGallery'), K.RESTAURANT_GALLERY);
+    renderGallery($('#hamamGallery'), K.HAMAM_GALLERY);
+  }
+  paintGalleries();
+  paints.push(paintGalleries);
 
   /* Statik ve oluşturulan tüm .reveal öğelerini izlemeye başla. */
   observeReveals(document);
@@ -2847,7 +3013,7 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     if (name === currentView) return false;
     Object.keys(views).forEach(function (k) { views[k].hidden = k !== name; });
     currentView = name;
-    document.title = TITLES[name] || TITLES.home;
+    document.title = U('title.' + name, TITLES[name] || TITLES.home);
     window.Layout.setActive(name);
     setMenu(false);
     if (lb.open) lb.close();
@@ -2914,6 +3080,105 @@ dialog.dish-dlg { width: min(940px, 94vw); }
     }
     if (h === 'main') el.focus({ preventScroll: true });
   });
+  function applyStatic() {
+    $$('[data-i18n]').forEach(function (el) {
+      if (el._i18nSrc == null) el._i18nSrc = el.textContent;
+      el.textContent = U(el.getAttribute('data-i18n'), el._i18nSrc);
+    });
+    $$('[data-i18n-html]').forEach(function (el) {
+      if (el._i18nHtml == null) el._i18nHtml = el.innerHTML;
+      el.innerHTML = U(el.getAttribute('data-i18n-html'), el._i18nHtml);
+    });
+    $$('[data-i18n-aria]').forEach(function (el) {
+      if (el._i18nAria == null) el._i18nAria = el.getAttribute('aria-label') || '';
+      el.setAttribute('aria-label', U(el.getAttribute('data-i18n-aria'), el._i18nAria));
+    });
+    $$('[data-i18n-alt]').forEach(function (el) {
+      if (el._i18nAlt == null) el._i18nAlt = el.getAttribute('alt') || '';
+      el.alt = altOf(el.getAttribute('data-i18n-alt'), el._i18nAlt);
+    });
+    $$('[data-i18n-title]').forEach(function (el) {
+      if (el._i18nTitle == null) el._i18nTitle = el.getAttribute('title') || '';
+      el.setAttribute('title', U(el.getAttribute('data-i18n-title'), el._i18nTitle));
+    });
+    $$('[data-i18n-ph]').forEach(function (el) {
+      if (el._i18nPh == null) el._i18nPh = el.getAttribute('placeholder') || '';
+      el.setAttribute('placeholder', U(el.getAttribute('data-i18n-ph'), el._i18nPh));
+    });
+  }
+  function applyChrome() {
+    $$('[data-booking]').forEach(function (el) { if (C.BOOKING_URL) el.href = bookHref(); });
+    if (mapFrame && C.MAP_EMBED_URL) {
+      var hl = (window.I18N && window.I18N.mapHl && window.I18N.mapHl[langCode()]) || 'tr';
+      var next = C.MAP_EMBED_URL.replace(/([?&])hl=[^&]*/, '$1hl=' + hl);
+      if (mapFrame.getAttribute('src') !== next) mapFrame.src = next;
+    }
+    var meta = document.querySelector('meta[name="description"]');
+    if (meta) {
+      if (!meta._i18nSrc) meta._i18nSrc = meta.getAttribute('content') || '';
+      meta.setAttribute('content', U('meta', meta._i18nSrc));
+    }
+    if (currentView && currentView !== 'aktivite') document.title = U('title.' + currentView, TITLES[currentView] || TITLES.home);
+    var btn = $('#langBtn');
+    var list = $('#langMenu');
+    if (btn && window.I18N) {
+      var cur = window.I18N.langs.filter(function (l) { return l.id === langCode(); })[0];
+      btn.textContent = cur ? cur.short : 'TR';
+      if (list && !list.childElementCount) {
+        list.innerHTML = window.I18N.langs.map(function (l) {
+          return '<li role="none"><button type="button" role="option" data-set-lang="' + l.id + '">' + l.name + '</button></li>';
+        }).join('');
+      }
+      if (list) $$('[data-set-lang]', list).forEach(function (b) {
+        b.setAttribute('aria-selected', String(b.getAttribute('data-set-lang') === langCode()));
+      });
+    }
+    var creditList = $('#creditList');
+    if (creditList && K.CREDITS) {
+      creditList.innerHTML = K.CREDITS.map(function (c, i) {
+        return '<li>' + esc(TX('credits', String(i), null, c[0])) + ' · <a href="' + esc(c[2]) + '" target="_blank" rel="noopener" class="underline decoration-sand-300/30 hover:text-gold">' + esc(c[1]) + '</a></li>';
+      }).join('');
+    }
+    var burgerNow = $('#burger');
+    if (burgerNow) burgerNow.setAttribute('aria-label', burgerNow.getAttribute('aria-expanded') === 'true' ? U('burger.close', 'Menüyü kapat') : U('burger.open', 'Menüyü aç'));
+    document.documentElement.classList.remove('i18n-wait');
+  }
+  function setLanguage(code) {
+    if (!window.I18N || !window.I18N.langs.some(function (l) { return l.id === code; })) code = 'tr';
+    try { localStorage.setItem('goreme-lang', code); } catch (e) {}
+    document.documentElement.lang = code;
+    applyStatic();
+    paints.forEach(function (fn) { try { fn(); } catch (err) { console.error(err); } });
+    applyChrome();
+    if (typeof onScroll === 'function') onScroll();
+  }
+  (function () {
+    var btn = $('#langBtn');
+    var list = $('#langMenu');
+    if (!btn || !list) return;
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = list.hidden;
+      list.hidden = !open;
+      btn.setAttribute('aria-expanded', String(open));
+    });
+    list.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-set-lang]');
+      if (!b) return;
+      list.hidden = true;
+      btn.setAttribute('aria-expanded', 'false');
+      setLanguage(b.getAttribute('data-set-lang'));
+    });
+    document.addEventListener('click', function () {
+      if (!list.hidden) { list.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !list.hidden) { list.hidden = true; btn.setAttribute('aria-expanded', 'false'); btn.focus(); }
+    });
+  })();
+  applyStatic();
+  applyChrome();
+
   window.addEventListener('popstate', function () { applyHash(false); });
   window.addEventListener('hashchange', function () { applyHash(false); });
   applyHash(true);
